@@ -12,12 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tictactoe.ui.theme.Primery
 import com.example.tictactoe.ui.theme.Secondery
-
 
 @Composable
 fun GameButton(player: String, onClick: () -> Unit = {}) {
@@ -50,7 +48,7 @@ fun GameButton(player: String, onClick: () -> Unit = {}) {
 }
 
 @Composable
-fun ButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
+fun ButtonGrid(viewModel: TicTacToeViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
     Column() {
@@ -117,11 +115,4 @@ fun ButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
             )
         }
     }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun GridPreview() {
-    ButtonGrid()
 }
