@@ -1,16 +1,20 @@
 package com.example.tictactoe.ui.Screen
 
+import android.app.Activity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,6 +58,10 @@ fun ButtonGrid(viewModel: TicTacToeViewModel) {
 
     if(uiState.ToCheck) {
         uiState.winner = CheckWinner(viewModel = viewModel)
+        if(uiState.winner != "") {
+            showWinner(winner = uiState.winner, viewModel = viewModel)
+        }
+
     } else {
         uiState.winner = ""
     }
@@ -142,4 +150,30 @@ fun ButtonGrid(viewModel: TicTacToeViewModel) {
             )
         }
     }
+}
+
+@Composable
+fun showWinner(winner: String) {
+
+    val activity = (LocalContext.current as Activity)
+
+    AlertDialog(
+        onDismissRequest = {},
+        title = { Text(text = "Winner is: $winner", fontWeight = FontWeight.ExtraBold, color = Color.Black, textAlign = TextAlign.Center)},
+        text = { Text(text = "Congratulations for winning", color = Color.Black, textAlign = TextAlign.Center)},
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    activity.finish()
+                }
+            ) {
+                Text("Exit")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {}) {
+                Text(text = "Play again")
+            }
+        }
+    )
 }
