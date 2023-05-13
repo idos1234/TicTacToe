@@ -6,10 +6,10 @@ import androidx.compose.runtime.getValue
 import com.example.tictactoe.ui.Screen.TicTacToeViewModel
 
 @Composable
-fun CheckWinner(viewModel: TicTacToeViewModel) {
+fun CheckWinner(viewModel: TicTacToeViewModel): String {
     val uiState by viewModel.uiState.collectAsState()
 
-    var winner: String = ""
+    var winner = ""
 
     // first row
 
@@ -21,7 +21,7 @@ fun CheckWinner(viewModel: TicTacToeViewModel) {
         }
     }
 
-    else if(uiState.Box1 == "O") {
+    if(uiState.Box1 == "O") {
         if(uiState.Box2 == "O") {
             if(uiState.Box3 == "O"){
                 winner = "O"
@@ -31,7 +31,7 @@ fun CheckWinner(viewModel: TicTacToeViewModel) {
 
     // second row
 
-    else if(uiState.Box4 == "X") {
+    if(uiState.Box4 == "X") {
         if(uiState.Box5 == "X") {
             if(uiState.Box6 == "X"){
                 winner = "X"
@@ -39,7 +39,7 @@ fun CheckWinner(viewModel: TicTacToeViewModel) {
         }
     }
 
-    else if(uiState.Box4 == "O") {
+    if(uiState.Box4 == "O") {
         if(uiState.Box5 == "O") {
             if(uiState.Box6 == "O"){
                 winner = "O"
@@ -49,7 +49,7 @@ fun CheckWinner(viewModel: TicTacToeViewModel) {
 
     // third row
 
-    else if(uiState.Box7 == "X") {
+    if(uiState.Box7 == "X") {
         if(uiState.Box8 == "X") {
             if(uiState.Box9 == "X"){
                 winner = "X"
@@ -57,7 +57,7 @@ fun CheckWinner(viewModel: TicTacToeViewModel) {
         }
     }
 
-    else if(uiState.Box7 == "O") {
+    if(uiState.Box7 == "O") {
         if(uiState.Box8 == "O") {
             if(uiState.Box9 == "O"){
                 winner = "O"
@@ -67,7 +67,7 @@ fun CheckWinner(viewModel: TicTacToeViewModel) {
 
     // first column
 
-    else if(uiState.Box1 == "X") {
+    if(uiState.Box1 == "X") {
         if(uiState.Box4 == "X") {
             if(uiState.Box7 == "X"){
                 winner = "X"
@@ -75,7 +75,7 @@ fun CheckWinner(viewModel: TicTacToeViewModel) {
         }
     }
 
-    else if(uiState.Box1 == "O") {
+    if(uiState.Box1 == "O") {
         if(uiState.Box4 == "O") {
             if(uiState.Box7 == "O"){
                 winner = "O"
@@ -85,7 +85,7 @@ fun CheckWinner(viewModel: TicTacToeViewModel) {
 
     // second column
 
-    else if(uiState.Box2 == "X") {
+    if(uiState.Box2 == "X") {
         if(uiState.Box5 == "X") {
             if(uiState.Box8 == "X"){
                 winner = "X"
@@ -93,7 +93,7 @@ fun CheckWinner(viewModel: TicTacToeViewModel) {
         }
     }
 
-    else if(uiState.Box2 == "O") {
+    if(uiState.Box2 == "O") {
         if(uiState.Box5 == "O") {
             if(uiState.Box8 == "O"){
                 winner = "O"
@@ -103,7 +103,7 @@ fun CheckWinner(viewModel: TicTacToeViewModel) {
 
     // third column
 
-    else if(uiState.Box3 == "X") {
+    if(uiState.Box3 == "X") {
         if(uiState.Box6 == "X") {
             if(uiState.Box9 == "X"){
                 winner = "X"
@@ -111,11 +111,50 @@ fun CheckWinner(viewModel: TicTacToeViewModel) {
         }
     }
 
-    else if(uiState.Box3 == "O") {
+    if(uiState.Box3 == "O") {
         if(uiState.Box6 == "O") {
             if(uiState.Box9 == "O"){
                 winner = "O"
             }
         }
     }
+
+    // first diagonal line
+
+    if(uiState.Box1 == "X") {
+        if(uiState.Box5 == "X") {
+            if(uiState.Box9 == "X"){
+                winner = "X"
+            }
+        }
+    }
+
+    if(uiState.Box1 == "O") {
+        if(uiState.Box5 == "O") {
+            if(uiState.Box9 == "O"){
+                winner = "O"
+            }
+        }
+    }
+
+    // second diagonal line
+
+    if(uiState.Box3 == "X") {
+        if(uiState.Box5 == "X") {
+            if(uiState.Box7 == "X"){
+                winner = "X"
+            }
+        }
+    }
+
+    if(uiState.Box3 == "O") {
+        if(uiState.Box5 == "O") {
+            if(uiState.Box7 == "O"){
+                winner = "O"
+            }
+        }
+    }
+
+    return winner
+
 }

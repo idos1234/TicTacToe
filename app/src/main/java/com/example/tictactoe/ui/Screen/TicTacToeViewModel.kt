@@ -21,4 +21,12 @@ class TicTacToeViewModel: ViewModel() {
             })
         }
     }
+
+    fun check_ToCheck(){
+        if (_uiState.value.times >= 5) {
+            _uiState.value.ToCheck = true
+        } else {
+            _uiState.value.ToCheck = false
+        }
+    }
 }

@@ -14,6 +14,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tictactoe.ui.CheckWinner
 import com.example.tictactoe.ui.theme.Primery
 import com.example.tictactoe.ui.theme.Secondery
 
@@ -51,24 +52,38 @@ fun GameButton(player: String, onClick: () -> Unit = {}) {
 fun ButtonGrid(viewModel: TicTacToeViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
+    if(uiState.ToCheck) {
+        uiState.winner = CheckWinner(viewModel = viewModel)
+    } else {
+        uiState.winner = ""
+    }
+
+
+
     Column() {
         Row() {
             GameButton(
                 player = uiState.player_Turn,
                 onClick = {
                     uiState.Box1 = uiState.player_Turn
+                    uiState.times ++
+                    viewModel.check_ToCheck()
                     viewModel.changePlayer()
                 })
             GameButton(
                 player = uiState.player_Turn,
                 onClick = {
                     uiState.Box2 = uiState.player_Turn
+                    uiState.times ++
+                    viewModel.check_ToCheck()
                     viewModel.changePlayer()
                 })
             GameButton(
                 player = uiState.player_Turn,
                 onClick = {
                     uiState.Box3 = uiState.player_Turn
+                    uiState.times ++
+                    viewModel.check_ToCheck()
                     viewModel.changePlayer()
 
                 })
@@ -78,18 +93,24 @@ fun ButtonGrid(viewModel: TicTacToeViewModel) {
                 player = uiState.player_Turn,
                 onClick = {
                     uiState.Box4 = uiState.player_Turn
+                    uiState.times ++
+                    viewModel.check_ToCheck()
                     viewModel.changePlayer()
                 })
             GameButton(
                 player = uiState.player_Turn,
                 onClick = {
                     uiState.Box5 = uiState.player_Turn
+                    uiState.times ++
+                    viewModel.check_ToCheck()
                     viewModel.changePlayer()
                 })
             GameButton(
                 player = uiState.player_Turn,
                 onClick = {
                     uiState.Box6 = uiState.player_Turn
+                    uiState.times ++
+                    viewModel.check_ToCheck()
                     viewModel.changePlayer()
                 })
         }
@@ -98,18 +119,24 @@ fun ButtonGrid(viewModel: TicTacToeViewModel) {
                 player = uiState.player_Turn,
                 onClick = {
                     uiState.Box7 = uiState.player_Turn
+                    uiState.times ++
+                    viewModel.check_ToCheck()
                     viewModel.changePlayer()
                 })
             GameButton(
                 player = uiState.player_Turn,
                 onClick = {
                     uiState.Box8 = uiState.player_Turn
+                    uiState.times ++
+                    viewModel.check_ToCheck()
                     viewModel.changePlayer()
                 })
             GameButton(
                 player = uiState.player_Turn,
                 onClick = {
                     uiState.Box9 = uiState.player_Turn
+                    uiState.times ++
+                    viewModel.check_ToCheck()
                     viewModel.changePlayer()
                 }
             )
