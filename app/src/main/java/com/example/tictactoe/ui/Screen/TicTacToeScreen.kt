@@ -59,7 +59,7 @@ fun ButtonGrid(viewModel: TicTacToeViewModel) {
     if(uiState.ToCheck) {
         uiState.winner = CheckWinner(viewModel = viewModel)
         if(uiState.winner != "") {
-            showWinner(winner = uiState.winner, viewModel = viewModel)
+            showWinner(winner = uiState.winner)
         }
 
     } else {
