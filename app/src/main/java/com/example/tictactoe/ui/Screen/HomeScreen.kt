@@ -20,7 +20,7 @@ import com.example.tictactoe.ui.theme.Secondery
 import com.example.tictactoe.ui.theme.Shapes
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onButtonClick: () -> Unit = {}) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize())
@@ -37,7 +37,7 @@ fun HomeScreen() {
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = {},
+            onClick = onButtonClick,
             colors = ButtonDefaults.buttonColors(Secondery),
             shape = Shapes.large,
         ) {

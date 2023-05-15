@@ -19,7 +19,7 @@ enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val tit
 }
 
 @Composable
-fun TicTacToeApp(viewModel: TicTacToeViewModel) {
+fun TicTacToeApp(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = GameScreen.valueOf(
@@ -36,11 +36,11 @@ fun TicTacToeApp(viewModel: TicTacToeViewModel) {
             modifier = Modifier.padding(innerPadding)
         ){
             composable(route = GameScreen.Start.name) {
-                HomeScreen()
+                HomeScreen(onButtonClick = {navController.navigate(GameScreen.TwoPlayers.name)})
             }
 
             composable(route = GameScreen.TwoPlayers.name) {
-
+                TicTacToeScreen(viewModel = viewModel, uiState = uiState, onPlayAgain = { navController.navigate(GameScreen.TwoPlayers.name) })
             }
         }
 
