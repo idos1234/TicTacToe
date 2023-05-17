@@ -15,7 +15,8 @@ import androidx.navigation.compose.rememberNavController
 
 enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val title: String) {
     Start(title = "TicTacToe"),
-    TwoPlayers(title = "T"),
+    TwoPlayers(title = "Two players"),
+    SinglePlayer("SinglePlayer")
 }
 
 @Composable
@@ -36,11 +37,17 @@ fun TicTacToeApp(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
             modifier = Modifier.padding(innerPadding)
         ){
             composable(route = GameScreen.Start.name) {
-                HomeScreen(onButtonClick = {navController.navigate(GameScreen.TwoPlayers.name)})
+                HomeScreen(
+                    onTwoPlayersClick = {navController.navigate(GameScreen.TwoPlayers.name)},
+                    onSinglePlayerClick = {navController.navigate(GameScreen.SinglePlayer.name)})
             }
 
             composable(route = GameScreen.TwoPlayers.name) {
                 TicTacToeScreen(viewModel = viewModel, uiState = uiState, onPlayAgain = { navController.navigate(GameScreen.TwoPlayers.name) })
+            }
+
+            composable(route = GameScreen.SinglePlayer.name) {
+                TicTacToeSinglePlayerScreen(viewModel = viewModel, uiState = uiState, onPlayAgain = { navController.navigate(GameScreen.SinglePlayer.name) })
             }
         }
 

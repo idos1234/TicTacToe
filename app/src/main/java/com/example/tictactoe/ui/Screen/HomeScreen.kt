@@ -20,7 +20,7 @@ import com.example.tictactoe.ui.theme.Secondery
 import com.example.tictactoe.ui.theme.Shapes
 
 @Composable
-fun HomeScreen(onButtonClick: () -> Unit = {}) {
+fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Unit = {}) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize())
@@ -37,7 +37,23 @@ fun HomeScreen(onButtonClick: () -> Unit = {}) {
         Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = onButtonClick,
+            onClick = onSinglePlayerClick,
+            colors = ButtonDefaults.buttonColors(Secondery),
+            shape = Shapes.large,
+        ) {
+            Text(
+                text = "Single Players",
+                fontWeight = FontWeight.ExtraBold,
+                fontStyle = FontStyle.Italic,
+                fontSize = 30.sp,
+                color = Color.Black
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(.5f))
+
+        Button(
+            onClick = onTwoPlayersClick,
             colors = ButtonDefaults.buttonColors(Secondery),
             shape = Shapes.large,
         ) {
@@ -47,7 +63,8 @@ fun HomeScreen(onButtonClick: () -> Unit = {}) {
                 fontStyle = FontStyle.Italic,
                 fontSize = 30.sp,
                 color = Color.Black
-            )        }
+            )
+        }
         Spacer(modifier = Modifier.weight(4f))
     }
 }
