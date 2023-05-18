@@ -22,13 +22,18 @@ import com.example.tictactoe.ui.CheckWinner
 import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Primery
 import com.example.tictactoe.ui.theme.Secondery
+import java.util.*
+import kotlin.concurrent.schedule
 
 @Composable
-fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}) {
+fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, setButton: () -> Unit = {}) {
 
     Card(modifier = Modifier.padding(8.dp),shape = RoundedCornerShape(100.dp), border = BorderStroke(3.dp, color = Secondery)) {
         TextButton(
-            onClick = { onClick() },
+            onClick = {
+                setButton()
+                Timer().schedule(500){onClick()}
+            },
             enabled = player.isEmpty(),
             modifier = Modifier.background(Primery)
         ) {
@@ -57,7 +62,7 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(),
         if(uiState.winner != "") {
             showWinner(winner = "Winner is: ${uiState.winner}", text = "Congratulations for winning", onPlayAgain = onPlayAgain)
         }
-        else if (uiState.times == 9){
+        else if (uiState.times >= 9){
             showWinner(winner = "Tie", text = "Try to win next time", onPlayAgain = onPlayAgain)
         }
 
@@ -78,63 +83,44 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(),
         Row() {
             SinglePlayerGameButton(
                 player = uiState.Box1,
-                onClick = {
-                    uiState.Box1 = uiState.player_Turn
-                    onClick()
-                })
+                setButton = {uiState.Box1 = uiState.player_Turn},
+                onClick = {onClick()})
             SinglePlayerGameButton(
                 player = uiState.Box2,
-                onClick = {
-                    uiState.Box2 = uiState.player_Turn
-                    onClick()
-                })
+                setButton = {uiState.Box2 = uiState.player_Turn},
+                onClick = {onClick()})
             SinglePlayerGameButton(
                 player = uiState.Box3,
-                onClick = {
-                    uiState.Box3 = uiState.player_Turn
-                    onClick()
-                })
+                setButton = {uiState.Box3 = uiState.player_Turn},
+                onClick = {onClick()})
         }
         Row() {
             SinglePlayerGameButton(
                 player = uiState.Box4,
-                onClick = {
-                    uiState.Box4 = uiState.player_Turn
-                    onClick()
-                })
+                setButton = {uiState.Box4= uiState.player_Turn},
+                onClick = {onClick()})
             SinglePlayerGameButton(
                 player = uiState.Box5,
-                onClick = {
-                    uiState.Box5 = uiState.player_Turn
-                    onClick()
-                })
+                setButton = {uiState.Box5 = uiState.player_Turn},
+                onClick = {onClick()})
             SinglePlayerGameButton(
                 player = uiState.Box6,
-                onClick = {
-                    uiState.Box6 = uiState.player_Turn
-                    onClick()
-                })
+                setButton = {uiState.Box6 = uiState.player_Turn},
+                onClick = {onClick()})
         }
         Row() {
             SinglePlayerGameButton(
                 player = uiState.Box7,
-                onClick = {
-                    uiState.Box7 = uiState.player_Turn
-                    onClick()
-                })
+                setButton = {uiState.Box7 = uiState.player_Turn},
+                onClick = {onClick()})
             SinglePlayerGameButton(
                 player = uiState.Box8,
-                onClick = {
-                    uiState.Box8 = uiState.player_Turn
-                    onClick()
-                })
+                setButton = {uiState.Box8 = uiState.player_Turn},
+                onClick = {onClick()})
             SinglePlayerGameButton(
                 player = uiState.Box9,
-                onClick = {
-                    uiState.Box9 = uiState.player_Turn
-                    onClick()
-                }
-            )
+                setButton = {uiState.Box9 = uiState.player_Turn},
+                onClick = {onClick()})
         }
     }
 }

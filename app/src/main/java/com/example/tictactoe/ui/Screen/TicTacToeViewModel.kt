@@ -27,35 +27,36 @@ class TicTacToeViewModel: ViewModel() {
     }
 
     fun botTurn() {
-        Thread.sleep(1500)
 
-
-        if(uiState.value.Box1 == "") {
-            uiState.value.Box1 = "O"
+        if(_uiState.value.Box1 == "") {
+            _uiState.value.Box1 = "O"
         }
-        else if(uiState.value.Box2 == "") {
-            uiState.value.Box2= "O"
+        else if(_uiState.value.Box2 == "") {
+            _uiState.value.Box2= "O"
         }
-        else if(uiState.value.Box3 == "") {
-            uiState.value.Box3 = "O"
+        else if(_uiState.value.Box3 == "") {
+            _uiState.value.Box3 = "O"
         }
-        else if(uiState.value.Box4 == "") {
-            uiState.value.Box4 = "O"
+        else if(_uiState.value.Box4 == "") {
+            _uiState.value.Box4 = "O"
         }
-        else if(uiState.value.Box5 == "") {
-            uiState.value.Box5 = "O"
+        else if(_uiState.value.Box5 == "") {
+            _uiState.value.Box5 = "O"
         }
-        else if(uiState.value.Box6 == "") {
-            uiState.value.Box6 = "O"
+        else if(_uiState.value.Box6 == "") {
+            _uiState.value.Box6 = "O"
         }
-        else if(uiState.value.Box7 == "") {
-            uiState.value.Box7 = "O"
+        else if(_uiState.value.Box7 == "") {
+            _uiState.value.Box7 = "O"
         }
-        else if(uiState.value.Box8 == "") {
-            uiState.value.Box8 = "O"
+        else if(_uiState.value.Box8 == "") {
+            _uiState.value.Box8 = "O"
         }
-        else if(uiState.value.Box9 == "") {
-            uiState.value.Box9 = "O"
+        else if(_uiState.value.Box9 == "") {
+            _uiState.value.Box9 = "O"
         }
+        _uiState.value.times ++
+        check_ToCheck()
+        changePlayer()
     }
 }
