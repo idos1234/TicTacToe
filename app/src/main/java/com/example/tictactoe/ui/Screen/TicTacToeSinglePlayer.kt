@@ -26,13 +26,17 @@ import java.util.*
 import kotlin.concurrent.schedule
 
 @Composable
-fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, setButton: () -> Unit = {}) {
+fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, viewModel: TicTacToeViewModel) {
 
     Card(modifier = Modifier.padding(8.dp),shape = RoundedCornerShape(100.dp), border = BorderStroke(3.dp, color = Secondery)) {
         TextButton(
             onClick = {
-                setButton()
-                Timer().schedule(500){onClick()}
+                onClick()
+                if (player.isEmpty()) {
+                    Timer().schedule(500) {
+                        viewModel.botTurn()
+                    }
+                }
             },
             enabled = player.isEmpty(),
             modifier = Modifier.background(Primery)
@@ -74,7 +78,6 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(),
         uiState.times ++
         viewModel.check_ToCheck()
         viewModel.changePlayer()
-        viewModel.botTurn()
     }
 
 
@@ -83,44 +86,71 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(),
         Row() {
             SinglePlayerGameButton(
                 player = uiState.Box1,
-                setButton = {uiState.Box1 = uiState.player_Turn},
-                onClick = {onClick()})
+                onClick = {
+                    uiState.Box1 = uiState.player_Turn
+                    onClick()
+                },
+                viewModel = viewModel)
             SinglePlayerGameButton(
                 player = uiState.Box2,
-                setButton = {uiState.Box2 = uiState.player_Turn},
-                onClick = {onClick()})
+                onClick = {
+                    uiState.Box2 = uiState.player_Turn
+                    onClick()
+                },
+                viewModel = viewModel)
             SinglePlayerGameButton(
                 player = uiState.Box3,
-                setButton = {uiState.Box3 = uiState.player_Turn},
-                onClick = {onClick()})
+                onClick = {
+                    uiState.Box3 = uiState.player_Turn
+                    onClick()
+                },
+                viewModel = viewModel)
         }
         Row() {
             SinglePlayerGameButton(
                 player = uiState.Box4,
-                setButton = {uiState.Box4= uiState.player_Turn},
-                onClick = {onClick()})
+                onClick = {
+                    uiState.Box4 = uiState.player_Turn
+                    onClick()
+                },
+                viewModel = viewModel)
             SinglePlayerGameButton(
                 player = uiState.Box5,
-                setButton = {uiState.Box5 = uiState.player_Turn},
-                onClick = {onClick()})
+                onClick = {
+                    uiState.Box5 = uiState.player_Turn
+                    onClick()
+                },
+                viewModel = viewModel)
             SinglePlayerGameButton(
                 player = uiState.Box6,
-                setButton = {uiState.Box6 = uiState.player_Turn},
-                onClick = {onClick()})
+                onClick = {
+                    uiState.Box6 = uiState.player_Turn
+                    onClick()
+                },
+                viewModel = viewModel)
         }
         Row() {
             SinglePlayerGameButton(
                 player = uiState.Box7,
-                setButton = {uiState.Box7 = uiState.player_Turn},
-                onClick = {onClick()})
+                onClick = {
+                    uiState.Box7 = uiState.player_Turn
+                    onClick()
+                },
+                viewModel = viewModel)
             SinglePlayerGameButton(
                 player = uiState.Box8,
-                setButton = {uiState.Box8 = uiState.player_Turn},
-                onClick = {onClick()})
+                onClick = {
+                    uiState.Box8 = uiState.player_Turn
+                    onClick()
+                },
+                viewModel = viewModel)
             SinglePlayerGameButton(
                 player = uiState.Box9,
-                setButton = {uiState.Box9 = uiState.player_Turn},
-                onClick = {onClick()})
+                onClick = {
+                    uiState.Box9 = uiState.player_Turn
+                    onClick()
+                },
+                viewModel = viewModel)
         }
     }
 }
@@ -136,6 +166,5 @@ fun TicTacToeSinglePlayerScreen(viewModel: TicTacToeViewModel = TicTacToeViewMod
         Spacer(modifier = Modifier.weight(1f))
         SinglePlayerButtonGrid(viewModel = viewModel, onPlayAgain = onPlayAgain)
         Spacer(modifier = Modifier.weight(4f))
-
     }
 }
