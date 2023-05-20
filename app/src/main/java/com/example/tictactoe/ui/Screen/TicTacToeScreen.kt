@@ -62,7 +62,7 @@ fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
 
     if(uiState.ToCheck) {
-        uiState.winner = CheckWinner(viewModel = viewModel)
+        uiState.winner = CheckWinner(uiState)
         if(uiState.winner != "") {
             showWinner(winner = "Winner is: ${uiState.winner}", text = "Congratulations for winning", onPlayAgain = onPlayAgain)
         }

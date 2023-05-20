@@ -27,14 +27,17 @@ import kotlin.concurrent.schedule
 
 @Composable
 fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, viewModel: TicTacToeViewModel) {
+    val uiState by viewModel.uiState.collectAsState()
 
     Card(modifier = Modifier.padding(8.dp),shape = RoundedCornerShape(100.dp), border = BorderStroke(3.dp, color = Secondery)) {
         TextButton(
             onClick = {
                 onClick()
                 if (player.isEmpty()) {
-                    Timer().schedule(500) {
-                        viewModel.botTurn()
+                    Timer().schedule(1000) {
+                        if (uiState.winner == "") {
+                            viewModel.botTurn(uiState)
+                        }
                     }
                 }
             },
@@ -62,7 +65,7 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(),
     val uiState by viewModel.uiState.collectAsState()
 
     if(uiState.ToCheck) {
-        uiState.winner = CheckWinner(viewModel = viewModel)
+        uiState.winner = CheckWinner(uiState)
         if(uiState.winner != "") {
             showWinner(winner = "Winner is: ${uiState.winner}", text = "Congratulations for winning", onPlayAgain = onPlayAgain)
         }

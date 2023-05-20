@@ -1,13 +1,10 @@
 package com.example.tictactoe.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import com.example.tictactoe.ui.Screen.TicTacToeViewModel
+import com.example.tictactoe.data.UiState
 
 @Composable
-fun CheckWinner(viewModel: TicTacToeViewModel): String {
-    val uiState by viewModel.uiState.collectAsState()
+fun CheckWinner(uiState: UiState): String {
 
     var winner = ""
 
