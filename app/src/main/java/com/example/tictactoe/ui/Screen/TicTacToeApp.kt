@@ -43,11 +43,17 @@ fun TicTacToeApp(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
             }
 
             composable(route = GameScreen.TwoPlayers.name) {
-                TicTacToeScreen(viewModel = viewModel, uiState = uiState, onPlayAgain = { navController.navigate(GameScreen.TwoPlayers.name) })
+                TicTacToeScreen(
+                    viewModel = viewModel,
+                    uiState = uiState,
+                    onPlayAgain = {navController.navigate(GameScreen.TwoPlayers.name)})
             }
 
             composable(route = GameScreen.SinglePlayer.name) {
-                TicTacToeSinglePlayerScreen(viewModel = viewModel, uiState = uiState, onPlayAgain = { navController.navigate(GameScreen.SinglePlayer.name) })
+                TicTacToeSinglePlayerScreen(
+                    viewModel = viewModel,
+                    uiState = uiState,
+                    onPlayAgain = { navController.navigate(GameScreen.SinglePlayer.name)})
             }
         }
 

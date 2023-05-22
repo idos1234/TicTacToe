@@ -15,4 +15,5 @@ data class UiState (
     var winner: String = "",
     var ToCheck: Boolean = false,
     var times: Int = 0,
+    var isenabled: Boolean = true
 )

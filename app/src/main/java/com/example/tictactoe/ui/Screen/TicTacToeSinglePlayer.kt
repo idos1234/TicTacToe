@@ -41,7 +41,7 @@ fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, viewModel: 
                     }
                 }
             },
-            enabled = player.isEmpty(),
+            enabled = uiState.isenabled ,
             modifier = Modifier.background(Primery)
         ) {
             Text(
@@ -79,6 +79,7 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(),
 
     val onClick = {
         uiState.times ++
+        uiState.isenabled = false
         viewModel.check_ToCheck()
         viewModel.changePlayer()
     }
@@ -90,22 +91,28 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(),
             SinglePlayerGameButton(
                 player = uiState.Box1,
                 onClick = {
-                    uiState.Box1 = uiState.player_Turn
-                    onClick()
+                    if (uiState.Box1 == "") {
+                        uiState.Box1 = uiState.player_Turn
+                        onClick()
+                    }
                 },
                 viewModel = viewModel)
             SinglePlayerGameButton(
                 player = uiState.Box2,
                 onClick = {
-                    uiState.Box2 = uiState.player_Turn
-                    onClick()
+                    if (uiState.Box2 == "") {
+                        uiState.Box2 = uiState.player_Turn
+                        onClick()
+                    }
                 },
                 viewModel = viewModel)
             SinglePlayerGameButton(
                 player = uiState.Box3,
                 onClick = {
-                    uiState.Box3 = uiState.player_Turn
-                    onClick()
+                    if (uiState.Box3 == "") {
+                        uiState.Box3 = uiState.player_Turn
+                        onClick()
+                    }
                 },
                 viewModel = viewModel)
         }
@@ -113,22 +120,28 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(),
             SinglePlayerGameButton(
                 player = uiState.Box4,
                 onClick = {
-                    uiState.Box4 = uiState.player_Turn
-                    onClick()
+                    if (uiState.Box4 == "") {
+                        uiState.Box4 = uiState.player_Turn
+                        onClick()
+                    }
                 },
                 viewModel = viewModel)
             SinglePlayerGameButton(
                 player = uiState.Box5,
                 onClick = {
-                    uiState.Box5 = uiState.player_Turn
-                    onClick()
+                    if (uiState.Box5 == "") {
+                        uiState.Box5 = uiState.player_Turn
+                        onClick()
+                    }
                 },
                 viewModel = viewModel)
             SinglePlayerGameButton(
                 player = uiState.Box6,
                 onClick = {
-                    uiState.Box6 = uiState.player_Turn
-                    onClick()
+                    if (uiState.Box6 == "") {
+                        uiState.Box6 = uiState.player_Turn
+                        onClick()
+                    }
                 },
                 viewModel = viewModel)
         }
@@ -136,22 +149,28 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(),
             SinglePlayerGameButton(
                 player = uiState.Box7,
                 onClick = {
-                    uiState.Box7 = uiState.player_Turn
-                    onClick()
+                    if (uiState.Box7 == "") {
+                        uiState.Box7 = uiState.player_Turn
+                        onClick()
+                    }
                 },
                 viewModel = viewModel)
             SinglePlayerGameButton(
                 player = uiState.Box8,
                 onClick = {
-                    uiState.Box8 = uiState.player_Turn
-                    onClick()
+                    if (uiState.Box8 == "") {
+                        uiState.Box8 = uiState.player_Turn
+                        onClick()
+                    }
                 },
                 viewModel = viewModel)
             SinglePlayerGameButton(
                 player = uiState.Box9,
                 onClick = {
-                    uiState.Box9 = uiState.player_Turn
-                    onClick()
+                    if (uiState.Box9 == "") {
+                        uiState.Box9 = uiState.player_Turn
+                        onClick()
+                    }
                 },
                 viewModel = viewModel)
         }
@@ -161,6 +180,7 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(),
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun TicTacToeSinglePlayerScreen(viewModel: TicTacToeViewModel = TicTacToeViewModel(), uiState: UiState = UiState(), onPlayAgain: () -> Unit = {}) {
+
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {

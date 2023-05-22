@@ -70,6 +70,7 @@ class TicTacToeViewModel: ViewModel() {
             }
         }
         _uiState.value.times ++
+        _uiState.value.isenabled = true
         check_ToCheck()
         changePlayer()
     }
