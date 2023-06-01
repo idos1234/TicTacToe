@@ -2,28 +2,28 @@ package com.example.tictactoe.ui
 
 import com.example.tictactoe.data.UiState
 
-fun WillWin (uiState: UiState): Int {
+fun WillWin (uiState: UiState, player: String): Int {
 
     var Box = 0
 
     // box1
 
-    if (uiState.Box2 == "X") {
-        if (uiState.Box3 == "X") {
+    if (uiState.Box2 == player) {
+        if (uiState.Box3 == player) {
             if (uiState.Box1 == "") {
                 Box = 1
             }
         }
     }
-    if (uiState.Box2 == "X") {
-        if (uiState.Box3 == "X") {
+    if (uiState.Box2 == player) {
+        if (uiState.Box3 == player) {
             if (uiState.Box1 == "") {
                 Box = 1
             }
         }
     }
-    if (uiState.Box5 == "X") {
-        if (uiState.Box9 == "X") {
+    if (uiState.Box5 == player) {
+        if (uiState.Box9 == player) {
             if (uiState.Box1 == "") {
                 Box = 1
             }
@@ -32,14 +32,14 @@ fun WillWin (uiState: UiState): Int {
 
     // box2
 
-    if (uiState.Box1 == "X") {
-        if (uiState.Box3 == "X") {
+    if (uiState.Box1 == player) {
+        if (uiState.Box3 == player) {
             if (uiState.Box2 == "") {
                 Box = 2
             }
         }
     }
-    if (uiState.Box5 == "X") {
+    if (uiState.Box5 == player) {
         if (uiState.Box8 == "X") {
             if (uiState.Box2 == "") {
                 Box = 2
@@ -49,22 +49,22 @@ fun WillWin (uiState: UiState): Int {
 
     // box3
 
-    if (uiState.Box2 == "X") {
-        if (uiState.Box1 == "X") {
+    if (uiState.Box2 == player) {
+        if (uiState.Box1 == player) {
             if (uiState.Box3 == "") {
                 Box = 3
             }
         }
     }
-    if (uiState.Box6 == "X") {
-        if (uiState.Box9 == "X") {
+    if (uiState.Box6 == player) {
+        if (uiState.Box9 == player) {
             if (uiState.Box3 == "") {
                 Box = 3
             }
         }
     }
-    if (uiState.Box5 == "X") {
-        if (uiState.Box7 == "X") {
+    if (uiState.Box5 == player) {
+        if (uiState.Box7 == player) {
             if (uiState.Box3 == "") {
                 Box = 3
             }
@@ -73,15 +73,15 @@ fun WillWin (uiState: UiState): Int {
 
     // box4
 
-    if (uiState.Box5 == "X") {
-        if (uiState.Box6 == "X") {
+    if (uiState.Box5 == player) {
+        if (uiState.Box6 == player) {
             if (uiState.Box4 == "") {
                 Box = 4
             }
         }
     }
-    if (uiState.Box1 == "X") {
-        if (uiState.Box7 == "X") {
+    if (uiState.Box1 == player) {
+        if (uiState.Box7 == player) {
             if (uiState.Box4 == "") {
                 Box = 4
             }
@@ -90,29 +90,29 @@ fun WillWin (uiState: UiState): Int {
 
     // box5
 
-    if (uiState.Box1 == "X") {
-        if (uiState.Box9 == "X") {
+    if (uiState.Box1 == player) {
+        if (uiState.Box9 == player) {
             if (uiState.Box5 == "") {
                 Box = 5
             }
         }
     }
-    if (uiState.Box3 == "X") {
-        if (uiState.Box7 == "X") {
+    if (uiState.Box3 == player) {
+        if (uiState.Box7 == player) {
             if (uiState.Box5 == "") {
                 Box = 5
             }
         }
     }
-    if (uiState.Box2 == "X") {
-        if (uiState.Box8 == "X") {
+    if (uiState.Box2 == player) {
+        if (uiState.Box8 == player) {
             if (uiState.Box5 == "") {
                 Box = 5
             }
         }
     }
-    if (uiState.Box4 == "X") {
-        if (uiState.Box6 == "X") {
+    if (uiState.Box4 == player) {
+        if (uiState.Box6 == player) {
             if (uiState.Box5 == "") {
                 Box = 5
             }
@@ -121,15 +121,15 @@ fun WillWin (uiState: UiState): Int {
 
     // box6
 
-    if (uiState.Box3 == "X") {
-        if (uiState.Box9 == "X") {
+    if (uiState.Box3 == player) {
+        if (uiState.Box9 == player) {
             if (uiState.Box6 == "") {
                 Box = 6
             }
         }
     }
-    if (uiState.Box4 == "X") {
-        if (uiState.Box5 == "X") {
+    if (uiState.Box4 == player) {
+        if (uiState.Box5 == player) {
             if (uiState.Box6 == "") {
                 Box = 6
             }
@@ -138,22 +138,22 @@ fun WillWin (uiState: UiState): Int {
 
     // box7
 
-    if (uiState.Box3 == "X") {
-        if (uiState.Box5 == "X") {
+    if (uiState.Box3 == player) {
+        if (uiState.Box5 == player) {
             if (uiState.Box7 == "") {
                 Box = 7
             }
         }
     }
-    if (uiState.Box1 == "X") {
-        if (uiState.Box4 == "X") {
+    if (uiState.Box1 == player) {
+        if (uiState.Box4 == player) {
             if (uiState.Box7 == "") {
                 Box = 7
             }
         }
     }
-    if (uiState.Box9 == "X") {
-        if (uiState.Box8 == "X") {
+    if (uiState.Box9 == player) {
+        if (uiState.Box8 == player) {
             if (uiState.Box7 == "") {
                 Box = 7
             }
@@ -162,15 +162,15 @@ fun WillWin (uiState: UiState): Int {
 
     // box8
 
-    if (uiState.Box2 == "X") {
-        if (uiState.Box5 == "X") {
+    if (uiState.Box2 == player) {
+        if (uiState.Box5 == player) {
             if (uiState.Box8 == "") {
                 Box = 8
             }
         }
     }
-    if (uiState.Box7 == "X") {
-        if (uiState.Box9 == "X") {
+    if (uiState.Box7 == player) {
+        if (uiState.Box9 == player) {
             if (uiState.Box8 == "") {
                 Box = 8
             }
@@ -179,22 +179,22 @@ fun WillWin (uiState: UiState): Int {
 
     // box9
 
-    if (uiState.Box3 == "X") {
-        if (uiState.Box6 == "X") {
+    if (uiState.Box3 == player) {
+        if (uiState.Box6 == player) {
             if (uiState.Box9 == "") {
                 Box = 9
             }
         }
     }
-    if (uiState.Box7 == "X") {
-        if (uiState.Box8 == "X") {
+    if (uiState.Box7 == player) {
+        if (uiState.Box8 == player) {
             if (uiState.Box9 == "") {
                 Box = 9
             }
         }
     }
-    if (uiState.Box1 == "X") {
-        if (uiState.Box5 == "X") {
+    if (uiState.Box1 == player) {
+        if (uiState.Box5 == player) {
             if (uiState.Box9 == "") {
                 Box = 9
             }

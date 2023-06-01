@@ -4,14 +4,15 @@ import android.annotation.SuppressLint
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import java.util.*
+import kotlin.concurrent.schedule
 
 enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val title: String) {
     Start(title = "TicTacToe"),
@@ -26,6 +27,10 @@ fun TicTacToeApp(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
     val currentScreen = GameScreen.valueOf(
         backStackEntry?.destination?.route ?: GameScreen.Start.name
     )
+
+    var timesPlayed by remember {
+        mutableStateOf(0)
+    }
 
     Scaffold(topBar = {}) {
         innerPadding ->
@@ -53,10 +58,28 @@ fun TicTacToeApp(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
                 TicTacToeSinglePlayerScreen(
                     viewModel = viewModel,
                     uiState = uiState,
-                    onPlayAgain = { navController.navigate(GameScreen.SinglePlayer.name)})
+                    onPlayAgain = {
+                        resetGame(viewModel, navController)
+                        timesPlayed ++
+                        Timer().schedule(1000) {
+                            if (timesPlayed % 2 == 1) {
+                                uiState.isenabled = false
+                                viewModel.botTurn(uiState)
+                            }
+                        }
+                    },
+                )
             }
         }
 
     }
 
+}
+
+fun resetGame(
+    viewModel: TicTacToeViewModel,
+    navController: NavHostController
+) {
+    viewModel.resetGame()
+    navController.popBackStack(GameScreen.SinglePlayer.name, inclusive = false)
 }

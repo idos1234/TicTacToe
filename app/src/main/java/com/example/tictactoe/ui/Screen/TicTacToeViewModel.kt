@@ -18,9 +18,13 @@ class TicTacToeViewModel: ViewModel() {
             currentState.copy(player_Turn =
             when (currentState.player_Turn) {
                 "X" -> "O"
-                else -> "X"
-            })
+                else -> "X" }
+            )
         }
+    }
+
+    fun resetGame() {
+        _uiState.value = UiState()
     }
 
     fun check_ToCheck(){
@@ -29,48 +33,53 @@ class TicTacToeViewModel: ViewModel() {
 
     fun botTurn(uiState: UiState) {
 
-        when(WillWin(uiState = uiState)) {
-            1 -> {_uiState.value.Box1 = "O"}
-            2 -> {_uiState.value.Box2 = "O"}
-            3 -> {_uiState.value.Box3 = "O"}
-            4 -> {_uiState.value.Box4 = "O"}
-            5 -> {_uiState.value.Box5 = "O"}
-            6 -> {_uiState.value.Box6 = "O"}
-            7 -> {_uiState.value.Box7 = "O"}
-            8 -> {_uiState.value.Box8 = "O"}
-            9 -> {_uiState.value.Box9 = "O"}
+        val negativePlayer = when(uiState.player_Turn) {
+            "X" -> "O"
+            else -> "X"
+        }
+
+        when(WillWin(uiState = uiState, player = negativePlayer)) {
+            1 -> {_uiState.value.Box1 = uiState.player_Turn}
+            2 -> {_uiState.value.Box2 = uiState.player_Turn}
+            3 -> {_uiState.value.Box3 = uiState.player_Turn}
+            4 -> {_uiState.value.Box4 = uiState.player_Turn}
+            5 -> {_uiState.value.Box5 = uiState.player_Turn}
+            6 -> {_uiState.value.Box6 = uiState.player_Turn}
+            7 -> {_uiState.value.Box7 = uiState.player_Turn}
+            8 -> {_uiState.value.Box8 = uiState.player_Turn}
+            9 -> {_uiState.value.Box9 = uiState.player_Turn}
             else -> {
                 if(_uiState.value.Box1 == "") {
-                    _uiState.value.Box1 = "O"
+                    _uiState.value.Box1 = uiState.player_Turn
                 }
                 else if(_uiState.value.Box2 == "") {
-                    _uiState.value.Box2= "O"
+                    _uiState.value.Box2 = uiState.player_Turn
                 }
                 else if(_uiState.value.Box3 == "") {
-                    _uiState.value.Box3 = "O"
+                    _uiState.value.Box3 = uiState.player_Turn
                 }
                 else if(_uiState.value.Box4 == "") {
-                    _uiState.value.Box4 = "O"
+                    _uiState.value.Box4 = uiState.player_Turn
                 }
                 else if(_uiState.value.Box5 == "") {
-                    _uiState.value.Box5 = "O"
+                    _uiState.value.Box5 = uiState.player_Turn
                 }
                 else if(_uiState.value.Box6 == "") {
-                    _uiState.value.Box6 = "O"
+                    _uiState.value.Box6 = uiState.player_Turn
                 }
                 else if(_uiState.value.Box7 == "") {
-                    _uiState.value.Box7 = "O"
+                    _uiState.value.Box7 = uiState.player_Turn
                 }
                 else if(_uiState.value.Box8 == "") {
-                    _uiState.value.Box8 = "O"
+                    _uiState.value.Box8 = uiState.player_Turn
                 }
                 else if(_uiState.value.Box9 == "") {
-                    _uiState.value.Box9 = "O"
+                    _uiState.value.Box9 = uiState.player_Turn
                 }
             }
         }
-        _uiState.value.times ++
-        _uiState.value.isenabled = true
+        uiState.times ++
+        uiState.isenabled = true
         check_ToCheck()
         changePlayer()
     }

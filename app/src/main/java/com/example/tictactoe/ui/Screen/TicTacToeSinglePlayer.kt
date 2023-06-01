@@ -181,13 +181,20 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(),
 @Composable
 fun TicTacToeSinglePlayerScreen(viewModel: TicTacToeViewModel = TicTacToeViewModel(), uiState: UiState = UiState(), onPlayAgain: () -> Unit = {}) {
 
+
+
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
         Spacer(modifier = Modifier.weight(2f))
         Text(text = "Player: ${uiState.player_Turn}", fontSize = 40.sp, fontWeight = FontWeight.ExtraBold)
         Spacer(modifier = Modifier.weight(1f))
-        SinglePlayerButtonGrid(viewModel = viewModel, onPlayAgain = onPlayAgain)
+        SinglePlayerButtonGrid(
+            viewModel = viewModel,
+            onPlayAgain = {
+                onPlayAgain()
+            }
+        )
         Spacer(modifier = Modifier.weight(4f))
     }
 }
