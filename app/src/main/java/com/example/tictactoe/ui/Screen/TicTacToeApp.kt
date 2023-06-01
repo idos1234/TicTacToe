@@ -59,11 +59,10 @@ fun TicTacToeApp(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
                     viewModel = viewModel,
                     uiState = uiState,
                     onPlayAgain = {
-                        resetGame(viewModel, navController)
                         timesPlayed ++
+                        resetGame(viewModel, navController, timesPlayed)
                         Timer().schedule(1000) {
                             if (timesPlayed % 2 == 1) {
-                                uiState.isenabled = false
                                 viewModel.botTurn(uiState)
                             }
                         }
@@ -78,8 +77,11 @@ fun TicTacToeApp(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
 
 fun resetGame(
     viewModel: TicTacToeViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    times: Int
 ) {
-    viewModel.resetGame()
+    val isBotTurn =
+        times % 2 != 1
+    viewModel.resetGame(isBotTurn)
     navController.popBackStack(GameScreen.SinglePlayer.name, inclusive = false)
 }

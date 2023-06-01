@@ -14,71 +14,115 @@ class TicTacToeViewModel: ViewModel() {
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     fun changePlayer() {
-        _uiState.update {currentState ->
-            currentState.copy(player_Turn =
-            when (currentState.player_Turn) {
-                "X" -> "O"
-                else -> "X" }
+        _uiState.update { currentState ->
+            currentState.copy(
+                player_Turn =
+                when (currentState.player_Turn) {
+                    "X" -> "O"
+                    else -> "X"
+                }
             )
         }
     }
 
-    fun resetGame() {
-        _uiState.value = UiState()
+    fun resetGame(isBotTurn: Boolean) {
+        _uiState.value = UiState(isenabled = isBotTurn)
     }
 
-    fun check_ToCheck(){
+    fun check_ToCheck() {
         _uiState.value.ToCheck = _uiState.value.times >= 4
     }
 
     fun botTurn(uiState: UiState) {
 
-        val negativePlayer = when(uiState.player_Turn) {
+        val negativePlayer = when (uiState.player_Turn) {
             "X" -> "O"
             else -> "X"
         }
 
-        when(WillWin(uiState = uiState, player = negativePlayer)) {
-            1 -> {_uiState.value.Box1 = uiState.player_Turn}
-            2 -> {_uiState.value.Box2 = uiState.player_Turn}
-            3 -> {_uiState.value.Box3 = uiState.player_Turn}
-            4 -> {_uiState.value.Box4 = uiState.player_Turn}
-            5 -> {_uiState.value.Box5 = uiState.player_Turn}
-            6 -> {_uiState.value.Box6 = uiState.player_Turn}
-            7 -> {_uiState.value.Box7 = uiState.player_Turn}
-            8 -> {_uiState.value.Box8 = uiState.player_Turn}
-            9 -> {_uiState.value.Box9 = uiState.player_Turn}
+        when (WillWin(uiState = uiState, player = uiState.player_Turn)) {
+            1 -> {
+                _uiState.value.Box1 = uiState.player_Turn
+            }
+            2 -> {
+                _uiState.value.Box2 = uiState.player_Turn
+            }
+            3 -> {
+                _uiState.value.Box3 = uiState.player_Turn
+            }
+            4 -> {
+                _uiState.value.Box4 = uiState.player_Turn
+            }
+            5 -> {
+                _uiState.value.Box5 = uiState.player_Turn
+            }
+            6 -> {
+                _uiState.value.Box6 = uiState.player_Turn
+            }
+            7 -> {
+                _uiState.value.Box7 = uiState.player_Turn
+            }
+            8 -> {
+                _uiState.value.Box8 = uiState.player_Turn
+            }
+            9 -> {
+                _uiState.value.Box9 = uiState.player_Turn
+            }
             else -> {
-                if(_uiState.value.Box1 == "") {
-                    _uiState.value.Box1 = uiState.player_Turn
-                }
-                else if(_uiState.value.Box2 == "") {
-                    _uiState.value.Box2 = uiState.player_Turn
-                }
-                else if(_uiState.value.Box3 == "") {
-                    _uiState.value.Box3 = uiState.player_Turn
-                }
-                else if(_uiState.value.Box4 == "") {
-                    _uiState.value.Box4 = uiState.player_Turn
-                }
-                else if(_uiState.value.Box5 == "") {
-                    _uiState.value.Box5 = uiState.player_Turn
-                }
-                else if(_uiState.value.Box6 == "") {
-                    _uiState.value.Box6 = uiState.player_Turn
-                }
-                else if(_uiState.value.Box7 == "") {
-                    _uiState.value.Box7 = uiState.player_Turn
-                }
-                else if(_uiState.value.Box8 == "") {
-                    _uiState.value.Box8 = uiState.player_Turn
-                }
-                else if(_uiState.value.Box9 == "") {
-                    _uiState.value.Box9 = uiState.player_Turn
+
+                when (WillWin(uiState = uiState, player = negativePlayer)) {
+                    1 -> {
+                        _uiState.value.Box1 = uiState.player_Turn
+                    }
+                    2 -> {
+                        _uiState.value.Box2 = uiState.player_Turn
+                    }
+                    3 -> {
+                        _uiState.value.Box3 = uiState.player_Turn
+                    }
+                    4 -> {
+                        _uiState.value.Box4 = uiState.player_Turn
+                    }
+                    5 -> {
+                        _uiState.value.Box5 = uiState.player_Turn
+                    }
+                    6 -> {
+                        _uiState.value.Box6 = uiState.player_Turn
+                    }
+                    7 -> {
+                        _uiState.value.Box7 = uiState.player_Turn
+                    }
+                    8 -> {
+                        _uiState.value.Box8 = uiState.player_Turn
+                    }
+                    9 -> {
+                        _uiState.value.Box9 = uiState.player_Turn
+                    }
+                    else -> {
+                        if (_uiState.value.Box1 == "") {
+                            _uiState.value.Box1 = uiState.player_Turn
+                        } else if (_uiState.value.Box2 == "") {
+                            _uiState.value.Box2 = uiState.player_Turn
+                        } else if (_uiState.value.Box3 == "") {
+                            _uiState.value.Box3 = uiState.player_Turn
+                        } else if (_uiState.value.Box4 == "") {
+                            _uiState.value.Box4 = uiState.player_Turn
+                        } else if (_uiState.value.Box5 == "") {
+                            _uiState.value.Box5 = uiState.player_Turn
+                        } else if (_uiState.value.Box6 == "") {
+                            _uiState.value.Box6 = uiState.player_Turn
+                        } else if (_uiState.value.Box7 == "") {
+                            _uiState.value.Box7 = uiState.player_Turn
+                        } else if (_uiState.value.Box8 == "") {
+                            _uiState.value.Box8 = uiState.player_Turn
+                        } else if (_uiState.value.Box9 == "") {
+                            _uiState.value.Box9 = uiState.player_Turn
+                        }
+                    }
                 }
             }
         }
-        uiState.times ++
+        uiState.times++
         uiState.isenabled = true
         check_ToCheck()
         changePlayer()
