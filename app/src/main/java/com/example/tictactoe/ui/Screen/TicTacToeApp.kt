@@ -33,7 +33,7 @@ enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val tit
 }
 
 @Composable()
-fun HomeScreenMenu(modifier: Modifier) {
+fun HomeScreenMenu(modifier: Modifier, navController: NavHostController, onChaneScreen: () -> Unit = {}) {
     Spacer(modifier = Modifier.height(30.dp))
 
     Column() {
@@ -42,13 +42,22 @@ fun HomeScreenMenu(modifier: Modifier) {
             contentDescription = null,
             modifier = modifier)
 
-        Button(onClick = {}, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = {
+            navController.navigate(GameScreen.Start.name)
+            onChaneScreen()},
+            modifier = Modifier.fillMaxWidth()) {
             Text(text = "Home")
         }
-        Button(onClick = {}, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = {
+            navController.navigate(GameScreen.Settings.name)
+            onChaneScreen()},
+            modifier = Modifier.fillMaxWidth()) {
             Text(text = "Settings")
         }
-        Button(onClick = {}, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = {
+            navController.navigate(GameScreen.AboutUs.name)
+            onChaneScreen()},
+            modifier = Modifier.fillMaxWidth()) {
             Text(text = "About Us")
         }
     }
@@ -116,6 +125,7 @@ fun TicTacToeApp(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
                         }
                     }
                 )
+            else -> {}
         }
     },
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
@@ -128,7 +138,13 @@ fun TicTacToeApp(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
                                 scaffoldState.drawerState.close()
                             }
                         }
-                    )
+                    ),
+                navController = navController,
+                onChaneScreen = {
+                    scope.launch {
+                        scaffoldState.drawerState.close()
+                    }
+                }
             )
         }
     ) {
@@ -167,6 +183,10 @@ fun TicTacToeApp(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
                         }
                     },
                 )
+            }
+
+            composable(route= GameScreen.Settings.name) {
+                SettingScreen()
             }
         }
 
