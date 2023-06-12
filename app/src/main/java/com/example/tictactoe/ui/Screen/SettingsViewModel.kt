@@ -10,6 +10,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
+/**
+ * The viewModel for the [SettingScreen]
+ */
+
 @ViewModelFactoryDsl
 class SettingsViewModel(playerRepository: PlayerRepository): ViewModel() {
 

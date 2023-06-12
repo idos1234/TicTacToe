@@ -14,23 +14,30 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.BackGround
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.concurrent.schedule
 
 enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val title: String) {
+    SignUp(title = "Sign Up"),
     Start(title = "Home"),
     Settings(title = "Settings"),
     AboutUs(title = "About Us"),
     TwoPlayers(title = "Two players"),
     SinglePlayer("SinglePlayer")
 }
+
+/**
+ * Provides Navigation graph for the application.
+ */
 
 @Composable()
 fun HomeScreenMenu(modifier: Modifier, navController: NavHostController, onChaneScreen: () -> Unit = {}) {
@@ -83,7 +90,9 @@ fun topHomeScreenBar(onClick: () -> Unit) {
 }
 
 @Composable
-fun TicTacToeApp(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
+fun TicTacToeApp(
+    viewModel: TicTacToeViewModel = TicTacToeViewModel(),
+    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = GameScreen.valueOf(
@@ -92,6 +101,9 @@ fun TicTacToeApp(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
 
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
+    val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+
 
     var timesPlayed by remember {
         mutableStateOf(0)
@@ -149,13 +161,23 @@ fun TicTacToeApp(viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
         }
     ) {
         innerPadding ->
-        val uiState by viewModel.uiState.collectAsState()
+
+        val startedDestination = if(settingsUiState.playerList.isEmpty()) {
+            GameScreen.SignUp.name
+        } else {
+            GameScreen.Start.name
+        }
 
         NavHost(
             navController = navController,
-            startDestination = GameScreen.Start.name,
+            startDestination =  startedDestination,
             modifier = Modifier.padding(innerPadding)
         ){
+
+            composable(route = GameScreen.SignUp.name) {
+                SignUpScreen()
+            }
+
             composable(route = GameScreen.Start.name) {
                 HomeScreen(
                     onTwoPlayersClick = {navController.navigate(GameScreen.TwoPlayers.name)},

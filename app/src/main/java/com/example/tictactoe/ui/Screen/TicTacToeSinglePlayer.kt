@@ -25,6 +25,10 @@ import com.example.tictactoe.ui.theme.Secondery
 import java.util.*
 import kotlin.concurrent.schedule
 
+/**
+ * Show a single button in the single player game grid
+ */
+
 @Composable
 fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, viewModel: TicTacToeViewModel) {
     val uiState by viewModel.uiState.collectAsState()
@@ -59,6 +63,10 @@ fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, viewModel: 
         }
     }
 }
+
+/**
+ * Show the single player game grid
+ */
 
 @Composable
 fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(), onPlayAgain: () -> Unit = {}) {
@@ -176,6 +184,10 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(),
         }
     }
 }
+
+/**
+ * Show the single player game screen
+ */
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable

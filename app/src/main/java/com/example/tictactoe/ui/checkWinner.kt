@@ -2,6 +2,12 @@ package com.example.tictactoe.ui
 
 import androidx.compose.runtime.Composable
 import com.example.tictactoe.data.UiState
+import com.example.tictactoe.ui.Screen.TicTacToeScreen
+import com.example.tictactoe.ui.Screen.TicTacToeSinglePlayerScreen
+
+/**
+ * Check the winner for the [TicTacToeScreen] and the [TicTacToeSinglePlayerScreen]
+ */
 
 @Composable
 fun CheckWinner(uiState: UiState): String {

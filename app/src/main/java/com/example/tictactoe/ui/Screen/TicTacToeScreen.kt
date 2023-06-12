@@ -27,6 +27,10 @@ import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Primery
 import com.example.tictactoe.ui.theme.Secondery
 
+/**
+ * Show a single button in the two players game grid
+ */
+
 @Composable
 fun GameButton(player: String, onClick: () -> Unit = {}) {
     var text by remember {
@@ -56,6 +60,10 @@ fun GameButton(player: String, onClick: () -> Unit = {}) {
         }
     }
 }
+
+/**
+ * Show the two players game grid
+ */
 
 @Composable
 fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
@@ -147,6 +155,10 @@ fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
     }
 }
 
+/**
+ * Show the winner
+ */
+
 @Composable
 fun showWinner(winner: String, text: String, onPlayAgain: () -> Unit) {
 
@@ -173,6 +185,10 @@ fun showWinner(winner: String, text: String, onPlayAgain: () -> Unit) {
         }
     )
 }
+
+/**
+ * Show the two players game screen
+ */
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable

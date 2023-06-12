@@ -8,6 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
+/**
+ * The viewModel for the [TicTacToeScreen] and the [TicTacToeSinglePlayerScreen]
+ */
+
 class TicTacToeViewModel: ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())

@@ -21,6 +21,10 @@ import com.example.tictactoe.ui.AppViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tictactoe.ui.theme.Secondery
 
+/**
+ * [SettingScreen] Show the settings screen
+ */
+
 @JvmOverloads
 @Composable
 fun SettingScreen(
@@ -35,6 +39,10 @@ fun SettingScreen(
         ShowPlayersButton(settingsUiState.playerList)
     }
 }
+
+/**
+ * Show the players from the data
+ */
 
 @Composable
 fun ShowPlayersButton(Players: List<Player> = listOf()) {

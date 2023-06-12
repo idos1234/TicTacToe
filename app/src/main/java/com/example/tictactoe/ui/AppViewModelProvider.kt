@@ -6,13 +6,22 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.tictactoe.ui.Screen.SettingsViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
 import com.example.tictactoe.PlayerApplication
+import com.example.tictactoe.ui.Screen.SignUpViewModel
 
+/**
+ * Provides Factory to create instance of ViewModel for the entire Inventory app
+ */
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
 
         initializer {
-            SettingsViewModel(playerApplication().container.playerRepository)        }
+            SettingsViewModel(playerApplication().container.playerRepository)
+        }
+
+        initializer {
+            SignUpViewModel(playerApplication().container.playerRepository)
+        }
     }
 }
 

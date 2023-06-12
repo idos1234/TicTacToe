@@ -1,5 +1,9 @@
 package com.example.tictactoe.data
 
+/**
+  * [UiState] has the data of the game
+ **/
+
 data class UiState (
     var Box1: String = "",
     var Box2: String = "",

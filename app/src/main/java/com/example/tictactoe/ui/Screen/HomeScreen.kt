@@ -17,6 +17,10 @@ import com.example.tictactoe.R
 import com.example.tictactoe.ui.theme.Secondery
 import com.example.tictactoe.ui.theme.Shapes
 
+/**
+ * [HomeScreen] Show the home screen
+ */
+
 @Composable
 fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Unit = {}) {
     Row() {

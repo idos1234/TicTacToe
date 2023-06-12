@@ -2,6 +2,10 @@ package com.example.tictactoe.ui
 
 import com.example.tictactoe.data.UiState
 
+/**
+ * Help the bot to choose which box it should choose
+ */
+
 fun WillWin (uiState: UiState, player: String): Int {
 
     var Box = 0
