@@ -13,6 +13,10 @@ class SignUpViewModel(private val playerRepository: PlayerRepository): ViewModel
     var playerUiState by mutableStateOf(PlayerUiState())
         private set
 
+    fun updateUiState(newPlayerUiState: PlayerUiState) {
+        playerUiState = newPlayerUiState.copy()
+    }
+
     suspend fun savePlayer() {
         if (playerUiState.isValid()) {
             playerRepository.insertIPlayer(playerUiState.toPlayer())

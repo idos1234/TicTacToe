@@ -54,8 +54,8 @@ fun ShowPlayersButton(Players: List<Player> = listOf()) {
         else -> Icons.Default.KeyboardArrowUp
     }
 
-    Card(elevation = 4.dp, backgroundColor = Secondery) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Card(elevation = 4.dp, backgroundColor = Secondery) {
                 Row() {
                     Text(text = "Show Players", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.Black, modifier = Modifier.padding(4.dp))
 
@@ -63,9 +63,9 @@ fun ShowPlayersButton(Players: List<Player> = listOf()) {
                         Icon(imageVector = icon, contentDescription = null, tint = Color.Black)
                     }
             }
-            if (toShowPlayers) {
-                ShowPlayers(Players = Players)
-            }
+        }
+        if (toShowPlayers) {
+            ShowPlayers(Players = Players)
         }
     }
 }
@@ -77,8 +77,16 @@ fun ShowPlayers(Players: List<Player>) {
     } else {
         LazyColumn(verticalArrangement = Arrangement.Center) {
             items(items = Players, key = { it.id }) { player ->
-                Card {
-                    Text(text = player.name, fontSize = 50.sp)
+                Card(backgroundColor = Secondery, elevation = 10.dp, modifier = Modifier
+                    .width(250.dp)
+                    .padding(16.dp)) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Spacer(modifier = Modifier.width(20.dp))
+                            Text(text = "${player.id}.", fontSize = 30.sp, modifier = Modifier.weight(1f))
+                            Text(text = player.name, fontSize = 30.sp, modifier = Modifier.weight(2f))
+                        }
+                    }
                 }
             }
         }
