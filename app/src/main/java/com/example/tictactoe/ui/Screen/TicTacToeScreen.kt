@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tictactoe.data.UiState
@@ -165,7 +164,7 @@ fun showWinner(winner: String, text: String, onPlayAgain: () -> Unit) {
     val activity = (LocalContext.current as Activity)
 
     AlertDialog(
-        modifier = Modifier.background(BackGround),
+        backgroundColor = BackGround,
         onDismissRequest = {},
         title = { Text(text = winner, fontWeight = FontWeight.ExtraBold, color = Color.Black, textAlign = TextAlign.Center)},
         text = { Text(text = text, color = Color.Black, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)},
@@ -203,10 +202,4 @@ fun TicTacToeScreen(viewModel: TicTacToeViewModel = TicTacToeViewModel(), uiStat
         Spacer(modifier = Modifier.weight(4f))
 
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun gamePreview() {
-    TicTacToeScreen()
 }

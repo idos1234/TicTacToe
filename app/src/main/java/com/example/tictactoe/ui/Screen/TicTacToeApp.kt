@@ -162,10 +162,10 @@ fun TicTacToeApp(
     ) {
         innerPadding ->
 
-        val startedDestination = if(settingsUiState.playerList.isEmpty()) {
-            GameScreen.SignUp.name
-        } else {
+        val startedDestination = if(settingsUiState.playerList.isNotEmpty()) {
             GameScreen.Start.name
+        } else {
+            GameScreen.SignUp.name
         }
 
         NavHost(
