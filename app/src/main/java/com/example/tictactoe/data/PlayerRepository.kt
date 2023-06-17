@@ -4,22 +4,27 @@ import kotlinx.coroutines.flow.Flow
 
 interface PlayerRepository {
     /**
-     * Retrieve all the items from the the given data source.
+     * Retrieve all the players from the the given data source.
      */
     fun getAllPlayersStream(): Flow<List<Player>>
 
     /**
-     * Insert item in the data source
+     * Insert player in the data source
      */
     suspend fun insertIPlayer(item: Player)
 
     /**
-     * Delete item from the data source
+     * Delete player from the data source
      */
     suspend fun deletePlayer(item: Player)
 
     /**
-     * Update item in the data source
+     * Delete all players from the data source
+     */
+    suspend fun clearData()
+
+    /**
+     * Update player in the data source
      */
     suspend fun updatePlayer(item: Player)
 }

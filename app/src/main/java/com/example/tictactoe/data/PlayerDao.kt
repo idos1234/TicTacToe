@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PlayerDao {
 
-    @Query("SELECT * from players ORDER BY name ASC")
+    @Query("SELECT * from players ORDER BY id ASC")
     fun getAllPlayers(): Flow<List<Player>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -17,4 +17,8 @@ interface PlayerDao {
 
     @Delete
     suspend fun delete(player: Player)
+
+
+    @Query("DELETE FROM players")
+    suspend fun clearData()
 }

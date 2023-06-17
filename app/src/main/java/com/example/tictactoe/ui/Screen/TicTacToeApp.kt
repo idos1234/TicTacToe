@@ -188,7 +188,16 @@ fun TicTacToeApp(
                 TicTacToeScreen(
                     viewModel = viewModel,
                     uiState = uiState,
-                    onPlayAgain = {navController.navigate(GameScreen.TwoPlayers.name)})
+                    onPlayAgain = {
+                        timesPlayed ++
+                        resetGame(
+                            viewModel,
+                            navController.popBackStack(GameScreen.TwoPlayers.name, inclusive = false),
+                            timesPlayed,
+                            GameScreen.TwoPlayers,
+                        )
+                    }
+                )
             }
 
             composable(route = GameScreen.SinglePlayer.name) {
@@ -197,13 +206,16 @@ fun TicTacToeApp(
                     uiState = uiState,
                     onPlayAgain = {
                         timesPlayed ++
-                        resetGame(viewModel, navController, timesPlayed)
+                        resetGame(viewModel,
+                            navController.popBackStack(GameScreen.SinglePlayer.name, inclusive = false),
+                            timesPlayed,
+                            GameScreen.SinglePlayer)
                         Timer().schedule(1000) {
                             if (timesPlayed % 2 == 1) {
                                 viewModel.botTurn(uiState)
                             }
                         }
-                    },
+                    }
                 )
             }
 
@@ -218,11 +230,16 @@ fun TicTacToeApp(
 
 fun resetGame(
     viewModel: TicTacToeViewModel,
-    navController: NavHostController,
-    times: Int
+    navController: Boolean,
+    times: Int,
+    screen: GameScreen,
 ) {
-    val isBotTurn =
-        times % 2 != 1
-    viewModel.resetGame(isBotTurn)
-    navController.popBackStack(GameScreen.SinglePlayer.name, inclusive = false)
+    if (screen == GameScreen.SinglePlayer) {
+        val isBotTurn =
+            times % 2 != 1
+        viewModel.resetGame(isBotTurn, times)
+    } else {
+        viewModel.resetGame(times = times)
+    }
+    navController
 }

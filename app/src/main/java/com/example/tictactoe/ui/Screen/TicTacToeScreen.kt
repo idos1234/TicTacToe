@@ -32,20 +32,15 @@ import com.example.tictactoe.ui.theme.Secondery
 
 @Composable
 fun GameButton(player: String, onClick: () -> Unit = {}) {
-    var text by remember {
-        mutableStateOf("")
-    }
 
     Card(modifier = Modifier.padding(8.dp),shape = RoundedCornerShape(100.dp), border = BorderStroke(3.dp, color = Secondery)) {
         TextButton(
-            onClick = {
-                onClick()
-                text = player},
-            enabled = player.isNotEmpty(),
+            onClick = onClick,
+            enabled = player.isEmpty(),
             modifier = Modifier.background(Primery)
         ) {
             Text(
-                text = text,
+                text = player,
                 style = TextStyle(
                     textAlign = TextAlign.Center,
                     fontSize = 35.sp,
@@ -92,63 +87,89 @@ fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
     Column() {
         Row() {
             GameButton(
-                player = uiState.player_Turn,
+                player = uiState.Box1,
                 onClick = {
-                    uiState.Box1 = uiState.player_Turn
-                    onClick()
-                })
+                    if (uiState.Box1 == "") {
+                        uiState.Box1 = uiState.player_Turn
+                        onClick()
+                    }
+                },
+            )
             GameButton(
-                player = uiState.player_Turn,
+                player = uiState.Box2,
                 onClick = {
-                    uiState.Box2 = uiState.player_Turn
-                    onClick()
-                })
+                    if (uiState.Box2 == "") {
+                        uiState.Box2 = uiState.player_Turn
+                        onClick()
+                    }
+                },
+            )
             GameButton(
-                player = uiState.player_Turn,
+                player = uiState.Box3,
                 onClick = {
-                    uiState.Box3 = uiState.player_Turn
-                    onClick()
-                })
+                    if (uiState.Box3 == "") {
+                        uiState.Box3 = uiState.player_Turn
+                        onClick()
+                    }
+                },
+            )
         }
         Row() {
             GameButton(
-                player = uiState.player_Turn,
+                player = uiState.Box4,
                 onClick = {
-                    uiState.Box4 = uiState.player_Turn
-                    onClick()
-                })
+                    if (uiState.Box4 == "") {
+                        uiState.Box4 = uiState.player_Turn
+                        onClick()
+                    }
+                },
+            )
             GameButton(
-                player = uiState.player_Turn,
+                player = uiState.Box5,
                 onClick = {
-                    uiState.Box5 = uiState.player_Turn
-                    onClick()
-                })
+                    if (uiState.Box5 == "") {
+                        uiState.Box5 = uiState.player_Turn
+                        onClick()
+                    }
+                },
+            )
             GameButton(
-                player = uiState.player_Turn,
+                player = uiState.Box6,
                 onClick = {
-                    uiState.Box6 = uiState.player_Turn
-                    onClick()
-                })
+                    if (uiState.Box6 == "") {
+                        uiState.Box6 = uiState.player_Turn
+                        onClick()
+                    }
+                },
+            )
         }
         Row() {
             GameButton(
-                player = uiState.player_Turn,
+                player = uiState.Box7,
                 onClick = {
-                    uiState.Box7 = uiState.player_Turn
-                    onClick()
-                })
+                    if (uiState.Box7 == "") {
+                        uiState.Box7 = uiState.player_Turn
+                        onClick()
+                    }
+                },
+            )
             GameButton(
-                player = uiState.player_Turn,
+                player = uiState.Box8,
                 onClick = {
-                    uiState.Box8 = uiState.player_Turn
-                    onClick()
-                })
+                    if (uiState.Box8 == "") {
+                        uiState.Box8 = uiState.player_Turn
+                        onClick()
+                    }
+                },
+            )
             GameButton(
-                player = uiState.player_Turn,
+                player = uiState.Box9,
                 onClick = {
-                    uiState.Box9 = uiState.player_Turn
-                    onClick()
-                }
+                    if (uiState.Box9 == "") {
+                        uiState.Box9 = uiState.player_Turn
+                        onClick()
+                    }
+                },
             )
         }
     }
@@ -191,15 +212,22 @@ fun showWinner(winner: String, text: String, onPlayAgain: () -> Unit) {
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun TicTacToeScreen(viewModel: TicTacToeViewModel = TicTacToeViewModel(), uiState: UiState = UiState(), onPlayAgain: () -> Unit = {}) {
+fun TicTacToeScreen(
+    viewModel: TicTacToeViewModel = TicTacToeViewModel(),
+    uiState: UiState = UiState(),
+    onPlayAgain: () -> Unit = {}) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
         Spacer(modifier = Modifier.weight(2f))
         Text(text = "Player: ${uiState.player_Turn}", fontSize = 40.sp, fontWeight = FontWeight.ExtraBold)
         Spacer(modifier = Modifier.weight(1f))
-        ButtonGrid(viewModel = viewModel, onPlayAgain = onPlayAgain)
+        ButtonGrid(
+            viewModel = viewModel,
+            onPlayAgain = {
+                onPlayAgain()
+            }
+        )
         Spacer(modifier = Modifier.weight(4f))
-
     }
 }

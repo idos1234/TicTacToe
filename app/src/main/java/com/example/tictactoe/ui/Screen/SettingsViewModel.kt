@@ -5,10 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.ViewModelFactoryDsl
 import com.example.tictactoe.data.Player
 import com.example.tictactoe.data.PlayerRepository
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 
 /**
  * The viewModel for the [SettingScreen]
@@ -16,6 +13,18 @@ import kotlinx.coroutines.flow.stateIn
 
 @ViewModelFactoryDsl
 class SettingsViewModel(playerRepository: PlayerRepository): ViewModel() {
+
+    private val _isDialogOpen = MutableStateFlow(isDialogOpen())
+    val isDialogOpen: StateFlow<isDialogOpen> = _isDialogOpen.asStateFlow()
+
+    fun ChangeAlertDialog() {
+        _isDialogOpen.update { currentState ->
+            currentState.copy(
+                isDialogOpen = !(currentState.isDialogOpen)
+            )
+
+        }
+    }
 
     val settingsUiState: StateFlow<SettingsUiState> =
         playerRepository.getAllPlayersStream().map { SettingsUiState(it) }
@@ -31,3 +40,7 @@ class SettingsViewModel(playerRepository: PlayerRepository): ViewModel() {
 }
 
 data class SettingsUiState(val playerList: List<Player> = listOf())
+
+data class isDialogOpen(
+    var isDialogOpen: Boolean = false
+)

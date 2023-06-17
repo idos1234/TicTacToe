@@ -7,6 +7,8 @@ class OfflinePlayerRepository(private val playerDao: PlayerDao) : PlayerReposito
         return playerDao.getAllPlayers()
     }
 
+    override suspend fun clearData() = playerDao.clearData()
+
     override suspend fun insertIPlayer(player: Player) = playerDao.insert(player)
 
     override suspend fun deletePlayer(player: Player) = playerDao.delete(player)

@@ -22,4 +22,9 @@ class SignUpViewModel(private val playerRepository: PlayerRepository): ViewModel
             playerRepository.insertIPlayer(playerUiState.toPlayer())
         }
     }
+
+    suspend fun clearData() {
+        playerRepository.clearData()
+    }
 }
+

@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,7 +19,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -27,6 +29,8 @@ import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Secondery
 import com.example.tictactoe.ui.theme.Shapes
 import kotlinx.coroutines.launch
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 
 @Composable
 fun SignUpScreen(
@@ -89,6 +93,10 @@ fun SignUpInputForm(
 ) {
     val focusManager = LocalFocusManager.current
 
+    var showPassword by remember {
+        mutableStateOf(false)
+    }
+
     OutlinedTextField(
         value = playerUiState.name,
         onValueChange = { onValueChange(playerUiState.copy(name = it)) },
@@ -101,7 +109,9 @@ fun SignUpInputForm(
         keyboardActions = KeyboardActions(
             onNext = { focusManager.moveFocus(FocusDirection.Down) }
         ),
-        colors = TextFieldDefaults.textFieldColors(backgroundColor = Secondery),
+        colors = TextFieldDefaults.textFieldColors(
+            backgroundColor = Secondery,
+            ),
         shape = Shapes.large,
     )
 
@@ -118,11 +128,19 @@ fun SignUpInputForm(
         ),
         colors = TextFieldDefaults.textFieldColors(backgroundColor = Secondery),
         shape = Shapes.large,
-    )
-}
+        visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = {
+            val image = if (showPassword)
+                Icons.Default.Visibility
+            else Icons.Filled.VisibilityOff
 
-@Preview(showBackground = true)
-@Composable
-fun SignUpScreenPreview() {
-    SignUpScreen()
+            // Localized description for accessibility services
+            val description = if (showPassword) "Hide password" else "Show password"
+
+            // Toggle button to hide or display password
+            IconButton(onClick = {showPassword = !showPassword}){
+                Icon(imageVector  = image, description)
+            }
+        }
+        )
 }
