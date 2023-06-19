@@ -71,7 +71,9 @@ fun SettingScreen(
 
         item {
             ClearDataButton(
-                viewModel = signUpViewModel,
+                signUpViewModel = signUpViewModel,
+                settingsViewModel = viewModel,
+                uiState = isDialogOpenUiState,
                 coroutineScope = coroutineScope
             )
         }
@@ -95,11 +97,11 @@ fun ShowPlayersButton(
 
 
     Button(
-         onClick = {settingsViewModel.ChangeAlertDialog()},
+         onClick = {settingsViewModel.ChangeShowingPlayersAlertDialog()},
          colors = ButtonDefaults.buttonColors(Secondery), shape = Shapes.large, modifier = Modifier.width(200.dp)) {
          Text(text = "Show Players", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black, modifier = Modifier.padding(4.dp))
      }
-    if (uiState.isDialogOpen) {
+    if (uiState.isShowingPlayersDialogOpen) {
         ShowPlayers(
             Players = Players,
             playerUiState = playerUiState,
@@ -107,7 +109,6 @@ fun ShowPlayersButton(
             coroutineScope = coroutineScope,
             viewModel = viewModel,
             settingsViewModel = settingsViewModel,
-            uiState = uiState
         )
     }
 }
@@ -120,7 +121,6 @@ fun ShowPlayers(
     coroutineScope: CoroutineScope,
     viewModel: SignUpViewModel,
     settingsViewModel: SettingsViewModel,
-    uiState: isDialogOpen
 ) {
 
     var toAddPlayer by remember {
@@ -133,24 +133,84 @@ fun ShowPlayers(
         Icons.Default.Add
     }
 
-    if (uiState.isDialogOpen) {
-        AlertDialog(
-            backgroundColor = BackGround,
-            title = {
-                IconButton(onClick = {settingsViewModel.ChangeAlertDialog()}) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = null
-                    )
+    AlertDialog(
+        backgroundColor = BackGround,
+        title = {
+            IconButton(onClick = {settingsViewModel.ChangeShowingPlayersAlertDialog()}) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = null
+                )
+            }
+                },
+        text = {
+            if (Players.isEmpty()) {
+                Column() {
+                    Text(text = "There Are Not Players", color = Color.Black)
+                    Button(
+                        onClick = { toAddPlayer = !toAddPlayer },
+                        modifier = Modifier.width(250.dp)
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
                 }
-            },
-            text = {
-
-                if (Players.isEmpty()) {
-                    Column() {
-                        Text(text = "There Are Not Players", color = Color.Black)
+            } else {
+                LazyColumn(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.height(300.dp)
+                ) {
+                    Players.forEach() { player ->
+                        item {
+                            Card(
+                                backgroundColor = Secondery,
+                                elevation = 10.dp,
+                                modifier = Modifier
+                                    .width(250.dp)
+                                    .padding(5.dp)
+                            ) {
+                                Text(
+                                    text = player.name,
+                                    fontSize = 15.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                    item {
+                        if (toAddPlayer) {
+                            OutlinedTextField(
+                                value = playerUiState.name,
+                                onValueChange = { onValueChange(playerUiState.copy(name = it)) },
+                                singleLine = true,
+                                label = { Text(text = "Player") },
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    imeAction = ImeAction.Done,
+                                    keyboardType = KeyboardType.Text
+                                ),
+                                colors = TextFieldDefaults.textFieldColors(backgroundColor = Secondery),
+                                shape = Shapes.large,
+                            )
+                        }
+                    }
+                    item {
                         Button(
-                            onClick = { toAddPlayer = !toAddPlayer },
+                            onClick = {
+                                if (toAddPlayer) {
+                                    if (playerUiState.isValid()) {
+                                        coroutineScope.launch {
+                                            toAddPlayer = false
+                                            viewModel.savePlayer()
+                                        }
+                                    }
+                                } else {
+                                    toAddPlayer = true
+                                }
+                                      },
+                            colors = ButtonDefaults.buttonColors(Secondery),
                             modifier = Modifier.width(250.dp)
                         ) {
                             Icon(
@@ -160,78 +220,14 @@ fun ShowPlayers(
                             )
                         }
                     }
-                } else {
-                    LazyColumn(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.height(300.dp)
-                    ) {
-                        Players.forEach() { player ->
-                            item {
-                                Card(
-                                    backgroundColor = Secondery,
-                                    elevation = 10.dp,
-                                    modifier = Modifier
-                                        .width(250.dp)
-                                        .padding(5.dp)
-                                ) {
-                                    Text(
-                                        text = player.name,
-                                        fontSize = 15.sp,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                            }
-                        }
-
-                        item {
-                            if (toAddPlayer) {
-                                OutlinedTextField(
-                                    value = playerUiState.name,
-                                    onValueChange = { onValueChange(playerUiState.copy(name = it)) },
-                                    singleLine = true,
-                                    label = { Text(text = "Player") },
-                                    keyboardOptions = KeyboardOptions.Default.copy(
-                                        imeAction = ImeAction.Done,
-                                        keyboardType = KeyboardType.Text
-                                    ),
-                                    colors = TextFieldDefaults.textFieldColors(backgroundColor = Secondery),
-                                    shape = Shapes.large,
-                                )
-                            }
-                        }
-
-                        item {
-                            Button(
-                                onClick = {
-                                    if (toAddPlayer) {
-                                        if (playerUiState.isValid()) {
-                                            coroutineScope.launch {
-                                                toAddPlayer = false
-                                                viewModel.savePlayer()
-                                            }
-                                        }
-                                    } else {
-                                        toAddPlayer = true
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(Secondery),
-                                modifier = Modifier.width(250.dp)
-                            ) {
-                                Icon(
-                                    imageVector = icon,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            }
-                        }
-                    }
                 }
-            },
-            onDismissRequest = {},
-            confirmButton = {}
-        )
-    }
+            }
+               },
+        onDismissRequest = {},
+        confirmButton = {}
+    )
 }
+
 
 /**
  * This function clear the players data from the game
@@ -239,18 +235,57 @@ fun ShowPlayers(
 
 @Composable
 fun ClearDataButton(
-    viewModel: SignUpViewModel,
-    coroutineScope: CoroutineScope
+    signUpViewModel: SignUpViewModel,
+    settingsViewModel: SettingsViewModel,
+    coroutineScope: CoroutineScope,
+    uiState: isDialogOpen
 ) {
 
     Button(
         onClick = {
-                  coroutineScope.launch {
-                      viewModel.clearData()
-                  }
+            settingsViewModel.ChangeCheckClearDataAlertDialog()
         },
         colors = ButtonDefaults.buttonColors(Secondery),
     ) {
         Text(text = "Clear Data", textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
     }
+
+    if (uiState.isCheckClearDataDialogOpen) {
+        CheckClearData(
+            viewModel = signUpViewModel,
+            coroutineScope = coroutineScope,
+            onCancelClick = {settingsViewModel.ChangeCheckClearDataAlertDialog()}
+        )
+    }
+}
+
+@Composable
+fun CheckClearData(
+    viewModel: SignUpViewModel,
+    coroutineScope: CoroutineScope,
+    onCancelClick: () -> Unit
+) {
+
+    AlertDialog(
+        title = { Text(text = "Are you sure you want to clear all data?") },
+        onDismissRequest = {},
+        dismissButton = {
+            TextButton(
+                onClick = { onCancelClick() }
+            ) {
+                Text("Cancel")
+            }
+                        },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            viewModel.clearData()
+                        }
+                    }
+                ) {
+                   Text("Clear")
+                }
+            }
+        )
 }

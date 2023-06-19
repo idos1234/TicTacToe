@@ -17,12 +17,19 @@ class SettingsViewModel(playerRepository: PlayerRepository): ViewModel() {
     private val _isDialogOpen = MutableStateFlow(isDialogOpen())
     val isDialogOpen: StateFlow<isDialogOpen> = _isDialogOpen.asStateFlow()
 
-    fun ChangeAlertDialog() {
+    fun ChangeShowingPlayersAlertDialog() {
         _isDialogOpen.update { currentState ->
             currentState.copy(
-                isDialogOpen = !(currentState.isDialogOpen)
+                isShowingPlayersDialogOpen = !(currentState.isShowingPlayersDialogOpen)
             )
+        }
+    }
 
+    fun ChangeCheckClearDataAlertDialog() {
+        _isDialogOpen.update { currentState ->
+            currentState.copy(
+                isCheckClearDataDialogOpen = !(currentState.isCheckClearDataDialogOpen)
+            )
         }
     }
 
@@ -42,5 +49,6 @@ class SettingsViewModel(playerRepository: PlayerRepository): ViewModel() {
 data class SettingsUiState(val playerList: List<Player> = listOf())
 
 data class isDialogOpen(
-    var isDialogOpen: Boolean = false
-)
+    var isShowingPlayersDialogOpen: Boolean = false,
+    var isCheckClearDataDialogOpen: Boolean = false,
+    )
