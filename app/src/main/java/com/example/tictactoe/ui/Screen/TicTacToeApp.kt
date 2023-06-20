@@ -29,10 +29,12 @@ import kotlin.concurrent.schedule
 enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val title: String) {
     SignUp(title = "Sign Up"),
     Start(title = "Home"),
+    ChooseSinglePlayer(title = "Choose Player"),
+    ChooseTwoPlayers(title = "Choose players"),
     Settings(title = "Settings"),
     AboutUs(title = "About Us"),
     TwoPlayers(title = "Two players"),
-    SinglePlayer("SinglePlayer")
+    SinglePlayer(title = "Single Player")
 }
 
 /**
@@ -180,8 +182,8 @@ fun TicTacToeApp(
 
             composable(route = GameScreen.Start.name) {
                 HomeScreen(
-                    onTwoPlayersClick = {navController.navigate(GameScreen.TwoPlayers.name)},
-                    onSinglePlayerClick = {navController.navigate(GameScreen.SinglePlayer.name)})
+                    onTwoPlayersClick = {navController.navigate(GameScreen.ChooseTwoPlayers.name)},
+                    onSinglePlayerClick = {navController.navigate(GameScreen.ChooseSinglePlayer.name)})
             }
 
             composable(route = GameScreen.TwoPlayers.name) {
@@ -221,6 +223,18 @@ fun TicTacToeApp(
 
             composable(route= GameScreen.Settings.name) {
                 SettingScreen()
+            }
+
+            composable(route= GameScreen.ChooseSinglePlayer.name) {
+                chooseSinglePlayerScreen(
+                    viewModel = viewModel
+                )
+            }
+
+            composable(route= GameScreen.ChooseTwoPlayers.name) {
+                chooseTwoPlayersScreen(
+                    viewModel = viewModel
+                )
             }
         }
 

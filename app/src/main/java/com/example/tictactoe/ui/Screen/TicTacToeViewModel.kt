@@ -14,8 +14,17 @@ import kotlinx.coroutines.flow.update
 
 class TicTacToeViewModel: ViewModel() {
 
-    private val _uiState = MutableStateFlow(UiState())
-    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    private var _uiState = MutableStateFlow(UiState())
+    var uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    fun setPlayers(player1: String = "", player2: String = "") {
+        _uiState.update {
+            it.copy(
+                player1 = player1,
+                player2 = player2
+            )
+        }
+    }
 
     fun changePlayer() {
         _uiState.update { currentState ->

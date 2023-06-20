@@ -16,6 +16,8 @@ data class UiState (
     var Box9: String = "",
 
     var player_Turn: String = "X",
+    var player1: String = "",
+    var player2: String = "",
     var winner: String = "",
     var ToCheck: Boolean = false,
     var times: Int = 0,
