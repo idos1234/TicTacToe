@@ -37,6 +37,7 @@ fun ShowPlayersScreen(
     ) {
     val signUpUiState = signUpViewModel.playerUiState
     val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
     var toAddPlayer by remember {
@@ -72,11 +73,11 @@ fun ShowPlayersScreen(
                                 }
                                  else {
                                         if (playerNumber == 1){
-                                            viewModel.setPlayers(player1 = player.name)
+                                            viewModel.setPlayers(player1 = player.name, player2 =  uiState.player2)
                                         }
 
                                         if (playerNumber == 2){
-                                            viewModel.setPlayers(player2 = player.name)
+                                            viewModel.setPlayers(player1 = uiState.player1, player2 = player.name)
                                         }
                                 }
                             },
@@ -146,15 +147,25 @@ fun chooseSinglePlayerScreen(
         mutableStateOf(false)
     }
 
+    val buttonSize = if (isSinglePlayer) {
+        20.sp
+    } else {
+        15.sp
+    }
+
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = modifier
         .fillMaxSize()
         .background(BackGround)) {
 
         Text("Player: ${if (playerNumber == 1) uiState.player1 else uiState.player2}", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
 
+        Spacer(modifier = Modifier.height(20.dp))
+
         Button(onClick = {toShowPlayers = !toShowPlayers}) {
-            Text("Show Players", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+            Text("Show Players", fontSize = buttonSize, fontWeight = FontWeight.SemiBold)
         }
+
+        Spacer(modifier = Modifier.height(10.dp))
 
         if (toShowPlayers) {
             ShowPlayersScreen(
@@ -164,6 +175,8 @@ fun chooseSinglePlayerScreen(
                 isSinglePlayer = isSinglePlayer
             )
         }
+
+        Spacer(modifier = Modifier.height(20.dp))
 
         Button(
             onClick = {},
@@ -178,15 +191,19 @@ fun chooseSinglePlayerScreen(
 fun chooseTwoPlayersScreen (
     viewModel: TicTacToeViewModel
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.background(BackGround)) {
         chooseSinglePlayerScreen(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .padding(15.dp),
             viewModel = viewModel,
             playerNumber = 1,
             isSinglePlayer = false
         )
         chooseSinglePlayerScreen(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .padding(15.dp),
             viewModel = viewModel,
             playerNumber = 2,
             isSinglePlayer = false

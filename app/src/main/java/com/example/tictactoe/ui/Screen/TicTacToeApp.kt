@@ -8,11 +8,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -73,13 +75,13 @@ fun HomeScreenMenu(modifier: Modifier, navController: NavHostController, onChane
 }
 
 @Composable()
-fun topHomeScreenBar(onClick: () -> Unit) {
+fun TopAppBar(onClick: () -> Unit, icon: ImageVector) {
     Row(modifier = Modifier
         .fillMaxWidth()
         .height(45.dp)
         .background(BackGround), verticalAlignment = Alignment.CenterVertically) {
         Image(
-            imageVector = Icons.Default.Menu,
+            imageVector = icon,
             contentDescription = null,
             modifier = Modifier
                 .weight(1f)
@@ -116,30 +118,37 @@ fun TicTacToeApp(
         topBar = {
         when(currentScreen) {
             GameScreen.Start ->
-                topHomeScreenBar(
-                onClick = {
-                    scope.launch {
-                        scaffoldState.drawerState.open()
-                    }
-                }
-            )
-            GameScreen.Settings ->
-                topHomeScreenBar(
+                TopAppBar(
                     onClick = {
                         scope.launch {
                             scaffoldState.drawerState.open()
                         }
-                    }
+                    },
+                    icon = Icons.Default.Menu
+                )
+            GameScreen.Settings ->
+                TopAppBar(
+                    onClick = {
+                        scope.launch {
+                            scaffoldState.drawerState.open()
+                        }
+                    },
+                    icon = Icons.Default.Menu
                 )
             GameScreen.AboutUs ->
-                topHomeScreenBar(
+                TopAppBar(
                     onClick = {
                         scope.launch {
                             scaffoldState.drawerState.open()
                         }
-                    }
+                    },
+                    icon = Icons.Default.Menu
                 )
-            else -> {}
+            else -> {
+                TopAppBar(
+                    onClick = {navController.navigateUp()},
+                    icon = Icons.Default.ArrowBack)
+            }
         }
     },
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
