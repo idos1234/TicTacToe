@@ -236,13 +236,16 @@ fun TicTacToeApp(
 
             composable(route= GameScreen.ChooseSinglePlayer.name) {
                 chooseSinglePlayerScreen(
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    onReadyClicked = {navController.navigate(GameScreen.SinglePlayer.name)}
                 )
             }
 
             composable(route= GameScreen.ChooseTwoPlayers.name) {
                 chooseTwoPlayersScreen(
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    onReadyClicked = { navController.navigate(GameScreen.TwoPlayers.name) },
+                    uiState = uiState
                 )
             }
         }

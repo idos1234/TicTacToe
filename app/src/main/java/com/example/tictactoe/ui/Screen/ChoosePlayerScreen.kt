@@ -20,11 +20,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tictactoe.data.PlayerUiState
+import com.example.tictactoe.data.UiState
 import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Secondery
 import com.example.tictactoe.ui.theme.Shapes
 import kotlinx.coroutines.launch
+
+/**
+ * Show All The Players To Choose
+ */
 
 @Composable
 fun ShowPlayersScreen(
@@ -132,13 +137,19 @@ fun ShowPlayersScreen(
     }
 }
 
+/**
+ * Choose Player For [TicTacToeSinglePlayerScreen]
+ */
+
 @Composable
 fun chooseSinglePlayerScreen(
     signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory),
     viewModel: TicTacToeViewModel,
     playerNumber: Int = 1,
     modifier: Modifier = Modifier,
-    isSinglePlayer: Boolean = true
+    isSinglePlayer: Boolean = true,
+    onReadyClicked: () -> Unit,
+    isPlayerReady: Boolean = false
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
@@ -156,6 +167,10 @@ fun chooseSinglePlayerScreen(
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = modifier
         .fillMaxSize()
         .background(BackGround)) {
+
+        if (!isSinglePlayer && isPlayerReady) {
+            Text(text = "Ready!", fontWeight = FontWeight.SemiBold, fontSize = 30.sp)
+        }
 
         Text("Player: ${if (playerNumber == 1) uiState.player1 else uiState.player2}", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
 
@@ -179,7 +194,14 @@ fun chooseSinglePlayerScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(
-            onClick = {},
+            onClick = {
+                      if (isSinglePlayer) {
+                          if (uiState.player1 != "") {
+                              onReadyClicked()
+                          }
+                      } else
+                          onReadyClicked()
+            },
             colors = ButtonDefaults.buttonColors(Secondery)
         ) {
             Text("Ready", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
@@ -187,10 +209,25 @@ fun chooseSinglePlayerScreen(
     }
 }
 
+/**
+ * Choose Player For [TicTacToeScreen]
+ */
+
 @Composable
 fun chooseTwoPlayersScreen (
-    viewModel: TicTacToeViewModel
+    viewModel: TicTacToeViewModel,
+    onReadyClicked: () -> Unit,
+    uiState: UiState
 ) {
+
+    var isPlayer1Ready by remember {
+        mutableStateOf(false)
+    }
+
+    var isPlayer2Ready by remember {
+        mutableStateOf(false)
+    }
+
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.background(BackGround)) {
         chooseSinglePlayerScreen(
             modifier = Modifier
@@ -198,7 +235,12 @@ fun chooseTwoPlayersScreen (
                 .padding(15.dp),
             viewModel = viewModel,
             playerNumber = 1,
-            isSinglePlayer = false
+            isSinglePlayer = false,
+            onReadyClicked = {
+                if (uiState.player1 != "") isPlayer1Ready = !isPlayer1Ready
+                if (isPlayer1Ready == true && isPlayer2Ready == true) onReadyClicked()
+            },
+            isPlayerReady = isPlayer1Ready
         )
         chooseSinglePlayerScreen(
             modifier = Modifier
@@ -206,7 +248,12 @@ fun chooseTwoPlayersScreen (
                 .padding(15.dp),
             viewModel = viewModel,
             playerNumber = 2,
-            isSinglePlayer = false
+            isSinglePlayer = false,
+            onReadyClicked = {
+                if (uiState.player2 != "") isPlayer2Ready = !isPlayer2Ready
+                if (isPlayer1Ready == true && isPlayer2Ready == true) onReadyClicked()
+            },
+            isPlayerReady = isPlayer2Ready
         )
     }
 }
