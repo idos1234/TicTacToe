@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.update
 
 class TicTacToeViewModel: ViewModel() {
 
-    private var _uiState = MutableStateFlow(UiState())
-    var uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     fun setPlayers(player1: String = "", player2: String = "") {
         _uiState.update {
@@ -53,8 +53,36 @@ class TicTacToeViewModel: ViewModel() {
         }
     }
 
+    fun onClick() {
+        _uiState.update {
+            it.copy(
+                times = it.times + 1
+            )
+        }
+        check_ToCheck()
+        changePlayer()
+    }
+
     fun check_ToCheck() {
         _uiState.value.ToCheck = _uiState.value.times >= 4
+    }
+
+    fun SetBox(box: Int) {
+
+        _uiState.update {
+            when(box) {
+                1 -> it.copy(Box1 = _uiState.value.player_Turn)
+                2 -> it.copy(Box2 = _uiState.value.player_Turn)
+                3 -> it.copy(Box3 = _uiState.value.player_Turn)
+                4 -> it.copy(Box4 = _uiState.value.player_Turn)
+                5 -> it.copy(Box5 = _uiState.value.player_Turn)
+                6 -> it.copy(Box6 = _uiState.value.player_Turn)
+                7 -> it.copy(Box7 = _uiState.value.player_Turn)
+                8 -> it.copy(Box8 = _uiState.value.player_Turn)
+                9 -> it.copy(Box9 = _uiState.value.player_Turn)
+                else -> it.copy()
+            }
+        }
     }
 
     fun botTurn(uiState: UiState) {

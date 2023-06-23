@@ -1,6 +1,5 @@
 package com.example.tictactoe.ui.Screen
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -69,8 +68,7 @@ fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, viewModel: 
  */
 
 @Composable
-fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(), onPlayAgain: () -> Unit = {}) {
-    val uiState by viewModel.uiState.collectAsState()
+fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit, uiState: UiState) {
 
     if(uiState.ToCheck) {
         uiState.winner = CheckWinner(uiState)
@@ -189,15 +187,18 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel = TicTacToeViewModel(),
  * Show the single player game screen
  */
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun TicTacToeSinglePlayerScreen(viewModel: TicTacToeViewModel = TicTacToeViewModel(), uiState: UiState = UiState(), onPlayAgain: () -> Unit = {}) {
+fun TicTacToeSinglePlayerScreen(
+    viewModel: TicTacToeViewModel,
+    uiState: UiState,
+    onPlayAgain: () -> Unit) {
 
-
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
         .background(BackGround)
-        .fillMaxSize()) {
+        .fillMaxSize()
+    ) {
         Spacer(modifier = Modifier.weight(2f))
         Text(text = "Player: ${uiState.player_Turn}", fontSize = 40.sp, fontWeight = FontWeight.ExtraBold)
         Spacer(modifier = Modifier.weight(1f))
@@ -205,7 +206,8 @@ fun TicTacToeSinglePlayerScreen(viewModel: TicTacToeViewModel = TicTacToeViewMod
             viewModel = viewModel,
             onPlayAgain = {
                 onPlayAgain()
-            }
+            },
+            uiState = uiState
         )
         Spacer(modifier = Modifier.weight(4f))
     }

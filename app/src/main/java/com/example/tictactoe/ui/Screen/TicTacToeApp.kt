@@ -92,7 +92,6 @@ fun TopAppBar(onClick: () -> Unit, icon: ImageVector) {
         Spacer(modifier = Modifier.weight(3f))
     }
 }
-
 @Composable
 fun TicTacToeApp(
     viewModel: TicTacToeViewModel = TicTacToeViewModel(),
@@ -111,6 +110,13 @@ fun TicTacToeApp(
 
     var timesPlayed by remember {
         mutableStateOf(0)
+    }
+
+    var player1 by remember {
+        mutableStateOf("")
+    }
+    var player2 by remember {
+        mutableStateOf("")
     }
 
     Scaffold(
@@ -207,7 +213,9 @@ fun TicTacToeApp(
                             timesPlayed,
                             GameScreen.TwoPlayers,
                         )
-                    }
+                    },
+                    player1 = player1,
+                    player2 = player2
                 )
             }
 
@@ -237,7 +245,12 @@ fun TicTacToeApp(
             composable(route= GameScreen.ChooseSinglePlayer.name) {
                 chooseSinglePlayerScreen(
                     viewModel = viewModel,
-                    onReadyClicked = {navController.navigate(GameScreen.SinglePlayer.name)}
+                    onReadyClicked = {navController.navigate(GameScreen.SinglePlayer.name)},
+                    uiState = uiState,
+                    onPlayerClick = {
+                        player1 = uiState.player1
+                        player2 = uiState.player2
+                    }
                 )
             }
 
@@ -245,7 +258,11 @@ fun TicTacToeApp(
                 chooseTwoPlayersScreen(
                     viewModel = viewModel,
                     onReadyClicked = { navController.navigate(GameScreen.TwoPlayers.name) },
-                    uiState = uiState
+                    uiState = uiState,
+                    onPlayerClick = {
+                        player1 = uiState.player1
+                        player2 = uiState.player2
+                    }
                 )
             }
         }

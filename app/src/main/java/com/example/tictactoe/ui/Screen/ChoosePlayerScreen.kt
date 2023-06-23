@@ -26,6 +26,8 @@ import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Secondery
 import com.example.tictactoe.ui.theme.Shapes
 import kotlinx.coroutines.launch
+import java.util.*
+import kotlin.concurrent.schedule
 
 /**
  * Show All The Players To Choose
@@ -36,13 +38,14 @@ fun ShowPlayersScreen(
     signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory),
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     viewModel: TicTacToeViewModel,
+    uiState: UiState,
     onValueChange: (PlayerUiState) -> Unit,
     playerNumber: Int,
     isSinglePlayer: Boolean,
+    onPlayerClick: () -> Unit,
     ) {
     val signUpUiState = signUpViewModel.playerUiState
     val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
-    val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
     var toAddPlayer by remember {
@@ -84,6 +87,9 @@ fun ShowPlayersScreen(
                                         if (playerNumber == 2){
                                             viewModel.setPlayers(player1 = uiState.player1, player2 = player.name)
                                         }
+                                }
+                                Timer().schedule(1000) {
+                                    onPlayerClick()
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()
@@ -149,10 +155,11 @@ fun chooseSinglePlayerScreen(
     modifier: Modifier = Modifier,
     isSinglePlayer: Boolean = true,
     onReadyClicked: () -> Unit,
-    isPlayerReady: Boolean = false
+    isPlayerReady: Boolean = false,
+    uiState: UiState,
+    onPlayerClick: () -> Unit,
 ) {
 
-    val uiState by viewModel.uiState.collectAsState()
 
     var toShowPlayers by remember {
         mutableStateOf(false)
@@ -187,7 +194,9 @@ fun chooseSinglePlayerScreen(
                 onValueChange = signUpViewModel::updateUiState,
                 viewModel = viewModel,
                 playerNumber = playerNumber,
-                isSinglePlayer = isSinglePlayer
+                isSinglePlayer = isSinglePlayer,
+                uiState = uiState,
+                onPlayerClick = onPlayerClick,
             )
         }
 
@@ -217,7 +226,8 @@ fun chooseSinglePlayerScreen(
 fun chooseTwoPlayersScreen (
     viewModel: TicTacToeViewModel,
     onReadyClicked: () -> Unit,
-    uiState: UiState
+    uiState: UiState,
+    onPlayerClick: () -> Unit
 ) {
 
     var isPlayer1Ready by remember {
@@ -240,7 +250,9 @@ fun chooseTwoPlayersScreen (
                 if (uiState.player1 != "") isPlayer1Ready = !isPlayer1Ready
                 if (isPlayer1Ready == true && isPlayer2Ready == true) onReadyClicked()
             },
-            isPlayerReady = isPlayer1Ready
+            isPlayerReady = isPlayer1Ready,
+            uiState = uiState,
+            onPlayerClick = onPlayerClick
         )
         chooseSinglePlayerScreen(
             modifier = Modifier
@@ -253,7 +265,9 @@ fun chooseTwoPlayersScreen (
                 if (uiState.player2 != "") isPlayer2Ready = !isPlayer2Ready
                 if (isPlayer1Ready == true && isPlayer2Ready == true) onReadyClicked()
             },
-            isPlayerReady = isPlayer2Ready
+            isPlayerReady = isPlayer2Ready,
+            uiState = uiState,
+            onPlayerClick = onPlayerClick
         )
     }
 }

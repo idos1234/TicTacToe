@@ -1,9 +1,12 @@
 package com.example.tictactoe.data
 
+import androidx.compose.runtime.Stable
+
 /**
   * [UiState] has the data of the game
  **/
 
+@Stable
 data class UiState (
     var Box1: String = "",
     var Box2: String = "",

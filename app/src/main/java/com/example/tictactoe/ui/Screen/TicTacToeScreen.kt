@@ -1,6 +1,5 @@
 package com.example.tictactoe.ui.Screen
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -60,13 +59,18 @@ fun GameButton(player: String, onClick: () -> Unit = {}) {
  */
 
 @Composable
-fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
-    val uiState by viewModel.uiState.collectAsState()
+fun ButtonGrid(
+    viewModel: TicTacToeViewModel,
+    onPlayAgain: () -> Unit,
+    uiState: UiState,
+    player1: String,
+    player2: String
+) {
 
     if(uiState.ToCheck) {
         uiState.winner = CheckWinner(uiState)
         if(uiState.winner != "") {
-            showWinner(winner = "Winner is: ${uiState.winner}", text = "Congratulations for winning", onPlayAgain = onPlayAgain)
+            showWinner(winner = "Winner is: ${if (uiState.winner == "X") player1 else player2}", text = "Congratulations for winning", onPlayAgain = onPlayAgain)
         }
         else if (uiState.times == 9){
             showWinner(winner = "Tie", text = "Try to win next time", onPlayAgain = onPlayAgain)
@@ -77,20 +81,21 @@ fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
     }
 
     val onClick = {
-        uiState.times ++
-        viewModel.check_ToCheck()
-        viewModel.changePlayer()
+        viewModel.onClick()
     }
 
 
 
     Column() {
+
+
+
         Row() {
             GameButton(
                 player = uiState.Box1,
                 onClick = {
                     if (uiState.Box1 == "") {
-                        uiState.Box1 = uiState.player_Turn
+                        viewModel.SetBox(1)
                         onClick()
                     }
                 },
@@ -99,7 +104,7 @@ fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
                 player = uiState.Box2,
                 onClick = {
                     if (uiState.Box2 == "") {
-                        uiState.Box2 = uiState.player_Turn
+                        viewModel.SetBox(2)
                         onClick()
                     }
                 },
@@ -108,7 +113,7 @@ fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
                 player = uiState.Box3,
                 onClick = {
                     if (uiState.Box3 == "") {
-                        uiState.Box3 = uiState.player_Turn
+                        viewModel.SetBox(3)
                         onClick()
                     }
                 },
@@ -119,7 +124,7 @@ fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
                 player = uiState.Box4,
                 onClick = {
                     if (uiState.Box4 == "") {
-                        uiState.Box4 = uiState.player_Turn
+                        viewModel.SetBox(4)
                         onClick()
                     }
                 },
@@ -128,7 +133,7 @@ fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
                 player = uiState.Box5,
                 onClick = {
                     if (uiState.Box5 == "") {
-                        uiState.Box5 = uiState.player_Turn
+                        viewModel.SetBox(5)
                         onClick()
                     }
                 },
@@ -137,7 +142,7 @@ fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
                 player = uiState.Box6,
                 onClick = {
                     if (uiState.Box6 == "") {
-                        uiState.Box6 = uiState.player_Turn
+                        viewModel.SetBox(6)
                         onClick()
                     }
                 },
@@ -148,7 +153,7 @@ fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
                 player = uiState.Box7,
                 onClick = {
                     if (uiState.Box7 == "") {
-                        uiState.Box7 = uiState.player_Turn
+                        viewModel.SetBox(7)
                         onClick()
                     }
                 },
@@ -157,7 +162,7 @@ fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
                 player = uiState.Box8,
                 onClick = {
                     if (uiState.Box8 == "") {
-                        uiState.Box8 = uiState.player_Turn
+                        viewModel.SetBox(8)
                         onClick()
                     }
                 },
@@ -166,7 +171,7 @@ fun ButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit) {
                 player = uiState.Box9,
                 onClick = {
                     if (uiState.Box9 == "") {
-                        uiState.Box9 = uiState.player_Turn
+                        viewModel.SetBox(9)
                         onClick()
                     }
                 },
@@ -185,7 +190,7 @@ fun showWinner(winner: String, text: String, onPlayAgain: () -> Unit) {
     val activity = (LocalContext.current as Activity)
 
     AlertDialog(
-        backgroundColor = BackGround,
+        backgroundColor = Secondery,
         onDismissRequest = {},
         title = { Text(text = winner, fontWeight = FontWeight.ExtraBold, color = Color.Black, textAlign = TextAlign.Center)},
         text = { Text(text = text, color = Color.Black, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)},
@@ -206,27 +211,46 @@ fun showWinner(winner: String, text: String, onPlayAgain: () -> Unit) {
     )
 }
 
+@Composable
+fun ShowPlayerTurn(player: String) {
+    Text(text = "Player: $player", fontSize = 40.sp, fontWeight = FontWeight.ExtraBold)
+
+}
+
 /**
  * Show the two players game screen
  */
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun TicTacToeScreen(
-    viewModel: TicTacToeViewModel = TicTacToeViewModel(),
-    uiState: UiState = UiState(),
-    onPlayAgain: () -> Unit = {}) {
+    viewModel: TicTacToeViewModel,
+    uiState: UiState,
+    onPlayAgain: () -> Unit,
+    player1: String,
+    player2: String
+) {
+
+
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
         Spacer(modifier = Modifier.weight(2f))
-        Text(text = "Player: ${uiState.player_Turn}", fontSize = 40.sp, fontWeight = FontWeight.ExtraBold)
+        ShowPlayerTurn(
+            player = if (uiState.player_Turn == "X") {
+                player1
+            } else {
+                player2
+            }
+        )
         Spacer(modifier = Modifier.weight(1f))
         ButtonGrid(
             viewModel = viewModel,
             onPlayAgain = {
                 onPlayAgain()
-            }
+            },
+            uiState = uiState,
+            player1 = player1,
+            player2 = player2
         )
         Spacer(modifier = Modifier.weight(4f))
     }
