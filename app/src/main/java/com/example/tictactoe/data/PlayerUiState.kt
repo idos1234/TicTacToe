@@ -2,8 +2,9 @@ package com.example.tictactoe.data
 
 data class PlayerUiState(
     val id: Int = 0,
-    var name: String = "",
-    var password: String? = ""
+    val name: String = "",
+    val score: Int = 0,
+    val password: String = ""
 )
 
 fun PlayerUiState.toPlayer(): Player = Player(

@@ -66,7 +66,7 @@ fun SignUpScreen(
 
         Button(
             onClick = {
-             if (uiState.isValid() && uiState.password!!.isNotEmpty()) {
+             if (uiState.isValid() && uiState.password.isNotEmpty()) {
                  coroutineScope.launch {
                      viewModel.savePlayer()
                  }
@@ -118,7 +118,7 @@ fun SignUpInputForm(
     Spacer(modifier = Modifier.height(15.dp))
 
     OutlinedTextField(
-        value = playerUiState.password!!,
+        value = playerUiState.password,
         onValueChange = { onValueChange(playerUiState.copy(password = it)) },
         singleLine = true,
         label = { Text(text = "Password") },

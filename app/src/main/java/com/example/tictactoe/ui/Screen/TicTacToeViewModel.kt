@@ -1,6 +1,7 @@
 package com.example.tictactoe.ui.Screen
 
 import androidx.lifecycle.ViewModel
+import com.example.tictactoe.data.Player
 import com.example.tictactoe.data.UiState
 import com.example.tictactoe.ui.WillWin
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,7 @@ class TicTacToeViewModel: ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    fun setPlayers(player1: String = "", player2: String = "") {
+    fun setPlayers(player1: Player, player2: Player) {
         _uiState.update {
             it.copy(
                 player1 = player1,

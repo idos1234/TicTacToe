@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.tictactoe.data.Player
 import com.example.tictactoe.data.PlayerUiState
 import com.example.tictactoe.data.UiState
 import com.example.tictactoe.ui.AppViewModelProvider
@@ -77,15 +78,15 @@ fun ShowPlayersScreen(
                         TextButton(
                             onClick = {
                                 if (isSinglePlayer){
-                                    viewModel.setPlayers(player.name, "Bot")
+                                    viewModel.setPlayers(player, Player(name = "Bot"))
                                 }
                                  else {
                                         if (playerNumber == 1){
-                                            viewModel.setPlayers(player1 = player.name, player2 =  uiState.player2)
+                                            viewModel.setPlayers(player1 = player, player2 =  uiState.player2)
                                         }
 
                                         if (playerNumber == 2){
-                                            viewModel.setPlayers(player1 = uiState.player1, player2 = player.name)
+                                            viewModel.setPlayers(player1 = uiState.player1, player2 = player)
                                         }
                                 }
                                 Timer().schedule(1000) {
@@ -179,7 +180,7 @@ fun chooseSinglePlayerScreen(
             Text(text = "Ready!", fontWeight = FontWeight.SemiBold, fontSize = 30.sp)
         }
 
-        Text("Player: ${if (playerNumber == 1) uiState.player1 else uiState.player2}", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+        Text("Player: ${if (playerNumber == 1) uiState.player1.name else uiState.player2.name}", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -205,7 +206,7 @@ fun chooseSinglePlayerScreen(
         Button(
             onClick = {
                       if (isSinglePlayer) {
-                          if (uiState.player1 != "") {
+                          if (uiState.player1.name != "") {
                               onReadyClicked()
                           }
                       } else
@@ -247,7 +248,7 @@ fun chooseTwoPlayersScreen (
             playerNumber = 1,
             isSinglePlayer = false,
             onReadyClicked = {
-                if (uiState.player1 != "") isPlayer1Ready = !isPlayer1Ready
+                if (uiState.player1.name != "") isPlayer1Ready = !isPlayer1Ready
                 if (isPlayer1Ready == true && isPlayer2Ready == true) onReadyClicked()
             },
             isPlayerReady = isPlayer1Ready,
@@ -262,7 +263,7 @@ fun chooseTwoPlayersScreen (
             playerNumber = 2,
             isSinglePlayer = false,
             onReadyClicked = {
-                if (uiState.player2 != "") isPlayer2Ready = !isPlayer2Ready
+                if (uiState.player2.name != "") isPlayer2Ready = !isPlayer2Ready
                 if (isPlayer1Ready == true && isPlayer2Ready == true) onReadyClicked()
             },
             isPlayerReady = isPlayer2Ready,

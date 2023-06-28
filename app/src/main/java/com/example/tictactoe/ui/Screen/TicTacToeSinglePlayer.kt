@@ -12,10 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tictactoe.data.Player
 import com.example.tictactoe.data.UiState
 import com.example.tictactoe.ui.CheckWinner
 import com.example.tictactoe.ui.theme.BackGround
@@ -68,12 +68,18 @@ fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, viewModel: 
  */
 
 @Composable
-fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Unit, uiState: UiState) {
+fun SinglePlayerButtonGrid(
+    viewModel: TicTacToeViewModel,
+    onPlayAgain: () -> Unit,
+    uiState: UiState,
+    player1: String,
+    player2: String
+) {
 
     if(uiState.ToCheck) {
         uiState.winner = CheckWinner(uiState)
         if(uiState.winner != "") {
-            showWinner(winner = "Winner is: ${uiState.winner}", text = "Congratulations for winning", onPlayAgain = onPlayAgain)
+            showWinner(winner = "Winner is: ${if (uiState.winner == "X") player1 else player2}", text = "Congratulations for winning", onPlayAgain = onPlayAgain)
         }
         else if (uiState.times >= 9){
             showWinner(winner = "Tie", text = "Try to win next time", onPlayAgain = onPlayAgain)
@@ -191,7 +197,10 @@ fun SinglePlayerButtonGrid(viewModel: TicTacToeViewModel, onPlayAgain: () -> Uni
 fun TicTacToeSinglePlayerScreen(
     viewModel: TicTacToeViewModel,
     uiState: UiState,
-    onPlayAgain: () -> Unit) {
+    onPlayAgain: () -> Unit,
+    player1: Player,
+    player2: Player
+) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -200,14 +209,22 @@ fun TicTacToeSinglePlayerScreen(
         .fillMaxSize()
     ) {
         Spacer(modifier = Modifier.weight(2f))
-        Text(text = "Player: ${uiState.player_Turn}", fontSize = 40.sp, fontWeight = FontWeight.ExtraBold)
+        ShowPlayerTurn(
+            player = if (uiState.player_Turn == "X") {
+                player1.name
+            } else {
+                player2.name
+            }
+        )
         Spacer(modifier = Modifier.weight(1f))
         SinglePlayerButtonGrid(
             viewModel = viewModel,
             onPlayAgain = {
                 onPlayAgain()
             },
-            uiState = uiState
+            uiState = uiState,
+            player1 = player1.name,
+            player2 = player2.name
         )
         Spacer(modifier = Modifier.weight(4f))
     }

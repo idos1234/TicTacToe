@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tictactoe.data.Player
 import com.example.tictactoe.data.UiState
 import com.example.tictactoe.ui.CheckWinner
 import com.example.tictactoe.ui.theme.BackGround
@@ -226,8 +227,8 @@ fun TicTacToeScreen(
     viewModel: TicTacToeViewModel,
     uiState: UiState,
     onPlayAgain: () -> Unit,
-    player1: String,
-    player2: String
+    player1: Player,
+    player2: Player
 ) {
 
 
@@ -237,9 +238,9 @@ fun TicTacToeScreen(
         Spacer(modifier = Modifier.weight(2f))
         ShowPlayerTurn(
             player = if (uiState.player_Turn == "X") {
-                player1
+                player1.name
             } else {
-                player2
+                player2.name
             }
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -249,8 +250,8 @@ fun TicTacToeScreen(
                 onPlayAgain()
             },
             uiState = uiState,
-            player1 = player1,
-            player2 = player2
+            player1 = player1.name,
+            player2 = player2.name
         )
         Spacer(modifier = Modifier.weight(4f))
     }

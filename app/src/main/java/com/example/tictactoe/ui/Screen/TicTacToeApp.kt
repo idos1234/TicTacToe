@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.tictactoe.data.Player
 import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.BackGround
 import kotlinx.coroutines.launch
@@ -113,10 +114,10 @@ fun TicTacToeApp(
     }
 
     var player1 by remember {
-        mutableStateOf("")
+        mutableStateOf(Player())
     }
     var player2 by remember {
-        mutableStateOf("")
+        mutableStateOf(Player())
     }
 
     Scaffold(
@@ -234,7 +235,9 @@ fun TicTacToeApp(
                                 viewModel.botTurn(uiState)
                             }
                         }
-                    }
+                    },
+                    player1 = player1,
+                    player2 = player2
                 )
             }
 

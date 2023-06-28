@@ -1,11 +1,18 @@
 package com.example.tictactoe.data
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Player::class], version = 1, exportSchema = false)
+@Database(
+    entities = [Player::class],
+    version = 2,
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2)
+    ]
+)
 abstract class PlayerDatabase : RoomDatabase() {
 
     abstract fun playerDao(): PlayerDao
