@@ -21,10 +21,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tictactoe.data.PlayerUiState
 import com.example.tictactoe.data.isValid
-import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Secondery
 import com.example.tictactoe.ui.theme.Shapes
@@ -34,7 +32,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 
 @Composable
 fun SignUpScreen(
-    viewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: SignUpViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
     val Context = LocalContext.current

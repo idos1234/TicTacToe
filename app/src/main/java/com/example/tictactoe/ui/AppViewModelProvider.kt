@@ -16,7 +16,9 @@ object AppViewModelProvider {
     val Factory = viewModelFactory {
 
         initializer {
-            SettingsViewModel(playerApplication().container.playerRepository)
+            SettingsViewModel(
+                playerApplication().container.playerRepository
+            )
         }
 
         initializer {

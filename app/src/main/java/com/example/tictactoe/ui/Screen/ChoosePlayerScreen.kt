@@ -89,7 +89,7 @@ fun ShowPlayersScreen(
                                             viewModel.setPlayers(player1 = uiState.player1, player2 = player)
                                         }
                                 }
-                                Timer().schedule(1000) {
+                                Timer().schedule(100) {
                                     onPlayerClick()
                                 }
                             },

@@ -11,12 +11,12 @@ interface PlayerRepository {
     /**
      * Insert player in the data source
      */
-    suspend fun insertIPlayer(item: Player)
+    suspend fun insertIPlayer(player: Player)
 
     /**
      * Delete player from the data source
      */
-    suspend fun deletePlayer(item: Player)
+    suspend fun deletePlayer(player: Player)
 
     /**
      * Delete all players from the data source
@@ -26,5 +26,10 @@ interface PlayerRepository {
     /**
      * Update player in the data source
      */
-    suspend fun updatePlayer(item: Player)
+    suspend fun updatePlayer(player: Player)
+
+    /**
+     * Update player score in the data source
+     */
+    suspend fun updatePlayerScore(id: Int, score: Int)
 }

@@ -12,7 +12,9 @@ import kotlinx.coroutines.flow.*
  */
 
 @ViewModelFactoryDsl
-class SettingsViewModel(playerRepository: PlayerRepository): ViewModel() {
+class SettingsViewModel(
+    playerRepository: PlayerRepository,
+): ViewModel() {
 
     private val _isDialogOpen = MutableStateFlow(isDialogOpen())
     val isDialogOpen: StateFlow<isDialogOpen> = _isDialogOpen.asStateFlow()

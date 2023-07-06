@@ -96,7 +96,9 @@ fun TopAppBar(onClick: () -> Unit, icon: ImageVector) {
 @Composable
 fun TicTacToeApp(
     viewModel: TicTacToeViewModel = TicTacToeViewModel(),
-    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)) {
+    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = GameScreen.valueOf(
@@ -105,9 +107,8 @@ fun TicTacToeApp(
 
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
-    val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
+    val settingsUiState1 by settingsViewModel.settingsUiState.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
-
 
     var timesPlayed by remember {
         mutableStateOf(0)
@@ -180,7 +181,7 @@ fun TicTacToeApp(
     ) {
         innerPadding ->
 
-        val startedDestination = if(settingsUiState.playerList.isNotEmpty()) {
+        val startedDestination = if(settingsUiState1.playerList.isNotEmpty()) {
             GameScreen.Start.name
         } else {
             GameScreen.SignUp.name
@@ -193,7 +194,7 @@ fun TicTacToeApp(
         ){
 
             composable(route = GameScreen.SignUp.name) {
-                SignUpScreen()
+                SignUpScreen(signUpViewModel)
             }
 
             composable(route = GameScreen.Start.name) {
@@ -225,11 +226,16 @@ fun TicTacToeApp(
                     viewModel = viewModel,
                     uiState = uiState,
                     onPlayAgain = {
-                        timesPlayed ++
-                        resetGame(viewModel,
-                            navController.popBackStack(GameScreen.SinglePlayer.name, inclusive = false),
+                        timesPlayed++
+                        resetGame(
+                            viewModel,
+                            navController.popBackStack(
+                                GameScreen.SinglePlayer.name,
+                                inclusive = false,
+                            ),
                             timesPlayed,
-                            GameScreen.SinglePlayer)
+                            GameScreen.SinglePlayer,
+                        )
                         Timer().schedule(1000) {
                             if (timesPlayed % 2 == 1) {
                                 viewModel.botTurn(uiState)
@@ -237,7 +243,11 @@ fun TicTacToeApp(
                         }
                     },
                     player1 = player1,
-                    player2 = player2
+                    player2 = player2,
+                    signUpViewModel = signUpViewModel,
+                    onWinner = {
+                        player1.score = player1.score + 1
+                    }
                 )
             }
 

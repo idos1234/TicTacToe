@@ -15,6 +15,11 @@ interface PlayerDao {
     @Update
     suspend fun update(player: Player)
 
+    @Query(
+        "UPDATE players " + "SET score = :score " + "WHERE id = :id"
+    )
+    suspend fun updatePlayerScore(id: Int, score: Int)
+
     @Delete
     suspend fun delete(player: Player)
 

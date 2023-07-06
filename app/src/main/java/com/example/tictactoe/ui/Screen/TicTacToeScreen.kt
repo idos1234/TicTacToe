@@ -71,7 +71,11 @@ fun ButtonGrid(
     if(uiState.ToCheck) {
         uiState.winner = CheckWinner(uiState)
         if(uiState.winner != "") {
-            showWinner(winner = "Winner is: ${if (uiState.winner == "X") player1 else player2}", text = "Congratulations for winning", onPlayAgain = onPlayAgain)
+            showWinner(
+                winner = "Winner is: ${if (uiState.winner == "X") player1 else player2}",
+                text = "Congratulations for winning",
+                onPlayAgain = onPlayAgain
+            )
         }
         else if (uiState.times == 9){
             showWinner(winner = "Tie", text = "Try to win next time", onPlayAgain = onPlayAgain)
