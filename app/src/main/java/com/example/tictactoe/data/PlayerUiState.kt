@@ -1,19 +1,25 @@
 package com.example.tictactoe.data
 
-data class PlayerUiState(
-    val id: Int = 0,
+data class MainPlayerUiState(
     var name: String = "",
     var score: Int = 0,
-    var password: String = ""
+    var password: String = "",
+    var secondPlayers: List<SecondPlayerUiState> = listOf()
 )
 
-fun PlayerUiState.toPlayer(): Player = Player(
-    id = id,
+data class SecondPlayerUiState(
+    var name: String = "",
+    var score: Int = 0
+)
+
+
+fun MainPlayerUiState.toPlayer(): Player = Player(
+    id = 1,
     name = name,
     score = score,
     password = password
 )
 
-fun PlayerUiState.isValid() : Boolean {
+fun MainPlayerUiState.isValid() : Boolean {
     return name.isNotBlank()
 }

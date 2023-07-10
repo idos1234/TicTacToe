@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tictactoe.data.Player
-import com.example.tictactoe.data.PlayerUiState
+import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.data.UiState
 import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.BackGround
@@ -40,12 +40,12 @@ fun ShowPlayersScreen(
     settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     viewModel: TicTacToeViewModel,
     uiState: UiState,
-    onValueChange: (PlayerUiState) -> Unit,
+    playerUiState: MainPlayerUiState,
+    onValueChange: (MainPlayerUiState) -> Unit = {},
     playerNumber: Int,
     isSinglePlayer: Boolean,
     onPlayerClick: () -> Unit,
     ) {
-    val signUpUiState = signUpViewModel.playerUiState
     val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -65,80 +65,91 @@ fun ShowPlayersScreen(
         modifier = Modifier
             .height(300.dp)
             .width(200.dp)) {
-        LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
-            item{
-                if (settingsUiState.playerList.isEmpty()) {
-                    Column() {
-                        Text(text = "There Are Not Players", color = Color.Black)
-                    }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
-                } else {
-                    settingsUiState.playerList.forEach{ player ->
+            LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
+                item {
+                    if (settingsUiState.playerList.isEmpty()) {
+                        Column() {
+                            Text(text = "There Are Not Players", color = Color.Black)
+                        }
 
-                        TextButton(
-                            onClick = {
-                                if (isSinglePlayer){
-                                    viewModel.setPlayers(player, Player(name = "Bot"))
-                                }
-                                 else {
-                                        if (playerNumber == 1){
-                                            viewModel.setPlayers(player1 = player, player2 =  uiState.player2)
+                    } else {
+                        settingsUiState.playerList.forEach { player ->
+
+                            TextButton(
+                                onClick = {
+                                    if (isSinglePlayer) {
+                                        viewModel.setPlayers(player, Player(name = "Bot"))
+                                    } else {
+                                        if (playerNumber == 1) {
+                                            viewModel.setPlayers(
+                                                player1 = player,
+                                                player2 = uiState.player2
+                                            )
                                         }
 
-                                        if (playerNumber == 2){
-                                            viewModel.setPlayers(player1 = uiState.player1, player2 = player)
+                                        if (playerNumber == 2) {
+                                            viewModel.setPlayers(
+                                                player1 = uiState.player1,
+                                                player2 = player
+                                            )
                                         }
+                                    }
+                                    Timer().schedule(100) {
+                                        onPlayerClick()
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Card(
+                                    elevation = 10.dp,
+                                    backgroundColor = Secondery,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = player.name,
+                                        fontSize = 15.sp,
+                                        textAlign = TextAlign.Center
+                                    )
                                 }
-                                Timer().schedule(100) {
-                                    onPlayerClick()
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Card(elevation = 10.dp, backgroundColor = Secondery, modifier = Modifier.fillMaxWidth()) {
-                                Text(
-                                    text = player.name,
-                                    fontSize = 15.sp,
-                                    textAlign = TextAlign.Center
-                                )
                             }
                         }
                     }
                 }
             }
-
-            item {
-                if(toAddPlayer) {
-                    OutlinedTextField(
-                        value = signUpUiState.name,
-                        onValueChange = { onValueChange(signUpUiState.copy(name = it)) },
-                        singleLine = true,
-                        label = { Text(text = "Player") },
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            imeAction = ImeAction.Done,
-                            keyboardType = KeyboardType.Text
-                        ),
-                        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.LightGray, textColor = Color.Black),
-                        shape = Shapes.large,
-                    )
-                }
+            if (toAddPlayer) {
+                OutlinedTextField(
+                    value = playerUiState.name,
+                    onValueChange = { onValueChange(playerUiState.copy(name = it)) },
+                    singleLine = true,
+                    label = { Text(text = "Player") },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Text
+                    ),
+                    colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = Color.LightGray,
+                        textColor = Color.Black
+                    ),
+                    shape = Shapes.large,
+                )
             }
 
-            item{
-                Button(
-                    onClick = {
-                        if (toAddPlayer) {
-                            coroutineScope.launch{
-                                signUpViewModel.savePlayer()
-                            }
+            Button(
+                onClick = {
+                    if (toAddPlayer) {
+                        coroutineScope.launch {
+                            signUpViewModel.savePlayer()
                         }
-                        toAddPlayer = !toAddPlayer
                     }
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null)
+                    toAddPlayer = !toAddPlayer
                 }
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null
+                )
             }
         }
     }
@@ -198,6 +209,7 @@ fun chooseSinglePlayerScreen(
                 isSinglePlayer = isSinglePlayer,
                 uiState = uiState,
                 onPlayerClick = onPlayerClick,
+                playerUiState = signUpViewModel.playerUiState
             )
         }
 

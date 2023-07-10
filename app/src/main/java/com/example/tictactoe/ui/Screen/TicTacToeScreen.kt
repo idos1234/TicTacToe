@@ -1,5 +1,6 @@
 package com.example.tictactoe.ui.Screen
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -25,6 +26,9 @@ import com.example.tictactoe.ui.CheckWinner
 import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Primery
 import com.example.tictactoe.ui.theme.Secondery
+import kotlinx.coroutines.launch
+import java.util.*
+import kotlin.concurrent.schedule
 
 /**
  * Show a single button in the two players game grid
@@ -59,23 +63,65 @@ fun GameButton(player: String, onClick: () -> Unit = {}) {
  * Show the two players game grid
  */
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun ButtonGrid(
     viewModel: TicTacToeViewModel,
+    signUpViewModel: SignUpViewModel,
     onPlayAgain: () -> Unit,
     uiState: UiState,
-    player1: String,
-    player2: String
+    player1: Player,
+    player2: Player,
+    onWinner: () -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
+    var wasNotUpdate by remember {
+        mutableStateOf(true)
+    }
+    var toShowWinner by remember {
+        mutableStateOf(false)
+    }
 
     if(uiState.ToCheck) {
         uiState.winner = CheckWinner(uiState)
         if(uiState.winner != "") {
-            showWinner(
-                winner = "Winner is: ${if (uiState.winner == "X") player1 else player2}",
-                text = "Congratulations for winning",
-                onPlayAgain = onPlayAgain
-            )
+
+            if (uiState.winner == "X"){
+                if (wasNotUpdate) {
+                    coroutineScope.launch {
+                        signUpViewModel.updateScore(player1)
+                    }
+                    Timer().schedule(500) {
+                        onWinner()
+                    }
+                    wasNotUpdate = false
+                }
+            } else if (uiState.winner == "O"){
+                if (wasNotUpdate) {
+                    coroutineScope.launch {
+                        signUpViewModel.updateScore(player2)
+                    }
+                    Timer().schedule(500) {
+                        onWinner()
+                    }
+                    wasNotUpdate = false
+                }
+            }
+
+            Timer().schedule(500) { toShowWinner = true }
+
+            if (toShowWinner) {
+                showWinner(
+                    winner = "Winner is: ${if (uiState.winner == "X") player1.name else player2.name} \n ${if (uiState.winner == "X")"Your Score: ${player1.score}" else "Your Score: ${player2.score}"}",
+                    text = "Congratulations for winning",
+                    onPlayAgain = {
+                        wasNotUpdate = true
+                        toShowWinner = false
+                        onPlayAgain()
+                    }
+                )
+            }
         }
         else if (uiState.times == 9){
             showWinner(winner = "Tie", text = "Try to win next time", onPlayAgain = onPlayAgain)
@@ -229,10 +275,12 @@ fun ShowPlayerTurn(player: String) {
 @Composable
 fun TicTacToeScreen(
     viewModel: TicTacToeViewModel,
+    signUpViewModel: SignUpViewModel,
     uiState: UiState,
     onPlayAgain: () -> Unit,
     player1: Player,
-    player2: Player
+    player2: Player,
+    onWinner: () -> Unit
 ) {
 
 
@@ -254,8 +302,10 @@ fun TicTacToeScreen(
                 onPlayAgain()
             },
             uiState = uiState,
-            player1 = player1.name,
-            player2 = player2.name
+            player1 = player1,
+            player2 = player2,
+            signUpViewModel = signUpViewModel,
+            onWinner = onWinner
         )
         Spacer(modifier = Modifier.weight(4f))
     }

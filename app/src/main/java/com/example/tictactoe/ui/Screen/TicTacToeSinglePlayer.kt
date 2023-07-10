@@ -104,7 +104,7 @@ fun SinglePlayerButtonGrid(
                 }
             }
 
-            Timer().schedule(75) { toShowWinner = true }
+            Timer().schedule(500) { toShowWinner = true }
 
             if (toShowWinner) {
                 showWinner(

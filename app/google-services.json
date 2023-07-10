@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "315349484101",
+    "project_id": "kotlin-tictactoe-game",
+    "storage_bucket": "kotlin-tictactoe-game.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:315349484101:android:65f9f48296c5ad529a592c",
+        "android_client_info": {
+          "package_name": "com.example.tictactoe"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "315349484101-20oalqrc531fbp43gk4l6cmc9utduocs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGTa01EqLa5rcYOhFxjHkSr3d9akd5EfE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "315349484101-20oalqrc531fbp43gk4l6cmc9utduocs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

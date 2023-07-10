@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'com.google.devtools.ksp' version "1.8.0-1.0.9"
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -57,6 +58,7 @@ android {
 
 dependencies {
 
+    implementation 'com.google.firebase:firebase-database-ktx:20.2.2'
     def nav_version = "2.5.3"
 
     //noinspection GradleDependency

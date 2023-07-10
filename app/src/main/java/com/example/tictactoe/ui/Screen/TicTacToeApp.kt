@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -25,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.tictactoe.data.Player
 import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.BackGround
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.concurrent.schedule
@@ -121,6 +123,9 @@ fun TicTacToeApp(
         mutableStateOf(Player())
     }
 
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("Players")
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
@@ -189,12 +194,16 @@ fun TicTacToeApp(
 
         NavHost(
             navController = navController,
-            startDestination =  startedDestination,
+            startDestination =  GameScreen.SignUp.name,
             modifier = Modifier.padding(innerPadding)
         ){
 
             composable(route = GameScreen.SignUp.name) {
-                SignUpScreen(signUpViewModel)
+                SignUpScreen(
+                    signUpViewModel,
+                    LocalContext.current,
+                    databaseReference
+                )
             }
 
             composable(route = GameScreen.Start.name) {
@@ -217,7 +226,11 @@ fun TicTacToeApp(
                         )
                     },
                     player1 = player1,
-                    player2 = player2
+                    player2 = player2,
+                    signUpViewModel = signUpViewModel,
+                    onWinner = {
+                        player1.score = player1.score + 1
+                    }
                 )
             }
 

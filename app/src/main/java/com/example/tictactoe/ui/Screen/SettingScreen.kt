@@ -23,7 +23,7 @@ import com.example.tictactoe.data.Player
 import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.AppViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.tictactoe.data.PlayerUiState
+import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.data.isValid
 import com.example.tictactoe.ui.theme.Secondery
 import com.example.tictactoe.ui.theme.Shapes
@@ -48,34 +48,44 @@ fun SettingScreen(
     val coroutineScope = rememberCoroutineScope()
 
 
-
-    LazyColumn(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .fillMaxSize()
         .background(BackGround)) {
-        item {
-            ShowPlayersButton(
-                Players = settingsUiState.playerList,
-                playerUiState = signUpUiState,
-                onValueChange = signUpViewModel::updateUiState,
-                coroutineScope = coroutineScope,
-                viewModel = signUpViewModel,
-                settingsViewModel = viewModel,
-                uiState = isDialogOpenUiState
 
-            )
-        }
+        Text(text = "Settings", fontWeight = FontWeight.Bold, fontSize = 70.sp)
+        
+        Spacer(modifier = Modifier.height(50.dp))
+        
+        LazyColumn(
+            horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+                .fillMaxSize()
+                .background(BackGround)
+        ) {
+            item {
+                ShowPlayersButton(
+                    Players = settingsUiState.playerList,
+                    playerUiState = signUpUiState,
+                    onValueChange = signUpViewModel::updateUiState,
+                    coroutineScope = coroutineScope,
+                    viewModel = signUpViewModel,
+                    settingsViewModel = viewModel,
+                    uiState = isDialogOpenUiState
 
-        item {
-            Spacer(modifier = Modifier.height(20.dp))
-        }
+                )
+            }
 
-        item {
-            ClearDataButton(
-                signUpViewModel = signUpViewModel,
-                settingsViewModel = viewModel,
-                uiState = isDialogOpenUiState,
-                coroutineScope = coroutineScope
-            )
+            item {
+                Spacer(modifier = Modifier.height(50.dp))
+            }
+
+            item {
+                ClearDataButton(
+                    signUpViewModel = signUpViewModel,
+                    settingsViewModel = viewModel,
+                    uiState = isDialogOpenUiState,
+                    coroutineScope = coroutineScope
+                )
+            }
         }
     }
 }
@@ -87,8 +97,8 @@ fun SettingScreen(
 @Composable
 fun ShowPlayersButton(
     Players: List<Player> = listOf(),
-    playerUiState: PlayerUiState,
-    onValueChange: (PlayerUiState) -> Unit,
+    playerUiState: MainPlayerUiState,
+    onValueChange: (MainPlayerUiState) -> Unit,
     coroutineScope: CoroutineScope,
     viewModel: SignUpViewModel,
     settingsViewModel: SettingsViewModel,
@@ -116,8 +126,8 @@ fun ShowPlayersButton(
 @Composable
 fun ShowPlayers(
     Players: List<Player> = listOf(),
-    playerUiState: PlayerUiState,
-    onValueChange: (PlayerUiState) -> Unit = {},
+    playerUiState: MainPlayerUiState,
+    onValueChange: (MainPlayerUiState) -> Unit = {},
     coroutineScope: CoroutineScope,
     viewModel: SignUpViewModel,
     settingsViewModel: SettingsViewModel,

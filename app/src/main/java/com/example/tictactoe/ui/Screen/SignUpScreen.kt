@@ -1,5 +1,6 @@
 package com.example.tictactoe.ui.Screen
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -21,20 +22,24 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tictactoe.data.PlayerUiState
+import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.data.isValid
 import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Secondery
 import com.example.tictactoe.ui.theme.Shapes
-import kotlinx.coroutines.launch
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 
 @Composable
 fun SignUpScreen(
-    viewModel: SignUpViewModel
+    viewModel: SignUpViewModel,
+    context: Context,
+    databaseReference: DatabaseReference
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val Context = LocalContext.current
 
     val uiState = viewModel.playerUiState
@@ -65,9 +70,30 @@ fun SignUpScreen(
         Button(
             onClick = {
              if (uiState.isValid() && uiState.password.isNotEmpty()) {
-                 coroutineScope.launch {
-                     viewModel.savePlayer()
-                 }
+                 val empObj =
+                     MainPlayerUiState(name = uiState.name, password = uiState.password, score = 0, secondPlayers = listOf())
+
+                 databaseReference.addValueEventListener(object : ValueEventListener {
+                     override fun onDataChange(snapshot: DataSnapshot) {
+
+                         databaseReference.setValue(empObj)
+
+                         Toast.makeText(
+                             context,
+                             "Data added to Firebase Database",
+                             Toast.LENGTH_SHORT
+                         ).show()
+                     }
+
+                     override fun onCancelled(error: DatabaseError) {
+
+                         Toast.makeText(
+                             context,
+                             "Fail to add data $error",
+                             Toast.LENGTH_SHORT
+                         ).show()
+                     }
+                 })
              } else {
                  isPasswordOrNameEmpty = true
              }
@@ -86,8 +112,8 @@ fun SignUpScreen(
 
 @Composable
 fun SignUpInputForm(
-    onValueChange: (PlayerUiState) -> Unit = {},
-    playerUiState: PlayerUiState
+    onValueChange: (MainPlayerUiState) -> Unit = {},
+    playerUiState: MainPlayerUiState
 ) {
     val focusManager = LocalFocusManager.current
 

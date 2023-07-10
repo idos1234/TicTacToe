@@ -10,11 +10,11 @@ import com.example.tictactoe.data.*
 @ViewModelFactoryDsl
 class SignUpViewModel(private val playerRepository: PlayerRepository): ViewModel() {
 
-    var playerUiState by mutableStateOf(PlayerUiState())
+    var playerUiState by mutableStateOf(MainPlayerUiState())
         private set
 
 
-    fun updateUiState(newPlayerUiState: PlayerUiState) {
+    fun updateUiState(newPlayerUiState: MainPlayerUiState) {
         playerUiState = newPlayerUiState.copy()
     }
 
