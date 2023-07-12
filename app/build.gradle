@@ -58,7 +58,9 @@ android {
 
 dependencies {
 
+    // FireBase Dependency
     implementation 'com.google.firebase:firebase-database-ktx:20.2.2'
+    implementation 'com.google.firebase:firebase-firestore:24.6.1'
     def nav_version = "2.5.3"
 
     //noinspection GradleDependency

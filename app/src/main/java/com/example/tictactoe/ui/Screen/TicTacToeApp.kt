@@ -123,9 +123,6 @@ fun TicTacToeApp(
         mutableStateOf(Player())
     }
 
-    val firebaseDatabase = FirebaseDatabase.getInstance()
-    val databaseReference = firebaseDatabase.getReference("Players")
-
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
@@ -194,7 +191,7 @@ fun TicTacToeApp(
 
         NavHost(
             navController = navController,
-            startDestination =  GameScreen.SignUp.name,
+            startDestination =  GameScreen.Start.name,
             modifier = Modifier.padding(innerPadding)
         ){
 
@@ -202,7 +199,6 @@ fun TicTacToeApp(
                 SignUpScreen(
                     signUpViewModel,
                     LocalContext.current,
-                    databaseReference
                 )
             }
 

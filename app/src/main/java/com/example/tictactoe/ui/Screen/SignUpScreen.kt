@@ -14,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -29,18 +28,14 @@ import com.example.tictactoe.ui.theme.Secondery
 import com.example.tictactoe.ui.theme.Shapes
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun SignUpScreen(
     viewModel: SignUpViewModel,
     context: Context,
-    databaseReference: DatabaseReference
 ) {
-    val Context = LocalContext.current
 
     val uiState = viewModel.playerUiState
     var isPasswordOrNameEmpty by remember {
@@ -61,7 +56,7 @@ fun SignUpScreen(
             onValueChange = viewModel::updateUiState)
 
         if (isPasswordOrNameEmpty) {
-            Toast.makeText(Context, "You have to fill all of the labels", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "You have to fill all of the labels", Toast.LENGTH_SHORT).show()
             isPasswordOrNameEmpty = false
         }
 
@@ -70,30 +65,20 @@ fun SignUpScreen(
         Button(
             onClick = {
              if (uiState.isValid() && uiState.password.isNotEmpty()) {
-                 val empObj =
-                     MainPlayerUiState(name = uiState.name, password = uiState.password, score = 0, secondPlayers = listOf())
+                 val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-                 databaseReference.addValueEventListener(object : ValueEventListener {
-                     override fun onDataChange(snapshot: DataSnapshot) {
+                 val dbCourses: CollectionReference = db.collection("Players")
 
-                         databaseReference.setValue(empObj)
+                 val courses = MainPlayerUiState(uiState.name, 0, uiState.password, listOf())
 
-                         Toast.makeText(
-                             context,
-                             "Data added to Firebase Database",
-                             Toast.LENGTH_SHORT
-                         ).show()
-                     }
+                 dbCourses.add(courses).addOnSuccessListener {
+                     Toast.makeText(
+                         context, "Welcome to (App Name)", Toast.LENGTH_SHORT
+                     ).show()
 
-                     override fun onCancelled(error: DatabaseError) {
-
-                         Toast.makeText(
-                             context,
-                             "Fail to add data $error",
-                             Toast.LENGTH_SHORT
-                         ).show()
-                     }
-                 })
+                 }.addOnFailureListener { e ->
+                     Toast.makeText(context, "Fail! Try again \n$e", Toast.LENGTH_SHORT).show()
+                 }
              } else {
                  isPasswordOrNameEmpty = true
              }
