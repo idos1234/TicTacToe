@@ -3,16 +3,15 @@ package com.example.tictactoe.ui.Screen
 import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -20,17 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.AppViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tictactoe.data.MainPlayerUiState
-import com.example.tictactoe.ui.theme.Secondery
-import com.example.tictactoe.ui.theme.Shapes
+import com.example.tictactoe.ui.theme.*
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -66,9 +61,7 @@ fun SettingScreen(
                 .background(BackGround)
         ) {
             item {
-                ShowPlayersButton(
-                    playerUiState = signUpUiState,
-                    onValueChange = signUpViewModel::updateUiState,
+                ShowTopPlayersButton(
                     settingsViewModel = viewModel,
                     uiState = isDialogOpenUiState,
                     context = LocalContext.current
@@ -97,9 +90,7 @@ fun SettingScreen(
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun ShowPlayersButton(
-    playerUiState: MainPlayerUiState,
-    onValueChange: (MainPlayerUiState) -> Unit,
+fun ShowTopPlayersButton(
     settingsViewModel: SettingsViewModel,
     uiState: isDialogOpen,
     context: Context
@@ -116,6 +107,9 @@ fun ShowPlayersButton(
                     val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
                     playerlist.add(p)
 
+                }
+                playerlist.sortBy {
+                    it?.score
                 }
             } else {
                 // if the snapshot is empty we are displaying
@@ -139,34 +133,24 @@ fun ShowPlayersButton(
     Button(
          onClick = {settingsViewModel.ChangeShowingPlayersAlertDialog()},
          colors = ButtonDefaults.buttonColors(Secondery), shape = Shapes.large, modifier = Modifier.width(200.dp)) {
-         Text(text = "Show Players", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black, modifier = Modifier.padding(4.dp))
+         Text(text = "Top Scores", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black, modifier = Modifier.padding(4.dp))
      }
     if (uiState.isShowingPlayersDialogOpen) {
-        ShowPlayers(
+        ShowTopPlayers(
             Players = playerlist,
-            playerUiState = playerUiState,
-            onValueChange = onValueChange,
             settingsViewModel = settingsViewModel,
         )
     }
 }
 
 @Composable
-fun ShowPlayers(
+fun ShowTopPlayers(
     Players: SnapshotStateList<MainPlayerUiState?>,
-    playerUiState: MainPlayerUiState,
-    onValueChange: (MainPlayerUiState) -> Unit = {},
     settingsViewModel: SettingsViewModel,
 ) {
 
     var toAddPlayer by remember {
         mutableStateOf(false)
-    }
-
-    val icon = if (toAddPlayer) {
-        Icons.Default.Done
-    } else{
-        Icons.Default.Add
     }
 
     AlertDialog(
@@ -178,71 +162,73 @@ fun ShowPlayers(
                     contentDescription = null
                 )
             }
-                },
+        },
         text = {
-            if (Players.isEmpty()) {
-                Column() {
-                    Text(text = "There Are Not Players", color = Color.Black)
-                    Button(
-                        onClick = {},
-                        modifier = Modifier.width(250.dp)
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
-                }
-            } else {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.height(300.dp).fillMaxWidth()) {
+                 Card(modifier = Modifier.width(250.dp), backgroundColor = Title, border = BorderStroke(1.dp, Color.Black), shape = RoundedCornerShape(0)) {
+                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+
+                         Text(
+                             text = "Place",
+                             fontSize = 20.sp,
+                             color = Color.White,
+                             textAlign = TextAlign.Center,
+                             modifier = Modifier.weight(1f)
+                         )
+
+                         Text(
+                             text = "Player",
+                             fontSize = 20.sp,
+                             color = Color.White,
+                             textAlign = TextAlign.Center,
+                             modifier = Modifier.weight(1f)
+                         )
+                          Text(
+                              text = "Score",
+                              fontSize = 20.sp,
+                              color = Color.White,
+                              textAlign = TextAlign.Center,
+                              modifier = Modifier.weight(1f)
+                          )
+                     }
+                 }
                 LazyColumn(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.height(300.dp)
+                    modifier = Modifier
+                        .height(300.dp)
                 ) {
                     itemsIndexed(Players) { index, item ->
                         Card(
-                            backgroundColor = Secondery,
-                            elevation = 10.dp,
                             modifier = Modifier
-                                .width(250.dp)
-                                .padding(5.dp)
+                                .width(250.dp),
+                            border = BorderStroke(1.dp, Color.Black),
+                            backgroundColor = if(index == 0) First else Secondery,
+                            shape = RoundedCornerShape(0)
                         ) {
-                            Players[index]?.name?.let {
+                            Row {
                                 Text(
-                                    text = it,
+                                    text = index.plus(1).toString(),
                                     fontSize = 15.sp,
-                                    textAlign = TextAlign.Center
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.weight(1f)
                                 )
+                                Players[index]?.name?.let {
+                                    Text(
+                                        text = it,
+                                        fontSize = 15.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                                Players[index]?.score?.let {
+                                    Text(
+                                        text = it.toString(),
+                                        fontSize = 15.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
                             }
-                        }
-                    }
-                    item {
-                        if (toAddPlayer) {
-                            OutlinedTextField(
-                                value = playerUiState.name,
-                                onValueChange = { onValueChange(playerUiState.copy(name = it)) },
-                                singleLine = true,
-                                label = { Text(text = "Player") },
-                                keyboardOptions = KeyboardOptions.Default.copy(
-                                    imeAction = ImeAction.Done,
-                                    keyboardType = KeyboardType.Text
-                                ),
-                                colors = TextFieldDefaults.textFieldColors(backgroundColor = Secondery),
-                                shape = Shapes.large,
-                            )
-                        }
-                    }
-                    item {
-                        Button(
-                            onClick = {},
-                            colors = ButtonDefaults.buttonColors(Secondery),
-                            modifier = Modifier.width(250.dp)
-                        ) {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                modifier = Modifier.size(30.dp)
-                            )
                         }
                     }
                 }

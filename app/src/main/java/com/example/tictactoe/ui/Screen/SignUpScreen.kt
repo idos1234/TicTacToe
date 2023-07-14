@@ -110,7 +110,7 @@ fun SignUpInputForm(
         value = playerUiState.name,
         onValueChange = { onValueChange(playerUiState.copy(name = it)) },
         singleLine = true,
-        label = { Text(text = "Username") },
+        placeholder = { Text(text = "Username") },
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Next,
             keyboardType = KeyboardType.Text
@@ -130,7 +130,7 @@ fun SignUpInputForm(
         value = playerUiState.password,
         onValueChange = { onValueChange(playerUiState.copy(password = it)) },
         singleLine = true,
-        label = { Text(text = "Password") },
+        placeholder = { Text(text = "Password") },
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Done,
             keyboardType = KeyboardType.Text

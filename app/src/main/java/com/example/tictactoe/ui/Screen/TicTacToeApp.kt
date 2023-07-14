@@ -26,7 +26,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.tictactoe.data.Player
 import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.BackGround
-import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.concurrent.schedule
@@ -191,7 +190,7 @@ fun TicTacToeApp(
 
         NavHost(
             navController = navController,
-            startDestination =  GameScreen.Start.name,
+            startDestination =  GameScreen.Settings.name,
             modifier = Modifier.padding(innerPadding)
         ){
 
