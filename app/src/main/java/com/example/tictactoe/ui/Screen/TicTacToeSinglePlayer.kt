@@ -11,15 +11,20 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tictactoe.data.Player
 import com.example.tictactoe.data.UiState
 import com.example.tictactoe.ui.CheckWinner
 import com.example.tictactoe.ui.theme.BackGround
+import com.example.tictactoe.ui.theme.Orange
 import com.example.tictactoe.ui.theme.Primery
 import com.example.tictactoe.ui.theme.Secondery
 import kotlinx.coroutines.launch
@@ -30,11 +35,12 @@ import kotlin.concurrent.schedule
  * Show a single button in the single player game grid
  */
 
+@OptIn(ExperimentalTextApi::class)
 @Composable
-fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, viewModel: TicTacToeViewModel) {
+fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Card(modifier = Modifier.padding(8.dp),shape = RoundedCornerShape(100.dp), border = BorderStroke(3.dp, color = Secondery)) {
+    Card(modifier = Modifier.padding(8.dp),shape = RoundedCornerShape(25.dp), border = BorderStroke(2.dp, color = Secondery)) {
         TextButton(
             onClick = {
                 onClick()
@@ -53,13 +59,22 @@ fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, viewModel: 
                 text = player,
                 style = TextStyle(
                     textAlign = TextAlign.Center,
-                    fontSize = 35.sp,
-                    color = Color.Black
+                    fontSize = 45.sp,
+                    fontWeight = FontWeight.Black,
+                    brush =
+                    if (player == "X") {
+                        Brush.linearGradient(
+                            listOf(Color.Blue, Secondery)
+                        )
+                    } else {
+                        Brush.linearGradient(
+                            listOf(Orange, Color.Yellow)
+                        )
+                    }
                 ),
                 modifier = Modifier
                     .padding(16.dp)
                     .size(50.dp)
-                    .fillMaxHeight()
             )
         }
     }

@@ -3,6 +3,7 @@ package com.example.tictactoe.data
 data class MainPlayerUiState(
     var name: String = "",
     var score: Int = 0,
+    var email: String = "" ,
     var password: String = "",
     var secondPlayers: List<SecondPlayerUiState> = listOf()
 )
@@ -20,5 +21,5 @@ fun MainPlayerUiState.toPlayer(): Player = Player(
 )
 
 fun MainPlayerUiState.isValid() : Boolean {
-    return name.isNotBlank()
+    return name.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()
 }

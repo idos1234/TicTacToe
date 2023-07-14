@@ -190,7 +190,7 @@ fun TicTacToeApp(
 
         NavHost(
             navController = navController,
-            startDestination =  GameScreen.Settings.name,
+            startDestination =  GameScreen.SignUp.name,
             modifier = Modifier.padding(innerPadding)
         ){
 
