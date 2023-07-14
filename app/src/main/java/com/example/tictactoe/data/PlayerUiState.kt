@@ -9,7 +9,6 @@ data class MainPlayerUiState(
 
 data class SecondPlayerUiState(
     var name: String = "",
-    var score: Int = 0
 )
 
 
