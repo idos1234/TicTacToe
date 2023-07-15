@@ -1,6 +1,8 @@
 package com.example.tictactoe.ui.Screen
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -94,10 +96,10 @@ fun TopAppBar(onClick: () -> Unit, icon: ImageVector) {
         Spacer(modifier = Modifier.weight(3f))
     }
 }
+@RequiresApi(Build.VERSION_CODES.M)
 @Composable
 fun TicTacToeApp(
     viewModel: TicTacToeViewModel = TicTacToeViewModel(),
-    settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val navController = rememberNavController()
@@ -108,8 +110,8 @@ fun TicTacToeApp(
 
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
-    val settingsUiState1 by settingsViewModel.settingsUiState.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    val signupUiState = signUpViewModel.emailsharedPreferences
 
     var timesPlayed by remember {
         mutableStateOf(0)
@@ -182,15 +184,15 @@ fun TicTacToeApp(
     ) {
         innerPadding ->
 
-        val startedDestination = if(settingsUiState1.playerList.isNotEmpty()) {
-            GameScreen.Start.name
-        } else {
+        val startedDestination = if(signupUiState.email == "") {
             GameScreen.SignUp.name
+        } else {
+            GameScreen.Start.name
         }
 
         NavHost(
             navController = navController,
-            startDestination =  GameScreen.SignUp.name,
+            startDestination =  startedDestination,
             modifier = Modifier.padding(innerPadding)
         ){
 
@@ -198,6 +200,7 @@ fun TicTacToeApp(
                 SignUpScreen(
                     signUpViewModel,
                     LocalContext.current,
+                    signupUiState
                 )
             }
 

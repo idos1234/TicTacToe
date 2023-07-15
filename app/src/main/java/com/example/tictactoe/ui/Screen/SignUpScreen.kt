@@ -1,7 +1,11 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.tictactoe.ui.Screen
 
 import android.content.Context
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -21,6 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys.AES256_GCM_SPEC
+import androidx.security.crypto.MasterKeys.getOrCreate
 import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.data.isValid
 import com.example.tictactoe.ui.theme.BackGround
@@ -29,10 +36,12 @@ import com.example.tictactoe.ui.theme.Shapes
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 
+@RequiresApi(Build.VERSION_CODES.M)
 @Composable
 fun SignUpScreen(
     viewModel: SignUpViewModel,
     context: Context,
+    emailsharedPreferences: sharedPreferences
 ) {
 
     val uiState = viewModel.playerUiState
@@ -50,6 +59,20 @@ fun SignUpScreen(
         mutableStateOf(false)
     }
 
+    val masterKeyAlias = getOrCreate(AES256_GCM_SPEC)
+
+    val sharedPreferences = EncryptedSharedPreferences.create(
+        // passing a file name to share a preferences
+        "preferences",
+        masterKeyAlias,
+        context,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+
+    val emailStr = sharedPreferences.getString("email", "")
+    emailsharedPreferences.email = emailStr!!
+
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .fillMaxSize()
         .background(BackGround))
@@ -61,6 +84,8 @@ fun SignUpScreen(
         SignUpInputForm(
             playerUiState = uiState,
             onValueChange = viewModel::updateUiState,
+            emailsharedPreferences = emailsharedPreferences,
+            onEmailValueChange = viewModel::updateEmail
         )
 
         OutlinedTextField(
@@ -123,6 +148,20 @@ fun SignUpScreen(
                          listOf()
                      )
 
+                     val masterKeyAlias = getOrCreate(AES256_GCM_SPEC)
+
+                     // Initialize/open an instance of EncryptedSharedPreferences on below line.
+                     val sharedPreferences = EncryptedSharedPreferences.create(
+                         // passing a file name to share a preferences
+                         "preferences",
+                         masterKeyAlias,
+                         context,
+                         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                     )
+
+                     sharedPreferences.edit().putString("email", emailsharedPreferences.email).apply()
+
                      dbCourses.add(courses).addOnSuccessListener {
                          Toast.makeText(
                              context, "Welcome to (App Name)", Toast.LENGTH_SHORT
@@ -154,6 +193,8 @@ fun SignUpScreen(
 fun SignUpInputForm(
     onValueChange: (MainPlayerUiState) -> Unit = {},
     playerUiState: MainPlayerUiState,
+    emailsharedPreferences: sharedPreferences,
+    onEmailValueChange: (sharedPreferences) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -183,12 +224,14 @@ fun SignUpInputForm(
 
     OutlinedTextField(
         value = playerUiState.email,
-        onValueChange = { onValueChange(playerUiState.copy(email = it)) },
+        onValueChange = {
+            onValueChange(playerUiState.copy(email = it))
+            onEmailValueChange(emailsharedPreferences.copy(email = it)) },
         singleLine = true,
         placeholder = { Text(text = "example@gmail.com") },
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Next,
-            keyboardType = KeyboardType.Text
+            keyboardType = KeyboardType.Email
         ),
         keyboardActions = KeyboardActions(
             onNext = { focusManager.moveFocus(FocusDirection.Down) }
@@ -210,7 +253,7 @@ fun SignUpInputForm(
         singleLine = true,
         placeholder = { Text(text = "Password") },
         keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = ImeAction.Done,
+            imeAction = ImeAction.Next,
             keyboardType = KeyboardType.Text
         ),
         colors = TextFieldDefaults.textFieldColors(backgroundColor = Secondery),

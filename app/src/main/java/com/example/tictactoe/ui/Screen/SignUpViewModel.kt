@@ -13,6 +13,12 @@ class SignUpViewModel(private val playerRepository: PlayerRepository): ViewModel
     var playerUiState by mutableStateOf(MainPlayerUiState())
         private set
 
+    var emailsharedPreferences by mutableStateOf(sharedPreferences())
+        private set
+
+    fun updateEmail(newEmail: sharedPreferences) {
+        emailsharedPreferences = newEmail.copy()
+    }
 
     fun updateUiState(newPlayerUiState: MainPlayerUiState) {
         playerUiState = newPlayerUiState.copy()
@@ -34,3 +40,7 @@ class SignUpViewModel(private val playerRepository: PlayerRepository): ViewModel
     }
 }
 
+
+data class sharedPreferences(
+    var email: String = ""
+)
