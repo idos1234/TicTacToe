@@ -1,6 +1,7 @@
 package com.example.tictactoe.ui.Screen
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
@@ -25,6 +26,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys.AES256_GCM_SPEC
+import androidx.security.crypto.MasterKeys.getOrCreate
 import com.example.tictactoe.data.Player
 import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.BackGround
@@ -100,7 +104,8 @@ fun TopAppBar(onClick: () -> Unit, icon: ImageVector) {
 @Composable
 fun TicTacToeApp(
     viewModel: TicTacToeViewModel = TicTacToeViewModel(),
-    signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    context: Context
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -123,6 +128,19 @@ fun TicTacToeApp(
     var player2 by remember {
         mutableStateOf(Player())
     }
+
+    val masterKeyAlias = getOrCreate(AES256_GCM_SPEC)
+
+    val sharedPreferences = EncryptedSharedPreferences.create(
+        "preferences",
+        masterKeyAlias,
+        context,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+
+    val emailStr = sharedPreferences.getString("email", "")
+    signupUiState.email = emailStr!!
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -200,7 +218,23 @@ fun TicTacToeApp(
                 SignUpScreen(
                     signUpViewModel,
                     LocalContext.current,
-                    signupUiState
+                    emailsharedPreferences = signupUiState,
+                    onClick = {
+                        val masterKeyAlias = getOrCreate(AES256_GCM_SPEC)
+
+                        val sharedPreferences = EncryptedSharedPreferences.create(
+                            "preferences",
+                            masterKeyAlias,
+                            context,
+                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                        )
+                        signUpViewModel.emailsharedPreferences.email = signUpViewModel.emailsharedPreferences.email2
+
+                        sharedPreferences.edit().putString("email", signupUiState.email).apply()
+
+                        navController.navigate(GameScreen.Start.name)
+                    }
                 )
             }
 
@@ -263,7 +297,24 @@ fun TicTacToeApp(
             }
 
             composable(route= GameScreen.Settings.name) {
-                SettingScreen()
+                SettingScreen(
+                    onClearClick = {
+                        val masterKeyAlias = getOrCreate(AES256_GCM_SPEC)
+
+                        val sharedPreferences = EncryptedSharedPreferences.create(
+                            "preferences",
+                            masterKeyAlias,
+                            context,
+                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                        )
+                        signUpViewModel.updateEmail(signupUiState.copy(email = ""))
+
+                        sharedPreferences.edit().putString("email", signupUiState.email).apply()
+
+                        navController.navigate(GameScreen.SignUp.name)
+                    }
+                )
             }
 
             composable(route= GameScreen.ChooseSinglePlayer.name) {
@@ -290,7 +341,6 @@ fun TicTacToeApp(
                 )
             }
         }
-
     }
 
 }

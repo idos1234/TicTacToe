@@ -33,14 +33,10 @@ class SignUpViewModel(private val playerRepository: PlayerRepository): ViewModel
     suspend fun updateScore(player: Player) {
         playerRepository.updatePlayerScore(id = player.id, score = player.score + 1)
     }
-
-
-    suspend fun clearData() {
-        playerRepository.clearData()
-    }
 }
 
 
 data class sharedPreferences(
-    var email: String = ""
+    var email: String = "",
+    var email2: String = ""
 )

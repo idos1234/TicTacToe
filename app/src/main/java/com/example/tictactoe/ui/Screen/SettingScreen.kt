@@ -27,8 +27,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.ui.theme.*
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 /**
  * [SettingScreen] Show the settings screen
@@ -38,14 +36,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingScreen(
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    onClearClick: () -> Unit
 ) {
 
-    val signUpUiState = signUpViewModel.playerUiState
     val isDialogOpenUiState by viewModel.isDialogOpen.collectAsState()
-
-    val coroutineScope = rememberCoroutineScope()
-
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .fillMaxSize()
@@ -74,10 +68,9 @@ fun SettingScreen(
 
             item {
                 ClearDataButton(
-                    signUpViewModel = signUpViewModel,
                     settingsViewModel = viewModel,
                     uiState = isDialogOpenUiState,
-                    coroutineScope = coroutineScope
+                    onClearClick = onClearClick
                 )
             }
         }
@@ -146,12 +139,8 @@ fun ShowTopPlayersButton(
 @Composable
 fun ShowTopPlayers(
     Players: SnapshotStateList<MainPlayerUiState?>,
-    settingsViewModel: SettingsViewModel,
+    settingsViewModel: SettingsViewModel
 ) {
-
-    var toAddPlayer by remember {
-        mutableStateOf(false)
-    }
 
     AlertDialog(
         backgroundColor = BackGround,
@@ -246,10 +235,9 @@ fun ShowTopPlayers(
 
 @Composable
 fun ClearDataButton(
-    signUpViewModel: SignUpViewModel,
     settingsViewModel: SettingsViewModel,
-    coroutineScope: CoroutineScope,
-    uiState: isDialogOpen
+    uiState: isDialogOpen,
+    onClearClick: () -> Unit
 ) {
 
     Button(
@@ -263,22 +251,21 @@ fun ClearDataButton(
 
     if (uiState.isCheckClearDataDialogOpen) {
         CheckClearData(
-            viewModel = signUpViewModel,
-            coroutineScope = coroutineScope,
-            onCancelClick = {settingsViewModel.ChangeCheckClearDataAlertDialog()}
+            onCancelClick = {settingsViewModel.ChangeCheckClearDataAlertDialog()},
+            onClearClick = onClearClick
         )
     }
 }
 
 @Composable
 fun CheckClearData(
-    viewModel: SignUpViewModel,
-    coroutineScope: CoroutineScope,
-    onCancelClick: () -> Unit
+    onCancelClick: () -> Unit,
+    onClearClick: () -> Unit
 ) {
 
     AlertDialog(
         title = { Text(text = "Are you sure you want to clear all data?") },
+        backgroundColor = BackGround,
         onDismissRequest = {},
         dismissButton = {
             TextButton(
@@ -289,11 +276,7 @@ fun CheckClearData(
                         },
             confirmButton = {
                 TextButton(
-                    onClick = {
-                        coroutineScope.launch {
-                            viewModel.clearData()
-                        }
-                    }
+                    onClick = onClearClick
                 ) {
                    Text("Clear")
                 }

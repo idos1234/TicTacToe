@@ -25,9 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys.AES256_GCM_SPEC
-import androidx.security.crypto.MasterKeys.getOrCreate
 import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.data.isValid
 import com.example.tictactoe.ui.theme.BackGround
@@ -41,7 +38,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 fun SignUpScreen(
     viewModel: SignUpViewModel,
     context: Context,
-    emailsharedPreferences: sharedPreferences
+    emailsharedPreferences: sharedPreferences,
+    onClick: () -> Unit
 ) {
 
     val uiState = viewModel.playerUiState
@@ -59,20 +57,6 @@ fun SignUpScreen(
         mutableStateOf(false)
     }
 
-    val masterKeyAlias = getOrCreate(AES256_GCM_SPEC)
-
-    val sharedPreferences = EncryptedSharedPreferences.create(
-        // passing a file name to share a preferences
-        "preferences",
-        masterKeyAlias,
-        context,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
-
-    val emailStr = sharedPreferences.getString("email", "")
-    emailsharedPreferences.email = emailStr!!
-
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .fillMaxSize()
         .background(BackGround))
@@ -84,8 +68,8 @@ fun SignUpScreen(
         SignUpInputForm(
             playerUiState = uiState,
             onValueChange = viewModel::updateUiState,
-            emailsharedPreferences = emailsharedPreferences,
-            onEmailValueChange = viewModel::updateEmail
+            onEmailValueChange = viewModel::updateEmail,
+            emailsharedPreferences = emailsharedPreferences
         )
 
         OutlinedTextField(
@@ -138,9 +122,9 @@ fun SignUpScreen(
                      isEnabled = false
                      val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-                     val dbCourses: CollectionReference = db.collection("Players")
+                     val dbPlayers: CollectionReference = db.collection("Players")
 
-                     val courses = MainPlayerUiState(
+                     val player = MainPlayerUiState(
                          uiState.name,
                          0,
                          uiState.email,
@@ -148,24 +132,12 @@ fun SignUpScreen(
                          listOf()
                      )
 
-                     val masterKeyAlias = getOrCreate(AES256_GCM_SPEC)
-
-                     // Initialize/open an instance of EncryptedSharedPreferences on below line.
-                     val sharedPreferences = EncryptedSharedPreferences.create(
-                         // passing a file name to share a preferences
-                         "preferences",
-                         masterKeyAlias,
-                         context,
-                         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                     )
-
-                     sharedPreferences.edit().putString("email", emailsharedPreferences.email).apply()
-
-                     dbCourses.add(courses).addOnSuccessListener {
+                     dbPlayers.add(player).addOnSuccessListener {
                          Toast.makeText(
                              context, "Welcome to (App Name)", Toast.LENGTH_SHORT
                          ).show()
+
+                         onClick()
 
                      }.addOnFailureListener { e ->
                          Toast.makeText(context, "Fail! Try again \n$e", Toast.LENGTH_SHORT).show()
@@ -226,7 +198,7 @@ fun SignUpInputForm(
         value = playerUiState.email,
         onValueChange = {
             onValueChange(playerUiState.copy(email = it))
-            onEmailValueChange(emailsharedPreferences.copy(email = it)) },
+            onEmailValueChange(emailsharedPreferences.copy(email2 = it)) },
         singleLine = true,
         placeholder = { Text(text = "example@gmail.com") },
         keyboardOptions = KeyboardOptions.Default.copy(
