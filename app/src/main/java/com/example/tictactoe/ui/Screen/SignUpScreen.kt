@@ -3,28 +3,37 @@
 package com.example.tictactoe.ui.Screen
 
 import android.content.Context
+import android.net.Uri
 import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.SupervisedUserCircle
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.data.isValid
 import com.example.tictactoe.ui.theme.BackGround
@@ -32,6 +41,7 @@ import com.example.tictactoe.ui.theme.Secondery
 import com.example.tictactoe.ui.theme.Shapes
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+
 
 @RequiresApi(Build.VERSION_CODES.M)
 @Composable
@@ -57,13 +67,48 @@ fun SignUpScreen(
         mutableStateOf(false)
     }
 
+    var selectedImageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri -> selectedImageUri = uri }
+    )
+
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .fillMaxSize()
         .background(BackGround))
     {
         Spacer(modifier = Modifier.height(80.dp))
         Text(text = "Welcome To (app name)", fontSize = 30.sp, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(20.dp))
+        
+        Card(
+            shape = RoundedCornerShape(125.dp),
+            elevation = 10.dp,
+            modifier = Modifier
+                .size(200.dp)
+                .clickable(
+                    onClick = {
+                        photoPickerLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    }
+                )
+        ) {
+            if (selectedImageUri == null) {
+                Image(imageVector = Icons.Default.SupervisedUserCircle, contentDescription = null, contentScale = ContentScale.FillBounds)
+            } else {
+                AsyncImage(
+                    model = selectedImageUri,
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
 
         SignUpInputForm(
             playerUiState = uiState,
@@ -127,9 +172,8 @@ fun SignUpScreen(
                      val player = MainPlayerUiState(
                          uiState.name,
                          0,
-                         uiState.email,
                          uiState.password,
-                         listOf()
+                         selectedImageUri.toString()
                      )
 
                      dbPlayers.add(player).addOnSuccessListener {
@@ -176,7 +220,8 @@ fun SignUpInputForm(
 
     OutlinedTextField(
         value = playerUiState.name,
-        onValueChange = { onValueChange(playerUiState.copy(name = it)) },
+        onValueChange = { onValueChange(playerUiState.copy(name = it))
+            onEmailValueChange(emailsharedPreferences.copy(name2 = it)) },
         singleLine = true,
         placeholder = { Text(text = "Name") },
         keyboardOptions = KeyboardOptions.Default.copy(
@@ -191,32 +236,7 @@ fun SignUpInputForm(
             ),
         shape = Shapes.large,
     )
-
-    Spacer(modifier = Modifier.height(15.dp))
-
-    OutlinedTextField(
-        value = playerUiState.email,
-        onValueChange = {
-            onValueChange(playerUiState.copy(email = it))
-            onEmailValueChange(emailsharedPreferences.copy(email2 = it)) },
-        singleLine = true,
-        placeholder = { Text(text = "example@gmail.com") },
-        keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = ImeAction.Next,
-            keyboardType = KeyboardType.Email
-        ),
-        keyboardActions = KeyboardActions(
-            onNext = { focusManager.moveFocus(FocusDirection.Down) }
-        ),
-        colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Secondery,
-        ),
-        shape = Shapes.large,
-        trailingIcon = {
-            Icon(imageVector = Icons.Default.Email, "")
-        }
-    )
-
+    
     Spacer(modifier = Modifier.height(15.dp))
 
     OutlinedTextField(

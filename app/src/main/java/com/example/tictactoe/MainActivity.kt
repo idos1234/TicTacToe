@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.ui.platform.LocalContext
 import com.example.tictactoe.ui.Screen.TicTacToeApp
 import com.example.tictactoe.ui.theme.TicTacToeTheme
 
@@ -15,7 +14,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             TicTacToeTheme {
-                TicTacToeApp(context = LocalContext.current)
+                TicTacToeApp()
             }
         }
     }

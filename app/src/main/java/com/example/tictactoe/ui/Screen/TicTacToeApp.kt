@@ -1,7 +1,7 @@
 package com.example.tictactoe.ui.Screen
 
 import android.annotation.SuppressLint
-import android.content.Context
+import android.app.Application
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
@@ -14,21 +14,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.SupervisedUserCircle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys.AES256_GCM_SPEC
-import androidx.security.crypto.MasterKeys.getOrCreate
+import coil.compose.AsyncImage
+import com.example.tictactoe.data.MainPlayerUiState
+import com.example.tictactoe.data.ModelPreferencesManager
 import com.example.tictactoe.data.Player
 import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.BackGround
@@ -51,15 +55,49 @@ enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val tit
  * Provides Navigation graph for the application.
  */
 
-@Composable()
-fun HomeScreenMenu(modifier: Modifier, navController: NavHostController, onChaneScreen: () -> Unit = {}) {
+@Composable
+fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChaneScreen: () -> Unit = {}) {
+
+    val player = ModelPreferencesManager.get<MainPlayerUiState>("Player")
+
+    Icon(
+        imageVector = Icons.Default.Close,
+        contentDescription = null,
+        modifier = modifier.padding(16.dp)
+    )
+
+    Column {
+        TopHomeScreenMenu(modifier = Modifier.weight(1f), player = player!!)
+        ButtonHomeScreenMenu(modifier = Modifier.weight(5f), navController = navController, onChaneScreen = onChaneScreen)
+    }
+}
+
+@SuppressLint("UnrememberedMutableState")
+@Composable
+fun TopHomeScreenMenu(modifier: Modifier, player: MainPlayerUiState) {
+
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
+        if (player.image == null) {
+            Image(imageVector = Icons.Default.SupervisedUserCircle, contentDescription = null, contentScale = ContentScale.FillBounds)
+        } else {
+            AsyncImage(
+                model = player.image,
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds
+            )
+        }
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+        Text(text = player.name, fontSize = 25.sp, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, onChaneScreen: () -> Unit = {}) {
     Spacer(modifier = Modifier.height(30.dp))
 
-    Column() {
-        Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = null,
-            modifier = modifier)
+    Column(modifier = modifier) {
 
         Button(onClick = {
             navController.navigate(GameScreen.Start.name)
@@ -83,21 +121,26 @@ fun HomeScreenMenu(modifier: Modifier, navController: NavHostController, onChane
 }
 
 @Composable()
-fun TopAppBar(onClick: () -> Unit, icon: ImageVector) {
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .height(45.dp)
-        .background(BackGround), verticalAlignment = Alignment.CenterVertically) {
-        Image(
-            imageVector = icon,
-            contentDescription = null,
+fun TopAppBar(onClick: () -> Unit, icon: ImageVector?, isBar: Boolean = true) {
+    if (isBar) {
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .size(30.dp)
-                .clickable(
-                    onClick = onClick
-                ))
-        Spacer(modifier = Modifier.weight(3f))
+                .fillMaxWidth()
+                .height(45.dp)
+                .background(BackGround), verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                imageVector = icon!!,
+                contentDescription = null,
+                modifier = Modifier
+                    .weight(1f)
+                    .size(30.dp)
+                    .clickable(
+                        onClick = onClick
+                    )
+            )
+            Spacer(modifier = Modifier.weight(3f))
+        }
     }
 }
 @RequiresApi(Build.VERSION_CODES.M)
@@ -105,23 +148,28 @@ fun TopAppBar(onClick: () -> Unit, icon: ImageVector) {
 fun TicTacToeApp(
     viewModel: TicTacToeViewModel = TicTacToeViewModel(),
     signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    context: Context
 ) {
+    //nav controller
+    val context = LocalContext.current
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = GameScreen.valueOf(
         backStackEntry?.destination?.route ?: GameScreen.Start.name
     )
 
+    // viewModel and uiState
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
     val signupUiState = signUpViewModel.emailsharedPreferences
+    val playerUiState = signUpViewModel.playerUiState
+
 
     var timesPlayed by remember {
         mutableStateOf(0)
     }
 
+    //game players
     var player1 by remember {
         mutableStateOf(Player())
     }
@@ -129,18 +177,11 @@ fun TicTacToeApp(
         mutableStateOf(Player())
     }
 
-    val masterKeyAlias = getOrCreate(AES256_GCM_SPEC)
-
-    val sharedPreferences = EncryptedSharedPreferences.create(
-        "preferences",
-        masterKeyAlias,
-        context,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
-
-    val emailStr = sharedPreferences.getString("email", "")
-    signupUiState.email = emailStr!!
+    //share preferences
+    var player by remember {
+        mutableStateOf(playerUiState)
+    }
+    ModelPreferencesManager.with(application = Application())
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -174,9 +215,17 @@ fun TicTacToeApp(
                     icon = Icons.Default.Menu
                 )
             else -> {
-                TopAppBar(
-                    onClick = {navController.navigateUp()},
-                    icon = Icons.Default.ArrowBack)
+                if (currentScreen == GameScreen.SignUp) {
+                    TopAppBar(
+                        icon = null,
+                        onClick = {},
+                        isBar = false
+                    )
+                } else {
+                    TopAppBar(
+                        onClick = {navController.navigateUp()},
+                        icon = Icons.Default.ArrowBack)
+                }
             }
         }
     },
@@ -202,7 +251,7 @@ fun TicTacToeApp(
     ) {
         innerPadding ->
 
-        val startedDestination = if(signupUiState.email == "") {
+        val startedDestination = if(player == null) {
             GameScreen.SignUp.name
         } else {
             GameScreen.Start.name
@@ -210,30 +259,18 @@ fun TicTacToeApp(
 
         NavHost(
             navController = navController,
-            startDestination =  startedDestination,
+            startDestination = GameScreen.SignUp.name,
             modifier = Modifier.padding(innerPadding)
         ){
 
             composable(route = GameScreen.SignUp.name) {
                 SignUpScreen(
                     signUpViewModel,
-                    LocalContext.current,
+                    context,
                     emailsharedPreferences = signupUiState,
                     onClick = {
-                        val masterKeyAlias = getOrCreate(AES256_GCM_SPEC)
-
-                        val sharedPreferences = EncryptedSharedPreferences.create(
-                            "preferences",
-                            masterKeyAlias,
-                            context,
-                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                        )
-                        signUpViewModel.emailsharedPreferences.email = signUpViewModel.emailsharedPreferences.email2
-
-                        sharedPreferences.edit().putString("email", signupUiState.email).apply()
-
-                        navController.navigate(GameScreen.Start.name)
+                        player = playerUiState
+                        ModelPreferencesManager.put(player, "Player")
                     }
                 )
             }
@@ -299,21 +336,9 @@ fun TicTacToeApp(
             composable(route= GameScreen.Settings.name) {
                 SettingScreen(
                     onClearClick = {
-                        val masterKeyAlias = getOrCreate(AES256_GCM_SPEC)
-
-                        val sharedPreferences = EncryptedSharedPreferences.create(
-                            "preferences",
-                            masterKeyAlias,
-                            context,
-                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                        )
-                        signUpViewModel.updateEmail(signupUiState.copy(email = ""))
-
-                        sharedPreferences.edit().putString("email", signupUiState.email).apply()
-
-                        navController.navigate(GameScreen.SignUp.name)
-                    }
+                        val player = null
+                        ModelPreferencesManager.put(player, "Player")
+                    },
                 )
             }
 

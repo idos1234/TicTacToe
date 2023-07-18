@@ -22,9 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tictactoe.ui.AppViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tictactoe.data.MainPlayerUiState
+import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.*
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -67,7 +67,7 @@ fun SettingScreen(
             }
 
             item {
-                ClearDataButton(
+                LogOutButton(
                     settingsViewModel = viewModel,
                     uiState = isDialogOpenUiState,
                     onClearClick = onClearClick
@@ -105,13 +105,7 @@ fun ShowTopPlayersButton(
                     it?.score
                 }
             } else {
-                // if the snapshot is empty we are displaying
-                // a toast message.
-                Toast.makeText(
-                    context,
-                    "No data found in Database",
-                    Toast.LENGTH_SHORT
-                ).show()
+
             }
         }
         .addOnFailureListener {
@@ -234,7 +228,7 @@ fun ShowTopPlayers(
  */
 
 @Composable
-fun ClearDataButton(
+fun LogOutButton(
     settingsViewModel: SettingsViewModel,
     uiState: isDialogOpen,
     onClearClick: () -> Unit
@@ -246,7 +240,7 @@ fun ClearDataButton(
         },
         colors = ButtonDefaults.buttonColors(Secondery),
     ) {
-        Text(text = "Clear Data", textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
+        Text(text = "Log out", textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
     }
 
     if (uiState.isCheckClearDataDialogOpen) {
@@ -264,8 +258,8 @@ fun CheckClearData(
 ) {
 
     AlertDialog(
-        title = { Text(text = "Are you sure you want to clear all data?") },
-        backgroundColor = BackGround,
+        title = { Text(text = "Are you sure you want to log out?")},
+        backgroundColor = Secondery,
         onDismissRequest = {},
         dismissButton = {
             TextButton(
@@ -278,7 +272,7 @@ fun CheckClearData(
                 TextButton(
                     onClick = onClearClick
                 ) {
-                   Text("Clear")
+                   Text("Log out")
                 }
             }
         )

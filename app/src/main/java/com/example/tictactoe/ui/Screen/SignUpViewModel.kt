@@ -37,6 +37,5 @@ class SignUpViewModel(private val playerRepository: PlayerRepository): ViewModel
 
 
 data class sharedPreferences(
-    var email: String = "",
-    var email2: String = ""
-)
+    var name: String = "",
+    var name2: String = "")
