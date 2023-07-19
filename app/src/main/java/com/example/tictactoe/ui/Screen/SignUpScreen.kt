@@ -19,7 +19,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SupervisedUserCircle
+import androidx.compose.material.icons.filled.TagFaces
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
@@ -83,7 +83,7 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(80.dp))
         Text(text = "Welcome To (app name)", fontSize = 30.sp, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(20.dp))
-        
+
         Card(
             shape = RoundedCornerShape(125.dp),
             elevation = 10.dp,
@@ -98,7 +98,7 @@ fun SignUpScreen(
                 )
         ) {
             if (selectedImageUri == null) {
-                Image(imageVector = Icons.Default.SupervisedUserCircle, contentDescription = null, contentScale = ContentScale.FillBounds)
+                Image(imageVector = Icons.Default.TagFaces, contentDescription = null, contentScale = ContentScale.FillBounds)
             } else {
                 AsyncImage(
                     model = selectedImageUri,
