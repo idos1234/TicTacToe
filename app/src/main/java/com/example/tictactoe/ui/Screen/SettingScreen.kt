@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -12,17 +14,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.TagFaces
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.*
@@ -104,8 +111,6 @@ fun ShowTopPlayersButton(
                 playerlist.sortBy {
                     it?.score
                 }
-            } else {
-
             }
         }
         .addOnFailureListener {
@@ -130,11 +135,19 @@ fun ShowTopPlayersButton(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ShowTopPlayers(
     Players: SnapshotStateList<MainPlayerUiState?>,
     settingsViewModel: SettingsViewModel
 ) {
+
+    var showPlayer by remember {
+        mutableStateOf(false)
+    }
+    var player by remember {
+        mutableStateOf(MainPlayerUiState())
+    }
 
     AlertDialog(
         backgroundColor = BackGround,
@@ -147,7 +160,9 @@ fun ShowTopPlayers(
             }
         },
         text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.height(300.dp).fillMaxWidth()) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+                .height(300.dp)
+                .fillMaxWidth()) {
                  Card(modifier = Modifier.width(250.dp), backgroundColor = Title, border = BorderStroke(1.dp, Color.Black), shape = RoundedCornerShape(0)) {
                      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
 
@@ -183,10 +198,16 @@ fun ShowTopPlayers(
                     itemsIndexed(Players) { index, item ->
                         Card(
                             modifier = Modifier
-                                .width(250.dp),
+                                .width(250.dp)
+                                .clickable(
+                                    onClick = {
+                                        showPlayer = true
+                                        player = item!!
+                                    }
+                                ),
                             border = BorderStroke(1.dp, Color.Black),
                             backgroundColor = if(index == 0) First else Secondery,
-                            shape = RoundedCornerShape(0)
+                            shape = RoundedCornerShape(0),
                         ) {
                             Row {
                                 Text(
@@ -220,6 +241,10 @@ fun ShowTopPlayers(
         onDismissRequest = {},
         confirmButton = {}
     )
+
+    if (showPlayer) {
+        showPlayer(player = player, onCloseClicked = { showPlayer = false })
+    }
 }
 
 
@@ -276,4 +301,54 @@ fun CheckClearData(
                 }
             }
         )
+}
+
+@Composable
+fun showPlayer(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Card(backgroundColor = Secondery, elevation = 10.dp) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(modifier = Modifier.align(Alignment.Start)) {
+                    IconButton(onClick = onCloseClicked) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = null,
+                            tint = Color.Black
+                        )
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Card(
+                        shape = RoundedCornerShape(125.dp),
+                        elevation = 10.dp,
+                        modifier = Modifier
+                            .size(90.dp)
+                    ) {
+                        if (player.image == "null") {
+                            Image(imageVector = Icons.Default.TagFaces, contentDescription = null, contentScale = ContentScale.FillBounds)
+                        } else {
+                            AsyncImage(
+                                model = player.image,
+                                contentDescription = null,
+                                contentScale = ContentScale.FillBounds
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(15.dp))
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = player.name, fontSize = 30.sp, fontWeight = FontWeight.SemiBold)
+                        Text(text = "Score: ${player.score}", fontSize = 20.sp, fontWeight = FontWeight.W500)
+
+                    }
+                }
+            }
+        }
+    }
 }

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION", "NAME_SHADOWING", "UNUSED_EXPRESSION")
+
 package com.example.tictactoe.ui.Screen
 
 import android.annotation.SuppressLint
@@ -23,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -31,9 +34,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.tictactoe.data.MainPlayerUiState
-import com.example.tictactoe.data.Player
 import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.BackGround
 import com.google.firebase.firestore.FirebaseFirestore
@@ -41,11 +44,12 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.concurrent.schedule
 
+
+
+
 enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val title: String) {
     SignUp(title = "Sign Up"),
     Start(title = "Home"),
-    ChooseSinglePlayer(title = "Choose Player"),
-    ChooseTwoPlayers(title = "Choose players"),
     Settings(title = "Settings"),
     AboutUs(title = "About Us"),
     TwoPlayers(title = "Two players"),
@@ -86,7 +90,7 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: s
     var player by remember {
         mutableStateOf(MainPlayerUiState())
     }
-    var db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     db.collection("Players").get()
         .addOnSuccessListener { queryDocumentSnapshots ->
@@ -124,8 +128,16 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: s
                 if (player.image == "null") {
                     Image(imageVector = Icons.Default.TagFaces, contentDescription = null, contentScale = ContentScale.FillBounds)
                 } else {
-                    AsyncImage(
-                        model = player.image,
+
+                    val painter = rememberAsyncImagePainter(
+                        ImageRequest
+                            .Builder(LocalContext.current)
+                            .data(data = player.image.toUri())
+                            .build()
+                    )
+
+                    Image(
+                        painter = painter,
                         contentDescription = null,
                         contentScale = ContentScale.FillBounds
                     )
@@ -135,8 +147,8 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: s
             Spacer(modifier = Modifier.width(15.dp))
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "Welcome ${player?.name!!}", fontSize = 30.sp, fontWeight = FontWeight.SemiBold)
-                Text(text = "Score: ${player?.score}", fontSize = 20.sp, fontWeight = FontWeight.W500)
+                Text(text = "Welcome ${player.name}", fontSize = 25.sp, fontWeight = FontWeight.SemiBold)
+                Text(text = "Score: ${player.score}", fontSize = 20.sp, fontWeight = FontWeight.W500)
 
             }
 
@@ -171,7 +183,7 @@ fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, o
     }
 }
 
-@Composable()
+@Composable
 fun TopAppBar(onClick: () -> Unit, icon: ImageVector?, isBar: Boolean = true) {
     if (isBar) {
         Row(
@@ -217,14 +229,6 @@ fun TicTacToeApp(
 
     var timesPlayed by remember {
         mutableStateOf(0)
-    }
-
-    //game players
-    var player1 by remember {
-        mutableStateOf(Player())
-    }
-    var player2 by remember {
-        mutableStateOf(Player())
     }
 
     //share preferences
@@ -349,8 +353,8 @@ fun TicTacToeApp(
 
             composable(route = GameScreen.Start.name) {
                 HomeScreen(
-                    onTwoPlayersClick = {navController.navigate(GameScreen.ChooseTwoPlayers.name)},
-                    onSinglePlayerClick = {navController.navigate(GameScreen.ChooseSinglePlayer.name)})
+                    onTwoPlayersClick = {navController.navigate(GameScreen.TwoPlayers.name)},
+                    onSinglePlayerClick = {navController.navigate(GameScreen.SinglePlayer.name)})
             }
 
             composable(route = GameScreen.TwoPlayers.name) {
@@ -365,12 +369,6 @@ fun TicTacToeApp(
                             timesPlayed,
                             GameScreen.TwoPlayers,
                         )
-                    },
-                    player1 = player1,
-                    player2 = player2,
-                    signUpViewModel = signUpViewModel,
-                    onWinner = {
-                        player1.score = player1.score + 1
                     }
                 )
             }
@@ -395,12 +393,6 @@ fun TicTacToeApp(
                                 viewModel.botTurn(uiState)
                             }
                         }
-                    },
-                    player1 = player1,
-                    player2 = player2,
-                    signUpViewModel = signUpViewModel,
-                    onWinner = {
-                        player1.score = player1.score + 1
                     }
                 )
             }
@@ -423,30 +415,6 @@ fun TicTacToeApp(
 
                         navController.navigate(GameScreen.Start.name)
                     },
-                )
-            }
-
-            composable(route= GameScreen.ChooseSinglePlayer.name) {
-                chooseSinglePlayerScreen(
-                    viewModel = viewModel,
-                    onReadyClicked = {navController.navigate(GameScreen.SinglePlayer.name)},
-                    uiState = uiState,
-                    onPlayerClick = {
-                        player1 = uiState.player1
-                        player2 = uiState.player2
-                    }
-                )
-            }
-
-            composable(route= GameScreen.ChooseTwoPlayers.name) {
-                chooseTwoPlayersScreen(
-                    viewModel = viewModel,
-                    onReadyClicked = { navController.navigate(GameScreen.TwoPlayers.name) },
-                    uiState = uiState,
-                    onPlayerClick = {
-                        player1 = uiState.player1
-                        player2 = uiState.player2
-                    }
                 )
             }
         }
