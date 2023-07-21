@@ -4,15 +4,9 @@ data class MainPlayerUiState(
     var name: String = "",
     var score: Int = 0,
     var password: String = "",
-    val image: String = ""
-)
-
-
-fun MainPlayerUiState.toPlayer(): Player = Player(
-    id = 1,
-    name = name,
-    score = score,
-    password = password
+    var currentImage: String = "",
+    var unlockedImages: List<String> = listOf(),
+    var lockedImages: List<String> = listOf()
 )
 
 fun MainPlayerUiState.isValid() : Boolean {

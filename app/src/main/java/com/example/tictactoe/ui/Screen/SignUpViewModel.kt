@@ -5,10 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.ViewModelFactoryDsl
-import com.example.tictactoe.data.*
+import com.example.tictactoe.data.MainPlayerUiState
 
 @ViewModelFactoryDsl
-class SignUpViewModel(private val playerRepository: PlayerRepository): ViewModel() {
+class SignUpViewModel(): ViewModel() {
+
+    var verifiedPassword = mutableStateOf("")
 
     var playerUiState by mutableStateOf(MainPlayerUiState())
         private set
@@ -24,14 +26,8 @@ class SignUpViewModel(private val playerRepository: PlayerRepository): ViewModel
         playerUiState = newPlayerUiState.copy()
     }
 
-    suspend fun savePlayer() {
-        if (playerUiState.isValid()) {
-            playerRepository.insertIPlayer(playerUiState.toPlayer())
-        }
-    }
-
-    suspend fun updateScore(player: Player) {
-        playerRepository.updatePlayerScore(id = player.id, score = player.score + 1)
+    fun clearPlayer() {
+        playerUiState = MainPlayerUiState()
     }
 }
 

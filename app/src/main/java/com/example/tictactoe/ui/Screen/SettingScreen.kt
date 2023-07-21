@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.*
@@ -329,15 +328,7 @@ fun showPlayer(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                         modifier = Modifier
                             .size(90.dp)
                     ) {
-                        if (player.image == "null") {
-                            Image(imageVector = Icons.Default.TagFaces, contentDescription = null, contentScale = ContentScale.FillBounds)
-                        } else {
-                            AsyncImage(
-                                model = player.image,
-                                contentDescription = null,
-                                contentScale = ContentScale.FillBounds
-                            )
-                        }
+                        Image(imageVector = Icons.Default.TagFaces, contentDescription = null, contentScale = ContentScale.FillBounds)
                     }
 
                     Spacer(modifier = Modifier.width(15.dp))

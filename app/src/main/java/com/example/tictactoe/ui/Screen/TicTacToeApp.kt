@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -34,11 +33,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.BackGround
+import com.example.tictactoe.ui.theme.Secondery
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import java.util.*
@@ -49,6 +47,7 @@ import kotlin.concurrent.schedule
 
 enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val title: String) {
     SignUp(title = "Sign Up"),
+    LogIn(title = "Log In"),
     Start(title = "Home"),
     Settings(title = "Settings"),
     AboutUs(title = "About Us"),
@@ -63,13 +62,15 @@ enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val tit
 @Composable
 fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChaneScreen: () -> Unit = {}, sharedPreferences: sharedPreferences) {
 
-    Icon(
-        imageVector = Icons.Default.Close,
-        contentDescription = null,
-        modifier = modifier.padding(16.dp)
-    )
+    Box(modifier = Modifier.background(Secondery).fillMaxWidth()) {
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = null,
+            modifier = modifier.padding(16.dp)
+        )
+    }
 
-    Column {
+    Column(modifier = Modifier.background(Secondery)) {
         TopHomeScreenMenu(
             modifier = Modifier.weight(1f),
             context = LocalContext.current,
@@ -125,31 +126,22 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: s
                 modifier = Modifier
                     .size(90.dp)
             ) {
-                if (player.image == "null") {
-                    Image(imageVector = Icons.Default.TagFaces, contentDescription = null, contentScale = ContentScale.FillBounds)
-                } else {
-
-                    val painter = rememberAsyncImagePainter(
-                        ImageRequest
-                            .Builder(LocalContext.current)
-                            .data(data = player.image.toUri())
-                            .build()
-                    )
-
-                    Image(
-                        painter = painter,
-                        contentDescription = null,
-                        contentScale = ContentScale.FillBounds
-                    )
+                Image(imageVector = Icons.Default.TagFaces, contentDescription = null, contentScale = ContentScale.FillBounds)
                 }
-            }
 
             Spacer(modifier = Modifier.width(15.dp))
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "Welcome ${player.name}", fontSize = 25.sp, fontWeight = FontWeight.SemiBold)
-                Text(text = "Score: ${player.score}", fontSize = 20.sp, fontWeight = FontWeight.W500)
-
+                Text(
+                    text = "Welcome ${player.name}",
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "Score: ${player.score}",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.W500
+                )
             }
 
         }
@@ -316,7 +308,7 @@ fun TicTacToeApp(
         innerPadding ->
 
         val startedDestination = if(signupUiState.name == "") {
-            GameScreen.SignUp.name
+            GameScreen.LogIn.name
         } else {
             GameScreen.Start.name
         }
@@ -347,7 +339,34 @@ fun TicTacToeApp(
                         sharedPreferences.edit().putString("name", signupUiState.name).apply()
 
                         navController.navigate(GameScreen.Start.name)
-                    }
+                    },
+                    signUpViewModel = signUpViewModel,
+                    onLogInClick = { navController.navigate(GameScreen.LogIn.name) }
+                )
+            }
+
+            composable(route = GameScreen.LogIn.name) {
+                LogInScreen(
+                    signUpViewModel,
+                    context,
+                    emailsharedPreferences = signupUiState,
+                    onClick = {
+                        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+
+                        val sharedPreferences = EncryptedSharedPreferences.create(
+                            "preferences",
+                            masterKeyAlias,
+                            context,
+                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                        )
+                        signUpViewModel.emailsharedPreferences.name = signUpViewModel.emailsharedPreferences.name2
+
+                        sharedPreferences.edit().putString("name", signupUiState.name).apply()
+
+                        navController.navigate(GameScreen.Start.name)
+                    },
+                    onSignInClick = { navController.navigate(GameScreen.SignUp.name) }
                 )
             }
 
@@ -413,7 +432,10 @@ fun TicTacToeApp(
 
                         sharedPreferences.edit().putString("name", signupUiState.name).apply()
 
-                        navController.navigate(GameScreen.Start.name)
+                        signUpViewModel.clearPlayer()
+
+                         navController.navigate(GameScreen.LogIn.name)
+
                     },
                 )
             }

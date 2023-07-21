@@ -11,18 +11,14 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tictactoe.data.UiState
 import com.example.tictactoe.ui.CheckWinner
 import com.example.tictactoe.ui.theme.BackGround
-import com.example.tictactoe.ui.theme.Orange
 import com.example.tictactoe.ui.theme.Primery
 import com.example.tictactoe.ui.theme.Secondery
 import java.util.*
@@ -32,12 +28,11 @@ import kotlin.concurrent.schedule
  * Show a single button in the single player game grid
  */
 
-@OptIn(ExperimentalTextApi::class)
 @Composable
-fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, viewModel: TicTacToeViewModel = TicTacToeViewModel()) {
+fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, viewModel: TicTacToeViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Card(modifier = Modifier.padding(8.dp),shape = RoundedCornerShape(25.dp), border = BorderStroke(2.dp, color = Secondery)) {
+    Card(modifier = Modifier.padding(8.dp),shape = RoundedCornerShape(100.dp), border = BorderStroke(3.dp, color = Secondery)) {
         TextButton(
             onClick = {
                 onClick()
@@ -56,22 +51,13 @@ fun SinglePlayerGameButton(player: String, onClick: () -> Unit = {}, viewModel: 
                 text = player,
                 style = TextStyle(
                     textAlign = TextAlign.Center,
-                    fontSize = 45.sp,
-                    fontWeight = FontWeight.Black,
-                    brush =
-                    if (player == "X") {
-                        Brush.linearGradient(
-                            listOf(Color.Blue, Secondery)
-                        )
-                    } else {
-                        Brush.linearGradient(
-                            listOf(Orange, Color.Yellow)
-                        )
-                    }
+                    fontSize = 35.sp,
+                    color = Color.Black
                 ),
                 modifier = Modifier
                     .padding(16.dp)
                     .size(50.dp)
+                    .fillMaxHeight()
             )
         }
     }
@@ -123,7 +109,7 @@ fun SinglePlayerButtonGrid(
                 player = uiState.Box1,
                 onClick = {
                     if (uiState.Box1 == "") {
-                        uiState.Box1 = uiState.player_Turn
+                        viewModel.SetBox(1)
                         onClick()
                     }
                 },
@@ -132,7 +118,7 @@ fun SinglePlayerButtonGrid(
                 player = uiState.Box2,
                 onClick = {
                     if (uiState.Box2 == "") {
-                        uiState.Box2 = uiState.player_Turn
+                        viewModel.SetBox(2)
                         onClick()
                     }
                 },
@@ -141,7 +127,7 @@ fun SinglePlayerButtonGrid(
                 player = uiState.Box3,
                 onClick = {
                     if (uiState.Box3 == "") {
-                        uiState.Box3 = uiState.player_Turn
+                        viewModel.SetBox(3)
                         onClick()
                     }
                 },
@@ -152,7 +138,7 @@ fun SinglePlayerButtonGrid(
                 player = uiState.Box4,
                 onClick = {
                     if (uiState.Box4 == "") {
-                        uiState.Box4 = uiState.player_Turn
+                        viewModel.SetBox(4)
                         onClick()
                     }
                 },
@@ -161,7 +147,7 @@ fun SinglePlayerButtonGrid(
                 player = uiState.Box5,
                 onClick = {
                     if (uiState.Box5 == "") {
-                        uiState.Box5 = uiState.player_Turn
+                        viewModel.SetBox(5)
                         onClick()
                     }
                 },
@@ -170,7 +156,7 @@ fun SinglePlayerButtonGrid(
                 player = uiState.Box6,
                 onClick = {
                     if (uiState.Box6 == "") {
-                        uiState.Box6 = uiState.player_Turn
+                        viewModel.SetBox(6)
                         onClick()
                     }
                 },
@@ -181,7 +167,7 @@ fun SinglePlayerButtonGrid(
                 player = uiState.Box7,
                 onClick = {
                     if (uiState.Box7 == "") {
-                        uiState.Box7 = uiState.player_Turn
+                        viewModel.SetBox(7)
                         onClick()
                     }
                 },
@@ -190,7 +176,7 @@ fun SinglePlayerButtonGrid(
                 player = uiState.Box8,
                 onClick = {
                     if (uiState.Box8 == "") {
-                        uiState.Box8 = uiState.player_Turn
+                        viewModel.SetBox(8)
                         onClick()
                     }
                 },
@@ -199,7 +185,7 @@ fun SinglePlayerButtonGrid(
                 player = uiState.Box9,
                 onClick = {
                     if (uiState.Box9 == "") {
-                        uiState.Box9 = uiState.player_Turn
+                        viewModel.SetBox(9)
                         onClick()
                     }
                 },

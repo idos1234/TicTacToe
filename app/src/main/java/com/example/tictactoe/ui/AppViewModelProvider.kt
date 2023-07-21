@@ -1,11 +1,11 @@
 package com.example.tictactoe.ui
 
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.tictactoe.ui.Screen.SettingsViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
 import com.example.tictactoe.PlayerApplication
+import com.example.tictactoe.ui.Screen.SettingsViewModel
 import com.example.tictactoe.ui.Screen.SignUpViewModel
 
 /**
@@ -22,7 +22,7 @@ object AppViewModelProvider {
         }
 
         initializer {
-            SignUpViewModel(playerApplication().container.playerRepository)
+            SignUpViewModel()
         }
     }
 }

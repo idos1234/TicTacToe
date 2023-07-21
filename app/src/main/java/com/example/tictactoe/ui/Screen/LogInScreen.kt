@@ -1,11 +1,7 @@
-@file:Suppress("DEPRECATION")
-
 package com.example.tictactoe.ui.Screen
 
 import android.content.Context
-import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -22,7 +18,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.*
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tictactoe.data.MainPlayerUiState
@@ -30,27 +29,25 @@ import com.example.tictactoe.data.isValid
 import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Secondery
 import com.example.tictactoe.ui.theme.Shapes
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 
-
-@RequiresApi(Build.VERSION_CODES.M)
 @Composable
-fun SignUpScreen(
+fun LogInScreen(
     viewModel: SignUpViewModel,
     context: Context,
     emailsharedPreferences: sharedPreferences,
-    onClick: () -> Unit,
-    signUpViewModel: SignUpViewModel,
-    onLogInClick: () -> Unit,
-    ) {
-
+    onSignInClick: () -> Unit,
+    onClick: () -> Unit
+) {
     val uiState = viewModel.playerUiState
+    var isEnabled by remember {
+        mutableStateOf(true)
+    }
     var isPasswordOrNameEmpty by remember {
         mutableStateOf(false)
     }
-    var isEnabled by remember {
-        mutableStateOf(true)
+    var player by remember {
+        mutableStateOf<MainPlayerUiState?>(null)
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
@@ -62,12 +59,11 @@ fun SignUpScreen(
 
         Spacer(modifier = Modifier.height(100.dp))
 
-        SignUpInputForm(
+        LogINInputForm(
             playerUiState = uiState,
             onValueChange = viewModel::updateUiState,
             onEmailValueChange = viewModel::updateEmail,
             emailsharedPreferences = emailsharedPreferences,
-            signUpViewModel = signUpViewModel
         )
 
         if (isPasswordOrNameEmpty) {
@@ -85,38 +81,58 @@ fun SignUpScreen(
 
         Button(
             onClick = {
-             if (uiState.isValid() && signUpViewModel.verifiedPassword.value.isNotEmpty()) {
-                 if (uiState.password != signUpViewModel.verifiedPassword.value) {
-                     Toast.makeText(context, "Password was not verified", Toast.LENGTH_SHORT).show()
-                 } else {
+                if (uiState.isValid()) {
+                    isEnabled = false
 
-                     isEnabled = false
-                     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+                    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-                     val dbPlayers: CollectionReference = db.collection("Players")
+                    db.collection("Players").get()
+                        .addOnSuccessListener { queryDocumentSnapshots ->
+                            if (!queryDocumentSnapshots.isEmpty) {
+                                val list = queryDocumentSnapshots.documents
+                                for (d in list) {
+                                    val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
+                                    if (p?.name == uiState.name){
+                                        player = p
+                                    }
+                                }
 
-                     val player = MainPlayerUiState(
-                         uiState.name,
-                         0,
-                         uiState.password,
-                     )
+                                if (player != null ) {
+                                    if (player?.password != uiState.password) {
+                                        Toast.makeText(
+                                            context,
+                                            "Password was not correct",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                        isEnabled = true
+                                    } else {
+                                        Toast.makeText(
+                                            context, "Welcome to (App Name)", Toast.LENGTH_SHORT
+                                        ).show()
 
-                     dbPlayers.add(player).addOnSuccessListener {
-                         Toast.makeText(
-                             context, "Welcome to (App Name)", Toast.LENGTH_SHORT
-                         ).show()
-
-                         onClick()
-
-                     }.addOnFailureListener { e ->
-                         Toast.makeText(context, "Fail! Try again \n$e", Toast.LENGTH_SHORT).show()
-                         isEnabled = true
-                     }
-                 }
-             } else {
-                 isPasswordOrNameEmpty = true
-             }
-        },
+                                        onClick()
+                                    }
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Player was not found",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    isEnabled = true
+                                }
+                            }
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(
+                                context,
+                                "Fail to get the data",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                } else {
+                    isPasswordOrNameEmpty = true
+                }
+            },
             shape = Shapes.large,
             enabled = isEnabled,
             colors = ButtonDefaults.buttonColors(Secondery),
@@ -125,28 +141,29 @@ fun SignUpScreen(
                 .padding(horizontal = 50.dp)
 
         ) {
-            Text(text = "Sign in", fontWeight = FontWeight.SemiBold, fontSize = 30.sp)
-            }
+            Text(text = "Next", fontWeight = FontWeight.SemiBold, fontSize = 30.sp)
+        }
 
         Spacer(modifier = Modifier.height(15.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = "Already have an account?")
-            TextButton(onClick = onLogInClick) {
-                Text(text = "Log in", color = Color.Yellow)
+            Text(text = "Don't have an account?")
+            TextButton(onClick = onSignInClick) {
+                Text(text = "Sign in", color = Color.Yellow)
             }
         }
+
     }
 }
 
 @Composable
-fun SignUpInputForm(
+fun LogINInputForm(
     onValueChange: (MainPlayerUiState) -> Unit = {},
     playerUiState: MainPlayerUiState,
     emailsharedPreferences: sharedPreferences,
     onEmailValueChange: (sharedPreferences) -> Unit,
-    signUpViewModel: SignUpViewModel
 ) {
+
     val focusManager = LocalFocusManager.current
 
     var showPassword by remember {
@@ -168,10 +185,10 @@ fun SignUpInputForm(
         ),
         colors = TextFieldDefaults.textFieldColors(
             backgroundColor = Secondery,
-            ),
+        ),
         shape = Shapes.large,
     )
-    
+
     Spacer(modifier = Modifier.height(15.dp))
 
     OutlinedTextField(
@@ -179,35 +196,6 @@ fun SignUpInputForm(
         onValueChange = { onValueChange(playerUiState.copy(password = it)) },
         singleLine = true,
         placeholder = { Text(text = "Password") },
-        keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = ImeAction.Next,
-            keyboardType = KeyboardType.Text
-        ),
-        colors = TextFieldDefaults.textFieldColors(backgroundColor = Secondery),
-        shape = Shapes.large,
-        visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-        trailingIcon = {
-            val image = if (showPassword)
-                Icons.Default.Visibility
-            else Icons.Filled.VisibilityOff
-
-            // Localized description for accessibility services
-            val description = if (showPassword) "Hide password" else "Show password"
-
-            // Toggle button to hide or display password
-            IconButton(onClick = {showPassword = !showPassword}){
-                Icon(imageVector  = image, description)
-            }
-        }
-    )
-
-    Spacer(modifier = Modifier.height(15.dp))
-
-    OutlinedTextField(
-        value = signUpViewModel.verifiedPassword.value,
-        onValueChange = { signUpViewModel.verifiedPassword.value = it },
-        singleLine = true,
-        placeholder = { Text(text = "Verify password") },
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Done,
             keyboardType = KeyboardType.Text
@@ -229,5 +217,4 @@ fun SignUpInputForm(
             }
         }
     )
-    Spacer(modifier = Modifier.height(15.dp))
 }
