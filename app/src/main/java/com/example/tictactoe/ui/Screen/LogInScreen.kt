@@ -55,7 +55,7 @@ fun LogInScreen(
         .background(BackGround))
     {
         Spacer(modifier = Modifier.height(80.dp))
-        Text(text = "Welcome To (app name)", fontSize = 30.sp, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)
+        Text(text = "Welcome again", fontSize = 30.sp, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)
 
         Spacer(modifier = Modifier.height(100.dp))
 
