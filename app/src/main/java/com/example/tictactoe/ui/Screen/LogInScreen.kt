@@ -59,6 +59,7 @@ fun LogInScreen(
 
         Spacer(modifier = Modifier.height(100.dp))
 
+        //login input form(name + password)
         LogINInputForm(
             playerUiState = uiState,
             onValueChange = viewModel::updateUiState,
@@ -66,6 +67,7 @@ fun LogInScreen(
             emailsharedPreferences = emailsharedPreferences,
         )
 
+        //check if password or name labels empty
         if (isPasswordOrNameEmpty) {
             Toast.makeText(context, "You have to fill all of the labels", Toast.LENGTH_SHORT).show()
             isPasswordOrNameEmpty = false
@@ -73,31 +75,41 @@ fun LogInScreen(
 
         Spacer(modifier = Modifier.height(60.dp))
 
+        //progressbar
         if (!isEnabled) {
             CircularProgressIndicator()
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
+
         Button(
             onClick = {
+                //check if name and password is valid
                 if (uiState.isValid()) {
                     isEnabled = false
 
+                    //get database
                     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
+                    //get Players collection from database
                     db.collection("Players").get()
+                        //on success
                         .addOnSuccessListener { queryDocumentSnapshots ->
+                            //check if collection is empty
                             if (!queryDocumentSnapshots.isEmpty) {
                                 val list = queryDocumentSnapshots.documents
                                 for (d in list) {
                                     val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
+                                    //find player using database
                                     if (p?.name == uiState.name){
                                         player = p
                                     }
                                 }
 
+                                //check if player found
                                 if (player != null ) {
+                                    //check if password was not correct
                                     if (player?.password != uiState.password) {
                                         Toast.makeText(
                                             context,
@@ -105,14 +117,18 @@ fun LogInScreen(
                                             Toast.LENGTH_LONG
                                         ).show()
                                         isEnabled = true
-                                    } else {
+                                    }
+                                    //log in to app
+                                    else {
                                         Toast.makeText(
                                             context, "Welcome to (App Name)", Toast.LENGTH_SHORT
                                         ).show()
 
                                         onClick()
                                     }
-                                } else {
+                                }
+                                //player was not found
+                                else {
                                     Toast.makeText(
                                         context,
                                         "Player was not found",
@@ -122,6 +138,7 @@ fun LogInScreen(
                                 }
                             }
                         }
+                        //on failure
                         .addOnFailureListener {
                             Toast.makeText(
                                 context,
@@ -129,7 +146,9 @@ fun LogInScreen(
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
-                } else {
+                }
+                //if name and password not valid
+                else {
                     isPasswordOrNameEmpty = true
                 }
             },
@@ -146,6 +165,7 @@ fun LogInScreen(
 
         Spacer(modifier = Modifier.height(15.dp))
 
+        //navigation to sign in
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(text = "Don't have an account?")
             TextButton(onClick = onSignInClick) {
@@ -170,6 +190,7 @@ fun LogINInputForm(
         mutableStateOf(false)
     }
 
+    //name text field
     OutlinedTextField(
         value = playerUiState.name,
         onValueChange = { onValueChange(playerUiState.copy(name = it))
@@ -191,6 +212,7 @@ fun LogINInputForm(
 
     Spacer(modifier = Modifier.height(15.dp))
 
+    //password text field
     OutlinedTextField(
         value = playerUiState.password,
         onValueChange = { onValueChange(playerUiState.copy(password = it)) },

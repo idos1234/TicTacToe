@@ -68,10 +68,12 @@ fun ButtonGrid(
     uiState: UiState,
 ) {
 
+    //if need to check winner
     if(uiState.ToCheck) {
         uiState.winner = CheckWinner(uiState)
         if(uiState.winner != "") {
 
+            //show winner
              showWinner(
                  winner = "Winner is: ${uiState.winner}",
                  text = "Congratulations for winning",
@@ -80,6 +82,7 @@ fun ButtonGrid(
                  }
              )
         }
+        //show tie
         else if (uiState.times == 9){
             showWinner(winner = "Tie", text = "Try to win next time", onPlayAgain = onPlayAgain)
         }
@@ -95,10 +98,8 @@ fun ButtonGrid(
 
 
     Column() {
-
-
-
         Row() {
+            //box1
             GameButton(
                 player = uiState.Box1,
                 onClick = {
@@ -108,6 +109,7 @@ fun ButtonGrid(
                     }
                 },
             )
+            //box2
             GameButton(
                 player = uiState.Box2,
                 onClick = {
@@ -117,6 +119,7 @@ fun ButtonGrid(
                     }
                 },
             )
+            //box3
             GameButton(
                 player = uiState.Box3,
                 onClick = {
@@ -128,6 +131,7 @@ fun ButtonGrid(
             )
         }
         Row() {
+            //box4
             GameButton(
                 player = uiState.Box4,
                 onClick = {
@@ -137,6 +141,7 @@ fun ButtonGrid(
                     }
                 },
             )
+            //box5
             GameButton(
                 player = uiState.Box5,
                 onClick = {
@@ -146,6 +151,7 @@ fun ButtonGrid(
                     }
                 },
             )
+            //box6
             GameButton(
                 player = uiState.Box6,
                 onClick = {
@@ -157,6 +163,7 @@ fun ButtonGrid(
             )
         }
         Row() {
+            //box7
             GameButton(
                 player = uiState.Box7,
                 onClick = {
@@ -166,6 +173,7 @@ fun ButtonGrid(
                     }
                 },
             )
+            //box8
             GameButton(
                 player = uiState.Box8,
                 onClick = {
@@ -175,6 +183,7 @@ fun ButtonGrid(
                     }
                 },
             )
+            //box9
             GameButton(
                 player = uiState.Box9,
                 onClick = {

@@ -1,7 +1,6 @@
 package com.example.tictactoe.ui.Screen
 
 import androidx.lifecycle.ViewModel
-import com.example.tictactoe.data.Player
 import com.example.tictactoe.data.UiState
 import com.example.tictactoe.ui.WillWin
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,15 +16,6 @@ class TicTacToeViewModel: ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
-
-    fun setPlayers(player1: Player, player2: Player) {
-        _uiState.update {
-            it.copy(
-                player1 = player1,
-                player2 = player2
-            )
-        }
-    }
 
     fun changePlayer() {
         _uiState.update { currentState ->
@@ -93,6 +83,7 @@ class TicTacToeViewModel: ViewModel() {
             else -> "X"
         }
 
+        //if bot can win
         when (WillWin(uiState = uiState, player = uiState.player_Turn)) {
             1 -> {
                 _uiState.value.Box1 = uiState.player_Turn
@@ -123,6 +114,7 @@ class TicTacToeViewModel: ViewModel() {
             }
             else -> {
 
+                //if bot need to defend
                 when (WillWin(uiState = uiState, player = negativePlayer)) {
                     1 -> {
                         _uiState.value.Box1 = uiState.player_Turn
@@ -151,6 +143,7 @@ class TicTacToeViewModel: ViewModel() {
                     9 -> {
                         _uiState.value.Box9 = uiState.player_Turn
                     }
+                    //random box
                     else -> {
                         if (_uiState.value.Box1 == "") {
                             _uiState.value.Box1 = uiState.player_Turn

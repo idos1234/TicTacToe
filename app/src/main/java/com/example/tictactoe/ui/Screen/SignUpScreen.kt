@@ -4,6 +4,8 @@ package com.example.tictactoe.ui.Screen
 
 import android.content.Context
 import android.os.Build
+import android.text.TextUtils
+import android.util.Patterns
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -32,7 +34,6 @@ import com.example.tictactoe.ui.theme.Secondery
 import com.example.tictactoe.ui.theme.Shapes
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
-import java.util.regex.Pattern
 
 
 @RequiresApi(Build.VERSION_CODES.M)
@@ -46,6 +47,7 @@ fun SignUpScreen(
     onLogInClick: () -> Unit,
     ) {
 
+    //player state
     val uiState = viewModel.playerUiState
     var isPasswordOrNameEmpty by remember {
         mutableStateOf(false)
@@ -66,6 +68,7 @@ fun SignUpScreen(
 
         Spacer(modifier = Modifier.height(100.dp))
 
+        //sign in input form
         SignUpInputForm(
             playerUiState = uiState,
             onValueChange = viewModel::updateUiState,
@@ -74,6 +77,7 @@ fun SignUpScreen(
             signUpViewModel = signUpViewModel
         )
 
+        //check if password or name labels empty
         if (isPasswordOrNameEmpty) {
             Toast.makeText(context, "You have to fill all of the labels", Toast.LENGTH_SHORT).show()
             isPasswordOrNameEmpty = false
@@ -81,31 +85,41 @@ fun SignUpScreen(
 
         Spacer(modifier = Modifier.height(60.dp))
 
+        //progressbar
         if (!isEnabled) {
             CircularProgressIndicator()
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        checkEmail(uiState.email)
-
         Button(
             onClick = {
-             if (uiState.isValid() && signUpViewModel.verifiedPassword.value.isNotEmpty() && uiState.email.isNotEmpty()) {
+                //check if player is valid
+                if (uiState.isValid() && signUpViewModel.verifiedPassword.value.isNotEmpty() && uiState.email.isNotEmpty()) {
+                 //if password eas not verified
                  if (uiState.password != signUpViewModel.verifiedPassword.value) {
                      Toast.makeText(context, "Password was not verified", Toast.LENGTH_SHORT).show()
+                 }
+                 //if email is not valid
+                 if (!isValidEmail(uiState.email)) {
+                     Toast.makeText(context, "Email is not valid", Toast.LENGTH_SHORT).show()
                  } else {
 
                      isEnabled = false
 
+                     //get database
                      val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
+                     //get Players collection from database
                      db.collection("Players").get()
+                         //on success
                          .addOnSuccessListener { queryDocumentSnapshots ->
+                             //check if collection is empty
                              if (!queryDocumentSnapshots.isEmpty) {
                                  val list = queryDocumentSnapshots.documents
                                  for (d in list) {
                                      val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
+                                     //check if name already used
                                      if (p?.name == uiState.name) {
                                          if (!alreadyUsed) {
                                              Toast.makeText(
@@ -118,6 +132,7 @@ fun SignUpScreen(
                                          alreadyUsed = true
                                          isEnabled = true
                                      }
+                                     //check if email already used
                                      if (p?.email == uiState.email) {
                                          if (p.name == uiState.name) {
                                              Toast.makeText(
@@ -131,6 +146,7 @@ fun SignUpScreen(
                                          isEnabled = true
                                      }
                                  }
+                                 //sign in to app
                                  if (!alreadyUsed) {
                                      val dbPlayers: CollectionReference = db.collection("Players")
 
@@ -141,14 +157,18 @@ fun SignUpScreen(
                                          uiState.password,
                                      )
 
-                                     dbPlayers.add(player).addOnSuccessListener {
+                                     dbPlayers.add(player)
+                                         //on success
+                                         .addOnSuccessListener {
                                          Toast.makeText(
                                              context, "Welcome to (App Name)", Toast.LENGTH_SHORT
                                          ).show()
 
                                          onClick()
 
-                                     }.addOnFailureListener { e ->
+                                     }
+                                         //on failure
+                                         .addOnFailureListener { e ->
                                          Toast.makeText(
                                              context,
                                              "Fail! Try again \n$e",
@@ -159,6 +179,7 @@ fun SignUpScreen(
                                  }
                              }
                          }
+                         //on failure
                          .addOnFailureListener {
                              Toast.makeText(
                                  context,
@@ -184,6 +205,7 @@ fun SignUpScreen(
 
         Spacer(modifier = Modifier.height(15.dp))
 
+        //navigation to log in
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(text = "Already have an account?")
             TextButton(onClick = onLogInClick) {
@@ -207,6 +229,7 @@ fun SignUpInputForm(
         mutableStateOf(false)
     }
 
+    //name text field
     OutlinedTextField(
         value = playerUiState.name,
         onValueChange = { onValueChange(playerUiState.copy(name = it))
@@ -228,6 +251,7 @@ fun SignUpInputForm(
     
     Spacer(modifier = Modifier.height(15.dp))
 
+    //email text field
     OutlinedTextField(
         value = playerUiState.email,
         onValueChange = { onValueChange(playerUiState.copy(email = it)) },
@@ -248,6 +272,7 @@ fun SignUpInputForm(
 
     Spacer(modifier = Modifier.height(15.dp))
 
+    //password text field
     OutlinedTextField(
         value = playerUiState.password,
         onValueChange = { onValueChange(playerUiState.copy(password = it)) },
@@ -277,6 +302,7 @@ fun SignUpInputForm(
 
     Spacer(modifier = Modifier.height(15.dp))
 
+    //verify password text field
     OutlinedTextField(
         value = signUpViewModel.verifiedPassword.value,
         onValueChange = { signUpViewModel.verifiedPassword.value = it },
@@ -306,17 +332,10 @@ fun SignUpInputForm(
     Spacer(modifier = Modifier.height(15.dp))
 }
 
-val EMAIL_ADDRESS_PATTERN: Pattern = Pattern.compile(
-    "[a-zA-Z0-9+._%\\-]{1,256}" +
-            "@" +
-            "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-            "(" +
-            "\\." +
-            "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-            ")+"
-)
-
-
-private fun checkEmail(email: String): Boolean {
-    return EMAIL_ADDRESS_PATTERN.matcher(email).matches()
+fun isValidEmail(target: CharSequence?): Boolean {
+    return if (TextUtils.isEmpty(target)) {
+        false
+    } else {
+        Patterns.EMAIL_ADDRESS.matcher(target!!).matches()
+    }
 }

@@ -60,6 +60,7 @@ fun SettingScreen(
                 .fillMaxSize()
                 .background(BackGround)
         ) {
+            //top players button
             item {
                 ShowTopPlayersButton(
                     settingsViewModel = viewModel,
@@ -72,6 +73,7 @@ fun SettingScreen(
                 Spacer(modifier = Modifier.height(50.dp))
             }
 
+            //log out button
             item {
                 LogOutButton(
                     settingsViewModel = viewModel,
@@ -95,23 +97,31 @@ fun ShowTopPlayersButton(
     context: Context
 ) {
 
+    //players list in database
     var playerlist = mutableStateListOf<MainPlayerUiState?>()
+    //database
     var db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
+    //get Players collection from database
     db.collection("Players").get()
+        //on success
         .addOnSuccessListener { queryDocumentSnapshots ->
+            //check if collection is empty
             if (!queryDocumentSnapshots.isEmpty) {
                 val list = queryDocumentSnapshots.documents
                 for (d in list) {
+                    //add every player to player list
                     val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
                     playerlist.add(p)
 
                 }
+                //sort players list by players' score
                 playerlist.sortBy {
                     it?.score
                 }
             }
         }
+        //on failure
         .addOnFailureListener {
             Toast.makeText(
                 context,
@@ -120,7 +130,7 @@ fun ShowTopPlayersButton(
             ).show()
         }
 
-
+    //show players button
     Button(
          onClick = {settingsViewModel.ChangeShowingPlayersAlertDialog()},
          colors = ButtonDefaults.buttonColors(Secondery), shape = Shapes.large, modifier = Modifier.width(200.dp)) {
@@ -134,7 +144,6 @@ fun ShowTopPlayersButton(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ShowTopPlayers(
     Players: SnapshotStateList<MainPlayerUiState?>,
@@ -162,6 +171,8 @@ fun ShowTopPlayers(
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
                 .height(300.dp)
                 .fillMaxWidth()) {
+
+                //table header
                  Card(modifier = Modifier.width(250.dp), backgroundColor = Title, border = BorderStroke(1.dp, Color.Black), shape = RoundedCornerShape(0)) {
                      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
 
@@ -194,6 +205,7 @@ fun ShowTopPlayers(
                     modifier = Modifier
                         .height(300.dp)
                 ) {
+                    //for every player show player's score, name, rank
                     itemsIndexed(Players) { index, item ->
                         Card(
                             modifier = Modifier
@@ -241,6 +253,7 @@ fun ShowTopPlayers(
         confirmButton = {}
     )
 
+    //show player's information on player click
     if (showPlayer) {
         showPlayer(player = player, onCloseClicked = { showPlayer = false })
     }
@@ -258,6 +271,7 @@ fun LogOutButton(
     onClearClick: () -> Unit
 ) {
 
+    //log out button
     Button(
         onClick = {
             settingsViewModel.ChangeCheckClearDataAlertDialog()
@@ -267,6 +281,7 @@ fun LogOutButton(
         Text(text = "Log out", textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
     }
 
+    //check logging out
     if (uiState.isCheckClearDataDialogOpen) {
         CheckClearData(
             onCancelClick = {settingsViewModel.ChangeCheckClearDataAlertDialog()},
@@ -302,6 +317,7 @@ fun CheckClearData(
         )
 }
 
+//show player's information
 @Composable
 fun showPlayer(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
     Dialog(

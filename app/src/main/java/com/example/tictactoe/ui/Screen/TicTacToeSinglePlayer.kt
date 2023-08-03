@@ -75,9 +75,11 @@ fun SinglePlayerButtonGrid(
     uiState: UiState,
 ) {
 
+    //if need to check winner
     if(uiState.ToCheck) {
         uiState.winner = CheckWinner(uiState)
         if(uiState.winner != "") {
+            //show winner
             showWinner(
                 winner = "Winner is: ${uiState.winner}",
                 text = "Congratulations for winning",
@@ -86,6 +88,7 @@ fun SinglePlayerButtonGrid(
                 }
             )
         }
+        //show tie
         else if (uiState.times >= 9){
             showWinner(winner = "Tie", text = "Try to win next time", onPlayAgain = onPlayAgain)
         }
@@ -105,6 +108,7 @@ fun SinglePlayerButtonGrid(
 
     Column {
         Row {
+            //box1
             SinglePlayerGameButton(
                 player = uiState.Box1,
                 onClick = {
@@ -114,6 +118,7 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel)
+            //box2
             SinglePlayerGameButton(
                 player = uiState.Box2,
                 onClick = {
@@ -123,6 +128,7 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel)
+            //box3
             SinglePlayerGameButton(
                 player = uiState.Box3,
                 onClick = {
@@ -134,6 +140,7 @@ fun SinglePlayerButtonGrid(
                 viewModel = viewModel)
         }
         Row() {
+            //box4
             SinglePlayerGameButton(
                 player = uiState.Box4,
                 onClick = {
@@ -143,6 +150,7 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel)
+            //box5
             SinglePlayerGameButton(
                 player = uiState.Box5,
                 onClick = {
@@ -152,6 +160,7 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel)
+            //box6
             SinglePlayerGameButton(
                 player = uiState.Box6,
                 onClick = {
@@ -163,6 +172,7 @@ fun SinglePlayerButtonGrid(
                 viewModel = viewModel)
         }
         Row() {
+            //box7
             SinglePlayerGameButton(
                 player = uiState.Box7,
                 onClick = {
@@ -172,6 +182,7 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel)
+            //box8
             SinglePlayerGameButton(
                 player = uiState.Box8,
                 onClick = {
@@ -181,6 +192,7 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel)
+            //box9
             SinglePlayerGameButton(
                 player = uiState.Box9,
                 onClick = {

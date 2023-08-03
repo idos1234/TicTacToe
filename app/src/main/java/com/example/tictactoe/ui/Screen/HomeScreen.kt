@@ -29,7 +29,7 @@ import com.example.tictactoe.ui.theme.Shapes
  */
 
 @Composable
-fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Unit = {}) {
+fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Unit = {}, onOnlineClick: () -> Unit = {}) {
     var showTrainingGames by remember {
         mutableStateOf(false)
     }
@@ -49,6 +49,7 @@ fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Un
         )
         Spacer(modifier = Modifier.weight(1f))
 
+        //button shows training game(offline)
         Button(
             onClick = { showTrainingGames = true },
             colors = ButtonDefaults.buttonColors(Primery),
@@ -56,6 +57,20 @@ fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Un
         ) {
             Text(
                 text = "Training games",
+                fontWeight = FontWeight.ExtraBold,
+                fontStyle = FontStyle.Italic,
+                fontSize = 30.sp,
+                color = Color.Black
+            )
+        }
+
+        Button(
+            onClick = onOnlineClick,
+            colors = ButtonDefaults.buttonColors(Primery),
+            shape = Shapes.large,
+        ) {
+            Text(
+                text = "Online",
                 fontWeight = FontWeight.ExtraBold,
                 fontStyle = FontStyle.Italic,
                 fontSize = 30.sp,
@@ -71,6 +86,7 @@ fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Un
     }
 }
 
+//show training games(offline)
 @Composable
 fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Unit = {}, onCloseClicked: () -> Unit) {
     Dialog(
@@ -102,6 +118,7 @@ fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () ->
 
                 Spacer(modifier = Modifier.height(20.dp))
 
+                //single player
                 Button(
                     onClick = onSinglePlayerClick,
                     colors = ButtonDefaults.buttonColors(Primery),
@@ -119,6 +136,7 @@ fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () ->
 
                 Spacer(modifier = Modifier.height(10.dp))
 
+                //two players
                 Button(
                     onClick = onTwoPlayersClick,
                     colors = ButtonDefaults.buttonColors(Primery),

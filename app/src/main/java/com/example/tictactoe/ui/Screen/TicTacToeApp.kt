@@ -42,9 +42,7 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.concurrent.schedule
 
-
-
-
+//game screens
 enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val title: String) {
     SignUp(title = "Sign Up"),
     LogIn(title = "Log In"),
@@ -52,7 +50,8 @@ enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val tit
     Settings(title = "Settings"),
     AboutUs(title = "About Us"),
     TwoPlayers(title = "Two players"),
-    SinglePlayer(title = "Single Player")
+    SinglePlayer(title = "Single Player"),
+    Online(title = "Online")
 }
 
 /**
@@ -91,14 +90,19 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: s
     var player by remember {
         mutableStateOf(MainPlayerUiState())
     }
+    //get database
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
+    //get Players collection from database
     db.collection("Players").get()
+        //on success
         .addOnSuccessListener { queryDocumentSnapshots ->
+            //check if collection is empty
             if (!queryDocumentSnapshots.isEmpty) {
                 val list = queryDocumentSnapshots.documents
                 for (d in list) {
                     val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
+                    //find player using database
                     if (p?.name == sharedPreferences.name){
                         player = p
                     }
@@ -106,6 +110,7 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: s
                 }
             }
         }
+        //on failure
         .addOnFailureListener {
             Toast.makeText(
                 context,
@@ -319,6 +324,7 @@ fun TicTacToeApp(
             modifier = Modifier.padding(innerPadding)
         ){
 
+            //sign up screen
             composable(route = GameScreen.SignUp.name) {
                 SignUpScreen(
                     signUpViewModel,
@@ -345,6 +351,7 @@ fun TicTacToeApp(
                 )
             }
 
+            //log in screen
             composable(route = GameScreen.LogIn.name) {
                 LogInScreen(
                     signUpViewModel,
@@ -370,12 +377,16 @@ fun TicTacToeApp(
                 )
             }
 
+            //home screen
             composable(route = GameScreen.Start.name) {
                 HomeScreen(
                     onTwoPlayersClick = {navController.navigate(GameScreen.TwoPlayers.name)},
-                    onSinglePlayerClick = {navController.navigate(GameScreen.SinglePlayer.name)})
+                    onSinglePlayerClick = {navController.navigate(GameScreen.SinglePlayer.name)},
+                    onOnlineClick = {navController.navigate(GameScreen.Online.name)}
+                )
             }
 
+            //game screen
             composable(route = GameScreen.TwoPlayers.name) {
                 TicTacToeScreen(
                     viewModel = viewModel,
@@ -392,6 +403,7 @@ fun TicTacToeApp(
                 )
             }
 
+            //single player game screen
             composable(route = GameScreen.SinglePlayer.name) {
                 TicTacToeSinglePlayerScreen(
                     viewModel = viewModel,
@@ -416,7 +428,13 @@ fun TicTacToeApp(
                 )
             }
 
-            composable(route= GameScreen.Settings.name) {
+            // online game screen
+            composable(route = GameScreen.Online.name) {
+                OnlineTicTacToe(LocalContext.current)
+            }
+
+            //settings screen
+            composable(route = GameScreen.Settings.name) {
                 SettingScreen(
                     onClearClick = {
                         val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
