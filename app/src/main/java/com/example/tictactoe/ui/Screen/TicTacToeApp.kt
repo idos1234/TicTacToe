@@ -430,7 +430,7 @@ fun TicTacToeApp(
 
             // online game screen
             composable(route = GameScreen.Online.name) {
-                OnlineTicTacToe(LocalContext.current)
+                OnlineTicTacToe(player = signupUiState.name)
             }
 
             //settings screen
