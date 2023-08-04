@@ -19,18 +19,17 @@ fun OnlineGameButton() {
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun OnlineButtonGrid(context: Context, player: String) {
-    var waitForPlayer by remember {
-        mutableStateOf(true)
+    var times by remember {
+        mutableStateOf(1)
     }
     var game by remember {
-        mutableStateOf(OnlineGameUiState())
+        mutableStateOf<OnlineGameUiState?>(null)
     }
-    while (waitForPlayer) {
-        //games in database
-        var GamesList = mutableStateListOf<OnlineGameUiState?>()
-        //database
-        var db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    var gamesList = mutableStateListOf<OnlineGameUiState>()
+    //get database
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
+    while (times == 1) {
         //get Players collection from database
         db.collection("Games").get()
             //on success
@@ -39,53 +38,45 @@ fun OnlineButtonGrid(context: Context, player: String) {
                 if (!queryDocumentSnapshots.isEmpty) {
                     val list = queryDocumentSnapshots.documents
                     for (d in list) {
-                        //add every player to player list
                         val p: OnlineGameUiState? = d.toObject(OnlineGameUiState::class.java)
-                        GamesList.add(p)
-
-                    }
-                }
-                var id: Int = GamesList.size
-
-                for (g in GamesList) {
-                    if (g?.player2 == "") {
-                        waitForPlayer = false
-                        game = g
-                    }
-                }
-
-                if (waitForPlayer) {
-                    db.collection("Games").get()
-                        .addOnSuccessListener {
-                            val dbGames: CollectionReference = db.collection("Games")
-
-                            val newGame = OnlineGameUiState(
-                                id = id + 1,
-                                player1 = player,
-                                player2 = "",
-                                winner = "",
-                                boxes = Boxes()
-                            )
-                            dbGames.add(newGame)
+                        //find player using database
+                        if (p?.player2 == "") {
+                            game = p
                         }
-                } else {
+
+                    }
+                }
+                val dbGames: CollectionReference = db.collection("Games")
+                if (game == null) {
+
                     val newGame = OnlineGameUiState(
-                        id = game.id,
-                        player1 = game.player1,
-                        player2 = player,
+                        id = gamesList.size.plus(1),
+                        player1 = player,
+                        player2 = "",
                         winner = "",
                         boxes = Boxes()
                     )
-                    db.collection("Games")
-                        .whereEqualTo("id", game.id)
-                        .get()
+
+                    dbGames.add(newGame)
                         .addOnSuccessListener {
+                            Toast.makeText(context,"Game started", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    val updatedGame = OnlineGameUiState(
+                        id = game!!.id,
+                        player1 = game!!.player1,
+                        player2 = player,
+                        winner = game!!.winner,
+                        boxes = game!!.boxes
+                    )
+                    dbGames
+                        .whereEqualTo("id", game!!.id)
+                        .get().addOnSuccessListener {
                             for (document in it) {
-                                db.collection("Games").document(document.id).set(newGame, SetOptions.merge())
+                                dbGames.document(document.id).set(updatedGame, SetOptions.merge())
                             }
                         }
                 }
-                waitForPlayer = false
             }
             //on failure
             .addOnFailureListener {
@@ -94,12 +85,9 @@ fun OnlineButtonGrid(context: Context, player: String) {
                     "Fail to get the data.",
                     Toast.LENGTH_SHORT
                 ).show()
-                waitForPlayer = false
             }
+        times ++
     }
-
-
-
 }
 
 @Composable
