@@ -45,6 +45,47 @@ fun OnlineButtonGrid(context: Context, player: String) {
 
                     }
                 }
+                var id: Int = GamesList.size
+
+                for (g in GamesList) {
+                    if (g?.player2 == "") {
+                        waitForPlayer = false
+                        game = g
+                    }
+                }
+
+                if (waitForPlayer) {
+                    db.collection("Games").get()
+                        .addOnSuccessListener {
+                            val dbGames: CollectionReference = db.collection("Games")
+
+                            val newGame = OnlineGameUiState(
+                                id = id + 1,
+                                player1 = player,
+                                player2 = "",
+                                winner = "",
+                                boxes = Boxes()
+                            )
+                            dbGames.add(newGame)
+                        }
+                } else {
+                    val newGame = OnlineGameUiState(
+                        id = game.id,
+                        player1 = game.player1,
+                        player2 = player,
+                        winner = "",
+                        boxes = Boxes()
+                    )
+                    db.collection("Games")
+                        .whereEqualTo("id", game.id)
+                        .get()
+                        .addOnSuccessListener {
+                            for (document in it) {
+                                db.collection("Games").document(document.id).set(newGame, SetOptions.merge())
+                            }
+                        }
+                }
+                waitForPlayer = false
             }
             //on failure
             .addOnFailureListener {
@@ -53,48 +94,8 @@ fun OnlineButtonGrid(context: Context, player: String) {
                     "Fail to get the data.",
                     Toast.LENGTH_SHORT
                 ).show()
-            }
-        var id: Int = GamesList.size
-
-        for (g in GamesList) {
-            if (g?.player2 == "") {
                 waitForPlayer = false
-                game = g
             }
-        }
-
-        if (waitForPlayer) {
-            db.collection("Games").get()
-                .addOnSuccessListener {
-                    val dbGames: CollectionReference = db.collection("Games")
-
-                    val newGame = OnlineGameUiState(
-                        id = id + 1,
-                        player1 = player,
-                        player2 = "",
-                        winner = "",
-                        boxes = Boxes()
-                    )
-                    dbGames.add(newGame)
-                }
-        } else {
-            val newGame = OnlineGameUiState(
-                id = id + 1,
-                player1 = game.player1,
-                player2 = player,
-                winner = "",
-                boxes = Boxes()
-            )
-            db.collection("Games")
-                .whereEqualTo("id", game.id)
-                .get()
-                .addOnSuccessListener {
-                    for (document in it) {
-                        db.collection("Games").document(document.id).set(newGame, SetOptions.merge())
-                    }
-                }
-        }
-        waitForPlayer = false
     }
 
 
