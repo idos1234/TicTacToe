@@ -250,7 +250,7 @@ fun TicTacToeApp(
         mutableStateOf(0)
     }
     var open by remember {
-        mutableStateOf(true)
+        mutableStateOf(false)
     }
 
     //share preferences
@@ -327,7 +327,10 @@ fun TicTacToeApp(
             if (open) {
                 CheckExit(
                     onCancelClick = {open = false},
-                    onQuitClick = {navController.navigateUp()}
+                    onQuitClick = {
+                        navController.navigateUp()
+                        open = false
+                    }
                 )
             }
     },
