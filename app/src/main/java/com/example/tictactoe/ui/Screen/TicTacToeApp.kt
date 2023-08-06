@@ -61,7 +61,9 @@ enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val tit
 @Composable
 fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChaneScreen: () -> Unit = {}, sharedPreferences: sharedPreferences) {
 
-    Box(modifier = Modifier.background(Secondery).fillMaxWidth()) {
+    Box(modifier = Modifier
+        .background(Secondery)
+        .fillMaxWidth()) {
         Icon(
             imageVector = Icons.Default.Close,
             contentDescription = null,
@@ -203,6 +205,26 @@ fun TopAppBar(onClick: () -> Unit, icon: ImageVector?, isBar: Boolean = true) {
         }
     }
 }
+
+@Composable
+fun CheckExit(onQuitClick: () -> Unit, onCancelClick: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = {},
+        title = {},
+        text = { Text(text = "Are you sure you want to quit the game") },
+        dismissButton = {
+            Button(onClick = onQuitClick) {
+                Text(text = "Quit")
+            }
+                        },
+        confirmButton = {
+            Button(onClick = onCancelClick) {
+                Text(text = "Cancel")
+            }
+        }
+    )
+}
+
 @RequiresApi(Build.VERSION_CODES.M)
 @Composable
 fun TicTacToeApp(
@@ -226,6 +248,9 @@ fun TicTacToeApp(
 
     var timesPlayed by remember {
         mutableStateOf(0)
+    }
+    var open by remember {
+        mutableStateOf(true)
     }
 
     //share preferences
@@ -274,20 +299,37 @@ fun TicTacToeApp(
                     },
                     icon = Icons.Default.Menu
                 )
-            else -> {
-                if (currentScreen == GameScreen.SignUp) {
-                    TopAppBar(
-                        icon = null,
-                        onClick = {},
-                        isBar = false
-                    )
-                } else {
-                    TopAppBar(
-                        onClick = {navController.navigateUp()},
-                        icon = Icons.Default.ArrowBack)
-                }
+            GameScreen.SignUp ->
+                TopAppBar(
+                    icon = null,
+                    onClick = {},
+                    isBar = false
+                )
+            GameScreen.LogIn ->
+                TopAppBar(
+                    icon = null,
+                    onClick = {},
+                    isBar = false
+                )
+            GameScreen.Online ->
+                TopAppBar(
+                    onClick = {
+                        open = true
+                    },
+                    icon = Icons.Default.ArrowBack
+                )
+            else ->
+                TopAppBar(
+                    onClick = {navController.navigateUp()},
+                    icon = Icons.Default.ArrowBack
+                )
             }
-        }
+            if (open) {
+                CheckExit(
+                    onCancelClick = {open = false},
+                    onQuitClick = {navController.navigateUp()}
+                )
+            }
     },
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
         drawerContent = {
