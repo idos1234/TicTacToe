@@ -1,5 +1,7 @@
 package com.example.tictactoe.data
 
+import com.example.tictactoe.R
+
 //data class for every player in database
 data class MainPlayerUiState(
     //player's name
@@ -11,7 +13,7 @@ data class MainPlayerUiState(
     //player's password
     var password: String = "",
     //player's image
-    var currentImage: String = "",
+    var currentImage: Int = R.drawable.ic_launcher_foreground,
     //images that the player got
     var unlockedImages: List<String> = listOf(),
     //images that the player didn't got

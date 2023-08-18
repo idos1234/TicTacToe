@@ -497,10 +497,11 @@ fun TicTacToeApp(
 
                         signUpViewModel.clearPlayer()
 
-                         navController.navigate(GameScreen.LogIn.name)
+                        navController.navigate(GameScreen.LogIn.name)
 
                     },
                 )
+
             }
         }
     }

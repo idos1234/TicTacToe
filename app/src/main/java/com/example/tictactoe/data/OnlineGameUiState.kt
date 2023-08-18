@@ -4,18 +4,20 @@ data class OnlineGameUiState (
     var id: Int = 0,
     var player1: String = "",
     var player2: String = "",
-    var winner: String = "",
-    var boxes: Boxes = Boxes()
+    var winner: String? = null,
+    var boxes: Boxes = Boxes(),
+    var playerTurn: String = "X",
+    var times: Int = 0
 )
 
 data class Boxes (
-    var box1: String = "",
-    var box2: String = "",
-    var box3: String = "",
-    var box4: String = "",
-    var box5: String = "",
-    var box6: String = "",
-    var box7: String = "",
-    var box8: String = "",
-    var box9: String = ""
+    var Box1: String = "",
+    var Box2: String = "",
+    var Box3: String = "",
+    var Box4: String = "",
+    var Box5: String = "",
+    var Box6: String = "",
+    var Box7: String = "",
+    var Box8: String = "",
+    var Box9: String = ""
 )
