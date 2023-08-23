@@ -4,7 +4,7 @@ data class OnlineGameUiState (
     var id: Int = 0,
     var player1: String = "",
     var player2: String = "",
-    var winner: String? = null,
+    var winner: String = "",
     var boxes: Boxes = Boxes(),
     var playerTurn: String = "X",
     var times: Int = 0

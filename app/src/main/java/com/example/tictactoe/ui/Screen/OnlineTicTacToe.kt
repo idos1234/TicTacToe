@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tictactoe.data.Boxes
 import com.example.tictactoe.data.OnlineGameUiState
+import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Primery
 import com.example.tictactoe.ui.theme.Secondery
 import com.google.firebase.database.DataSnapshot
@@ -52,7 +53,7 @@ fun SetBoxOnline(game: OnlineGameUiState, boxNumber: Int, playerTurn: String) {
 
 @Composable
 fun changePlayerTurn(game: OnlineGameUiState) {
-    var PlayerTurn = if(game.playerTurn == "X") {
+    val PlayerTurn = if(game.playerTurn == "X") {
         "O"
     } else {
         "X"
@@ -103,9 +104,13 @@ fun OnlineGameButton(game: OnlineGameUiState, boxNumber: Int, box: String, enabl
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun OnlineButtonGrid(game: OnlineGameUiState, myTurn: String?) {
+fun OnlineButtonGrid(game: OnlineGameUiState, myTurn: String?, gameStarted: Boolean) {
 
-    val enabled = myTurn == game.playerTurn
+    val enabled = if (gameStarted) {
+        myTurn == game.playerTurn
+    } else {
+        false
+    }
 
     Column {
         Row {
@@ -131,7 +136,7 @@ fun OnlineButtonGrid(game: OnlineGameUiState, myTurn: String?) {
 
     if(game.times >= 5) {
         databaseReference.child(game.id.toString()).child("winner").setValue(CheckOnlineWinner(game.boxes))
-        if(game.winner!!.isNotEmpty()) {
+        if(game.winner.isNotEmpty()) {
             if (game.winner == myTurn) {
                 //show winner
                 ShowOnlineWinner(text1 = "You won")
@@ -175,7 +180,7 @@ fun OnlineTicTacToe(player: String, context: Context) {
             while (times == 1) {
                 Loop@ for (Game in snapshot.children) {
                     val game = Game.getValue(OnlineGameUiState::class.java)
-                    if ((game!!.player2 == "") && (game.winner == null)) {
+                    if ((game!!.player2 == "") && (game.winner == "")) {
                         val updatedGame = OnlineGameUiState(
                             id = game.id,
                             player1 = game.player1,
@@ -195,7 +200,7 @@ fun OnlineTicTacToe(player: String, context: Context) {
                         id = snapshot.children.toList().size.plus(1),
                         player1 = player,
                         player2 = "",
-                        winner = null,
+                        winner = "",
                         boxes = Boxes()
                     )
                     databaseReference.child(snapshot.children.toList().size.plus(1).toString()).setValue(newGame)
@@ -228,25 +233,44 @@ fun OnlineTicTacToe(player: String, context: Context) {
 
     foundPlayer = currentGame.player2 != ""
 
-    if (!foundPlayer) {
-        AlertDialog(
-            onDismissRequest = {},
-            confirmButton = {},
-            dismissButton = {},
-            text = {
-                Row {
-                    Text(text = "Waiting for player")
-                    CircularProgressIndicator()
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+        .background(BackGround)
+        .fillMaxSize()) {
+        Spacer(modifier = Modifier.weight(1f))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Card(modifier = Modifier.size(150.dp).padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (currentGame.playerTurn == "X") Primery else { Secondery})) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("X", fontWeight = FontWeight.Bold, fontSize = 35.sp)
+                    Text(currentGame.player1, fontSize = 10.sp)
                 }
             }
-        )
+            Card(modifier = Modifier.size(150.dp).padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (currentGame.playerTurn == "O") Primery else { Secondery})) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (foundPlayer) {
+                        Text("O", fontWeight = FontWeight.Bold, fontSize = 35.sp)
+                        Text(currentGame.player2, fontSize = 10.sp)
+                    } else {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+        }
+        Spacer(modifier = Modifier.weight(2f))
+        OnlineButtonGrid(game = currentGame, myTurn = myTurn, gameStarted = foundPlayer)
+        Spacer(modifier = Modifier.weight(4f))
     }
-    OnlineButtonGrid(game = currentGame, myTurn = myTurn)
 }
 
 @Composable
 fun ShowOnlineWinner(text1: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = text1, fontSize = 25.sp, fontWeight = FontWeight.Bold)
-    }
+    AlertDialog(
+        onDismissRequest = {},
+        dismissButton = {},
+        confirmButton = {},
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = text1, fontSize = 25.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    )
 }

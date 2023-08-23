@@ -54,8 +54,19 @@ class TicTacToeViewModel: ViewModel() {
         changePlayer()
     }
 
+    fun onSinglePlayerClick() {
+        _uiState.update {
+            it.copy(
+                times = it.times + 1 ,
+                isenabled = false
+            )
+        }
+    }
+
     fun check_ToCheck() {
-        _uiState.value.ToCheck = _uiState.value.times >= 4
+        _uiState.update {
+            it.copy(ToCheck = _uiState.value.times >= 4)
+        }
     }
 
     fun SetBox(box: Int) {

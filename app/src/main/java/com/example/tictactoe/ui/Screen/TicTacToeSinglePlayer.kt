@@ -98,10 +98,11 @@ fun SinglePlayerButtonGrid(
     }
 
     val onClick = {
-        uiState.times ++
-        uiState.isenabled = false
+        viewModel.onSinglePlayerClick()
         viewModel.check_ToCheck()
-        viewModel.changePlayer()
+        if (uiState.winner == "") {
+            viewModel.changePlayer()
+        }
     }
 
 
