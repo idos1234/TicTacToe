@@ -6,10 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Card
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -228,12 +225,6 @@ fun showWinner(winner: String, text: String, onPlayAgain: () -> Unit) {
     )
 }
 
-@Composable
-fun ShowPlayerTurn(player: String) {
-    Text(text = "Player: $player", fontSize = 40.sp, fontWeight = FontWeight.ExtraBold)
-
-}
-
 /**
  * Show the two players game screen
  */
@@ -249,11 +240,20 @@ fun TicTacToeScreen(
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
-        Spacer(modifier = Modifier.weight(2f))
-        ShowPlayerTurn(
-            player = uiState.player_Turn
-        )
         Spacer(modifier = Modifier.weight(1f))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Card(modifier = Modifier.size(150.dp).padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "X") Primery else { Secondery})) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("X", fontWeight = FontWeight.Bold, fontSize = 50.sp)
+                }
+            }
+            Card(modifier = Modifier.size(150.dp).padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "O") Primery else { Secondery})) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("O", fontWeight = FontWeight.Bold, fontSize = 50.sp)
+                }
+            }
+        }
+        Spacer(modifier = Modifier.weight(2f))
         ButtonGrid(
             viewModel = viewModel,
             onPlayAgain = {

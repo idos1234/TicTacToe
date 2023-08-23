@@ -37,6 +37,7 @@ import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.ui.AppViewModelProvider
 import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Secondery
+import com.example.tictactoe.ui.theme.Shapes
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import java.util.*
@@ -59,7 +60,7 @@ enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val tit
  */
 
 @Composable
-fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChaneScreen: () -> Unit = {}, sharedPreferences: sharedPreferences) {
+fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChaneScreen: () -> Unit = {}, sharedPreferences: sharedPreferences, onLogOutClick: () -> Unit) {
 
     Box(modifier = Modifier
         .background(Secondery)
@@ -80,7 +81,8 @@ fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChane
         ButtonHomeScreenMenu(
             modifier = Modifier.weight(5f),
             navController = navController,
-            onChaneScreen = onChaneScreen
+            onChaneScreen = onChaneScreen,
+            onLogOutClick = onLogOutClick
         )
     }
 }
@@ -156,7 +158,10 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: s
 }
 
 @Composable
-fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, onChaneScreen: () -> Unit = {}) {
+fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, onChaneScreen: () -> Unit = {}, onLogOutClick: () -> Unit) {
+    var checkLogOut by remember {
+        mutableStateOf(false)
+    }
     Spacer(modifier = Modifier.height(30.dp))
 
     Column(modifier = modifier) {
@@ -168,17 +173,36 @@ fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, o
             Text(text = "Home")
         }
         Button(onClick = {
-            navController.navigate(GameScreen.Settings.name)
-            onChaneScreen()},
-            modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Settings")
-        }
-        Button(onClick = {
             navController.navigate(GameScreen.AboutUs.name)
             onChaneScreen()},
             modifier = Modifier.fillMaxWidth()) {
             Text(text = "About Us")
         }
+        Spacer(modifier = Modifier.weight(1f))
+        OutlinedButton(
+            onClick = {checkLogOut = true},
+            shape = Shapes.large,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 25.dp, end = 25.dp, bottom = 10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "Log out")
+                Spacer(modifier = Modifier.width(10.dp))
+                Icon(imageVector = Icons.Default.Logout, contentDescription = "Log out icon")
+            }
+
+        }
+    }
+
+    if (checkLogOut) {
+        CheckLogOut(
+            onCancelClick = {checkLogOut = false},
+            onClearClick = {
+                onLogOutClick()
+                checkLogOut = false
+                onChaneScreen()
+            }
+        )
     }
 }
 
@@ -351,7 +375,25 @@ fun TicTacToeApp(
                         scaffoldState.drawerState.close()
                     }
                 },
-                sharedPreferences = signupUiState
+                sharedPreferences = signupUiState,
+                onLogOutClick = {
+                    val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+
+                    val sharedPreferences = EncryptedSharedPreferences.create(
+                        "preferences",
+                        masterKeyAlias,
+                        context,
+                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                    )
+                    signUpViewModel.emailsharedPreferences.name = ""
+
+                    sharedPreferences.edit().putString("name", signupUiState.name).apply()
+
+                    signUpViewModel.clearPlayer()
+
+                    navController.navigate(GameScreen.LogIn.name)
+                }
             )
         }
     ) {

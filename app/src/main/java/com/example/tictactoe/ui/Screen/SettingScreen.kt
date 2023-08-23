@@ -283,7 +283,7 @@ fun LogOutButton(
 
     //check logging out
     if (uiState.isCheckClearDataDialogOpen) {
-        CheckClearData(
+        CheckLogOut(
             onCancelClick = {settingsViewModel.ChangeCheckClearDataAlertDialog()},
             onClearClick = onClearClick
         )
@@ -291,7 +291,7 @@ fun LogOutButton(
 }
 
 @Composable
-fun CheckClearData(
+fun CheckLogOut(
     onCancelClick: () -> Unit,
     onClearClick: () -> Unit
 ) {

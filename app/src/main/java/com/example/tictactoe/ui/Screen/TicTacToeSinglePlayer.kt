@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -225,11 +226,20 @@ fun TicTacToeSinglePlayerScreen(
             .background(BackGround)
             .fillMaxSize()
     ) {
-        Spacer(modifier = Modifier.weight(2f))
-        ShowPlayerTurn(
-            player = uiState.player_Turn
-        )
         Spacer(modifier = Modifier.weight(1f))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Card(modifier = Modifier.size(150.dp).padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "X") Primery else { Secondery})) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("X", fontWeight = FontWeight.Bold, fontSize = 50.sp)
+                }
+            }
+            Card(modifier = Modifier.size(150.dp).padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "O") Primery else { Secondery})) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("O", fontWeight = FontWeight.Bold, fontSize = 50.sp)
+                }
+            }
+        }
+        Spacer(modifier = Modifier.weight(2f))
         SinglePlayerButtonGrid(
             viewModel = viewModel,
             onPlayAgain = {
