@@ -2,7 +2,6 @@ package com.example.tictactoe.ui
 
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.tictactoe.ui.Screen.SettingsViewModel
 import com.example.tictactoe.ui.Screen.SignUpViewModel
 
 /**
@@ -11,11 +10,6 @@ import com.example.tictactoe.ui.Screen.SignUpViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
-
-        initializer {
-            SettingsViewModel()
-        }
-
         initializer {
             SignUpViewModel()
         }

@@ -48,16 +48,43 @@ enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val tit
     SignUp(title = "Sign Up"),
     LogIn(title = "Log In"),
     Start(title = "Home"),
-    Settings(title = "Settings"),
     AboutUs(title = "About Us"),
     TwoPlayers(title = "Two players"),
     SinglePlayer(title = "Single Player"),
-    Online(title = "Online")
+    Online(title = "Online"),
+    LeaderBoard(title = "LeaderBoard")
 }
 
 /**
  * Provides Navigation graph for the application.
  */
+
+@Composable
+fun CheckLogOut(
+    onCancelClick: () -> Unit,
+    onClearClick: () -> Unit
+) {
+
+    AlertDialog(
+        title = { Text(text = "Are you sure you want to log out?")},
+        backgroundColor = Secondery,
+        onDismissRequest = {},
+        dismissButton = {
+            TextButton(
+                onClick = { onCancelClick() }
+            ) {
+                Text("Cancel")
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onClearClick
+            ) {
+                Text("Log out")
+            }
+        }
+    )
+}
 
 @Composable
 fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChaneScreen: () -> Unit = {}, sharedPreferences: sharedPreferences, onLogOutClick: () -> Unit) {
@@ -173,6 +200,12 @@ fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, o
             Text(text = "Home")
         }
         Button(onClick = {
+            navController.navigate(GameScreen.LeaderBoard.name)
+            onChaneScreen()},
+            modifier = Modifier.fillMaxWidth()) {
+            Text(text = "LeaderBoard")
+        }
+        Button(onClick = {
             navController.navigate(GameScreen.AboutUs.name)
             onChaneScreen()},
             modifier = Modifier.fillMaxWidth()) {
@@ -249,7 +282,6 @@ fun CheckExit(onQuitClick: () -> Unit, onCancelClick: () -> Unit) {
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.M)
 @Composable
 fun TicTacToeApp(
     viewModel: TicTacToeViewModel = TicTacToeViewModel(),
@@ -305,7 +337,7 @@ fun TicTacToeApp(
                     },
                     icon = Icons.Default.Menu
                 )
-            GameScreen.Settings ->
+            GameScreen.LeaderBoard ->
                 TopAppBar(
                     onClick = {
                         scope.launch {
@@ -342,11 +374,7 @@ fun TicTacToeApp(
                     },
                     icon = Icons.Default.ArrowBack
                 )
-            else ->
-                TopAppBar(
-                    onClick = {navController.navigateUp()},
-                    icon = Icons.Default.ArrowBack
-                )
+            else ->{}
             }
             if (open) {
                 CheckExit(
@@ -515,36 +543,16 @@ fun TicTacToeApp(
                 )
             }
 
-            // online game screen
+            //online game screen
             composable(route = GameScreen.Online.name) {
                 OnlineTicTacToe(player = signupUiState.name, context = LocalContext.current)
             }
 
-            //settings screen
-            composable(route = GameScreen.Settings.name) {
-                SettingScreen(
-                    onClearClick = {
-                        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-
-                        val sharedPreferences = EncryptedSharedPreferences.create(
-                            "preferences",
-                            masterKeyAlias,
-                            context,
-                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                        )
-                        signUpViewModel.emailsharedPreferences.name = ""
-
-                        sharedPreferences.edit().putString("name", signupUiState.name).apply()
-
-                        signUpViewModel.clearPlayer()
-
-                        navController.navigate(GameScreen.LogIn.name)
-
-                    },
-                )
-
+            //leaderboard screen
+            composable(route = GameScreen.LeaderBoard.name) {
+                LeaderBoardScreen(context = LocalContext.current)
             }
+
         }
     }
 
