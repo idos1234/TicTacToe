@@ -32,10 +32,10 @@ import com.example.tictactoe.ui.theme.*
 import com.google.firebase.firestore.FirebaseFirestore
 
 @SuppressLint("UnrememberedMutableState")
-@JvmOverloads
 @Composable
 fun LeaderBoardScreen(
-    context: Context
+    context: Context,
+    yourPlayer: String
 ) {
     //players list in database
     var playerlist = mutableStateListOf<MainPlayerUiState?>()
@@ -75,13 +75,14 @@ fun LeaderBoardScreen(
         .background(BackGround)) {
         Text(text = "World LeaderBoard", fontSize = 30.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(75.dp))
-        ShowTopPlayers(Players = playerlist)
+        ShowTopPlayers(Players = playerlist, yourPlayer = yourPlayer)
     }
 }
 
 @Composable
 fun ShowTopPlayers(
     Players: SnapshotStateList<MainPlayerUiState?>,
+    yourPlayer: String
 ) {
 
     var showPlayer by remember {
@@ -91,11 +92,8 @@ fun ShowTopPlayers(
         mutableStateOf(MainPlayerUiState())
     }
     //table header
-    Card(modifier = Modifier.width(250.dp), border = BorderStroke(1.dp, Color.Black), shape = RoundedCornerShape(10)) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-            .fillMaxWidth()) {
+    Card(modifier = Modifier.fillMaxWidth(.9f), border = BorderStroke(1.dp, Color.Black), shape = RoundedCornerShape(10)) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally,) {
             Row(
                 modifier = Modifier.fillMaxWidth().background(Primery),
                 horizontalArrangement = Arrangement.Center,
@@ -133,7 +131,7 @@ fun ShowTopPlayers(
                 itemsIndexed(Players) { index, item ->
                     Card(
                         modifier = Modifier
-                            .width(250.dp)
+                            .fillMaxWidth()
                             .clickable(
                                 onClick = {
                                     showPlayer = true
@@ -141,7 +139,7 @@ fun ShowTopPlayers(
                                 }
                             ),
                         border = BorderStroke(1.dp, Color.Black),
-                        backgroundColor = Secondery,
+                        backgroundColor = if (item!!.name == yourPlayer) You else Secondery,
                         shape = RoundedCornerShape(0),
                     ) {
                         Row {

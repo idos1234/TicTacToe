@@ -4,9 +4,7 @@ package com.example.tictactoe.ui.Screen
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -374,7 +372,11 @@ fun TicTacToeApp(
                     },
                     icon = Icons.Default.ArrowBack
                 )
-            else ->{}
+            else ->{
+                TopAppBar(
+                onClick = {navController.navigateUp()},
+                icon = Icons.Default.ArrowBack
+            )}
             }
             if (open) {
                 CheckExit(
@@ -550,7 +552,7 @@ fun TicTacToeApp(
 
             //leaderboard screen
             composable(route = GameScreen.LeaderBoard.name) {
-                LeaderBoardScreen(context = LocalContext.current)
+                LeaderBoardScreen(context = LocalContext.current, yourPlayer = signupUiState.name)
             }
 
         }
