@@ -1,5 +1,7 @@
 package com.example.tictactoe.data
 
+import com.example.tictactoe.R
+
 //data class for every player in database
 data class MainPlayerUiState(
     //player's name
@@ -11,11 +13,29 @@ data class MainPlayerUiState(
     //player's password
     var password: String = "",
     //player's image
-    var currentImage: String = "",
+    var currentImage: Int = R.drawable.xo_1,
     //images that the player got
-    var unlockedImages: List<String> = listOf(),
+    var unlockedImages: List<Int> = listOf(R.drawable.xo_1),
     //images that the player didn't got
-    var lockedImages: List<String> = listOf()
+    var lockedImages: List<Int> = listOf(
+        R.drawable.xo_2,
+        R.drawable.xo_3,
+        R.drawable.xo_4,
+        R.drawable.xo_5_1,
+        R.drawable.xo_5_2,
+        R.drawable.xo_6,
+        R.drawable.xo_7,
+        R.drawable.xo_8,
+        R.drawable.xo_9,
+        R.drawable.xo_10_1,
+        R.drawable.xo_10_2,
+        R.drawable.xo_11,
+        R.drawable.xo_12,
+        R.drawable.xo_13,
+        R.drawable.xo_14,
+        R.drawable.xo_15_1,
+        R.drawable.xo_15_2
+    )
 )
 
 //check if name and password is valid in sign in and log in

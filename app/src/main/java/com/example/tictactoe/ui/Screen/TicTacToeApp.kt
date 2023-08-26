@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -160,7 +161,7 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: s
                 modifier = Modifier
                     .size(90.dp)
             ) {
-                Image(imageVector = Icons.Default.TagFaces, contentDescription = null, contentScale = ContentScale.FillBounds)
+                Image(painter = painterResource(id = player.currentImage), contentDescription = null, contentScale = ContentScale.FillBounds)
                 }
 
             Spacer(modifier = Modifier.width(15.dp))
