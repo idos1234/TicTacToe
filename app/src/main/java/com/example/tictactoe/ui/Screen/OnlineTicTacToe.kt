@@ -12,12 +12,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tictactoe.data.Boxes
+import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.data.OnlineGameUiState
 import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Primery
@@ -26,6 +28,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 @Composable
 fun SetBoxOnline(game: OnlineGameUiState, boxNumber: Int, playerTurn: String) {
@@ -104,7 +108,7 @@ fun OnlineGameButton(game: OnlineGameUiState, boxNumber: Int, box: String, enabl
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun OnlineButtonGrid(game: OnlineGameUiState, myTurn: String?, gameStarted: Boolean) {
+fun OnlineButtonGrid(game: OnlineGameUiState, myTurn: String?, gameStarted: Boolean, playerName: String) {
 
     val enabled = if (gameStarted) {
         myTurn == game.playerTurn
@@ -140,9 +144,11 @@ fun OnlineButtonGrid(game: OnlineGameUiState, myTurn: String?, gameStarted: Bool
             if (game.winner == myTurn) {
                 //show winner
                 ShowOnlineWinner(text1 = "You won")
+                updateScore(playerName = playerName, context = LocalContext.current, addedScore = 1)
             } else if (game.winner != myTurn) {
                 //show winner
                 ShowOnlineWinner(text1 = "You lose")
+                updateScore(playerName = playerName, context = LocalContext.current, addedScore = -1)
             }
         }
         //show tie
@@ -238,13 +244,17 @@ fun OnlineTicTacToe(player: String, context: Context) {
         .fillMaxSize()) {
         Spacer(modifier = Modifier.weight(1f))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Card(modifier = Modifier.size(150.dp).padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (currentGame.playerTurn == "X") Primery else { Secondery})) {
+            Card(modifier = Modifier
+                .size(150.dp)
+                .padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (currentGame.playerTurn == "X") Primery else { Secondery})) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("X", fontWeight = FontWeight.Bold, fontSize = 35.sp)
                     Text(currentGame.player1, fontSize = 10.sp)
                 }
             }
-            Card(modifier = Modifier.size(150.dp).padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (currentGame.playerTurn == "O") Primery else { Secondery})) {
+            Card(modifier = Modifier
+                .size(150.dp)
+                .padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (currentGame.playerTurn == "O") Primery else { Secondery})) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     if (foundPlayer) {
                         Text("O", fontWeight = FontWeight.Bold, fontSize = 35.sp)
@@ -256,7 +266,7 @@ fun OnlineTicTacToe(player: String, context: Context) {
             }
         }
         Spacer(modifier = Modifier.weight(2f))
-        OnlineButtonGrid(game = currentGame, myTurn = myTurn, gameStarted = foundPlayer)
+        OnlineButtonGrid(game = currentGame, myTurn = myTurn, gameStarted = foundPlayer, playerName = player)
         Spacer(modifier = Modifier.weight(4f))
     }
 }
@@ -273,4 +283,59 @@ fun ShowOnlineWinner(text1: String) {
             }
         }
     )
+}
+
+@Composable
+fun updateScore(playerName: String, context: Context, addedScore: Int) {
+    var player by remember {
+        mutableStateOf(MainPlayerUiState())
+    }
+    //get database
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    //get Players collection from database
+    db.collection("Players").get()
+        //on success
+        .addOnSuccessListener { queryDocumentSnapshots ->
+            //check if collection is empty
+            if (!queryDocumentSnapshots.isEmpty) {
+                val list = queryDocumentSnapshots.documents
+                Loop@ for (d in list) {
+                    val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
+                    //find player using database
+                    if (p?.name == playerName){
+                        player = p
+                        val updatedPlayer = MainPlayerUiState(
+                            name = player.name,
+                            email = player.email,
+                            score = (if (player.score + addedScore < 0) 0 else player.score + addedScore),
+                            password = player.password,
+                            currentImage = player.currentImage,
+                            unlockedImages = player.unlockedImages,
+                            lockedImages = player.lockedImages
+                        )
+
+                        db.collection("Players")
+                            .whereEqualTo("name", playerName)
+                            .get()
+                            .addOnSuccessListener {
+                                for (document in it) {
+                                    db.collection("Players").document(document.id).set(updatedPlayer,
+                                        SetOptions.merge())
+                                }
+                            }
+                        break@Loop
+                    }
+
+                }
+            }
+        }
+        //on failure
+        .addOnFailureListener {
+            Toast.makeText(
+                context,
+                "Fail to get the data.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
 }
