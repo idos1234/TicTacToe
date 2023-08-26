@@ -51,7 +51,8 @@ enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val tit
     TwoPlayers(title = "Two players"),
     SinglePlayer(title = "Single Player"),
     Online(title = "Online"),
-    LeaderBoard(title = "LeaderBoard")
+    LeaderBoard(title = "LeaderBoard"),
+    ProfileScreen(title = "ProfileScreen")
 }
 
 /**
@@ -86,7 +87,7 @@ fun CheckLogOut(
 }
 
 @Composable
-fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChaneScreen: () -> Unit = {}, sharedPreferences: sharedPreferences, onLogOutClick: () -> Unit) {
+fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChangeScreen: () -> Unit = {}, sharedPreferences: sharedPreferences, onLogOutClick: () -> Unit) {
 
     Box(modifier = Modifier
         .background(Secondery)
@@ -102,12 +103,14 @@ fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChane
         TopHomeScreenMenu(
             modifier = Modifier.weight(1f),
             context = LocalContext.current,
-            sharedPreferences = sharedPreferences
+            sharedPreferences = sharedPreferences,
+            navController = navController,
+            onChangeScreen = onChangeScreen
         )
         ButtonHomeScreenMenu(
             modifier = Modifier.weight(5f),
             navController = navController,
-            onChaneScreen = onChaneScreen,
+            onChangeScreen = onChangeScreen,
             onLogOutClick = onLogOutClick
         )
     }
@@ -115,7 +118,7 @@ fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChane
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: sharedPreferences) {
+fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: sharedPreferences, navController: NavHostController, onChangeScreen: () -> Unit) {
 
     var player by remember {
         mutableStateOf(MainPlayerUiState())
@@ -150,7 +153,12 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: s
         }
 
     Box(modifier = modifier
-        .clickable(onClick = {})
+        .clickable(
+            onClick = {
+                navController.navigate(GameScreen.ProfileScreen.name)
+                onChangeScreen()
+            }
+        )
         .fillMaxWidth()
         .padding(10.dp)
     ) {
@@ -184,7 +192,7 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: s
 }
 
 @Composable
-fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, onChaneScreen: () -> Unit = {}, onLogOutClick: () -> Unit) {
+fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, onChangeScreen: () -> Unit = {}, onLogOutClick: () -> Unit) {
     var checkLogOut by remember {
         mutableStateOf(false)
     }
@@ -194,19 +202,19 @@ fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, o
 
         Button(onClick = {
             navController.navigate(GameScreen.Start.name)
-            onChaneScreen()},
+            onChangeScreen()},
             modifier = Modifier.fillMaxWidth()) {
             Text(text = "Home")
         }
         Button(onClick = {
             navController.navigate(GameScreen.LeaderBoard.name)
-            onChaneScreen()},
+            onChangeScreen()},
             modifier = Modifier.fillMaxWidth()) {
             Text(text = "LeaderBoard")
         }
         Button(onClick = {
             navController.navigate(GameScreen.AboutUs.name)
-            onChaneScreen()},
+            onChangeScreen()},
             modifier = Modifier.fillMaxWidth()) {
             Text(text = "About Us")
         }
@@ -232,7 +240,7 @@ fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, o
             onClearClick = {
                 onLogOutClick()
                 checkLogOut = false
-                onChaneScreen()
+                onChangeScreen()
             }
         )
     }
@@ -401,7 +409,7 @@ fun TicTacToeApp(
                         }
                     ),
                 navController = navController,
-                onChaneScreen = {
+                onChangeScreen = {
                     scope.launch {
                         scaffoldState.drawerState.close()
                     }
@@ -554,6 +562,11 @@ fun TicTacToeApp(
             //leaderboard screen
             composable(route = GameScreen.LeaderBoard.name) {
                 LeaderBoardScreen(context = LocalContext.current, yourPlayer = signupUiState.name)
+            }
+
+            //profile screen
+            composable(route = GameScreen.ProfileScreen.name) {
+                ProfileScreen(player = signupUiState.name, context = LocalContext.current)
             }
 
         }
