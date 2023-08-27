@@ -11,10 +11,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
@@ -30,6 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import co.yml.charts.common.model.PlotType
+import co.yml.charts.ui.piechart.charts.DonutPieChart
+import co.yml.charts.ui.piechart.models.PieChartConfig
+import co.yml.charts.ui.piechart.models.PieChartData
 import coil.compose.AsyncImage
 import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.ui.theme.BackGround
@@ -80,18 +81,6 @@ fun ProfileScreen(player: String, context: Context) {
             Card(backgroundColor = Primery, modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "Welcome ${profile.name}",
-                        fontSize = 25.sp,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Text(
-                        text = "Score: ${profile.score}",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.W500
-                    )
-                }
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                     Box(contentAlignment = Alignment.BottomEnd) {
                         Card(
@@ -104,8 +93,39 @@ fun ProfileScreen(player: String, context: Context) {
                             }
                         Icon(imageVector = Icons.Default.Edit, contentDescription = "edit icon", modifier = Modifier.clickable(onClick = { showPhotos = true }))
                     }
+                    Text(
+                        text = profile.name,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
                 }
             }
+        }
+        item {
+            Column(horizontalAlignment = Alignment.Start) {
+                Row(horizontalArrangement = Arrangement.Start) {
+                   Card(Modifier.size(15.dp), backgroundColor = Color.Red){}
+                    Text(text = "Wins = ${profile.wins}", Modifier.padding(start = 4.dp))
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.Start) {
+                    Card(Modifier.size(15.dp), backgroundColor = Color.Yellow){}
+                    Text(text = "Loses = ${profile.loses}", Modifier.padding(start = 4.dp))
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.Start) {
+                    Card(Modifier.size(15.dp), backgroundColor = Color.Green){}
+                    Text(text = "Draws = ${profile.draws}", Modifier.padding(start = 4.dp))
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            PlayerGraph(
+                profile = profile,
+                winsColor = Color.Red,
+                losesColor = Color.Yellow,
+                drawsColor = Color.Green
+            )
+
         }
     }
     if (showPhotos) {
@@ -162,4 +182,35 @@ fun ShowPlayersImages(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun PlayerGraph(
+    profile: MainPlayerUiState,
+    winsColor: Color,
+    losesColor: Color,
+    drawsColor: Color
+    ) {
+    val donutChartData = PieChartData(
+        slices = listOf(
+            PieChartData.Slice("Wins", profile.wins.toFloat(), winsColor),
+            PieChartData.Slice("Loses", profile.loses.toFloat(), losesColor),
+            PieChartData.Slice("Draws", profile.draws.toFloat(), drawsColor),
+        ),
+        plotType = PlotType.Donut
+    )
+    val donutChartConfig = PieChartConfig(
+        strokeWidth = 100f,
+        backgroundColor = BackGround,
+        sliceLabelTextColor = BackGround
+    )
+    DonutPieChart(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(380.dp),
+        donutChartData,
+        donutChartConfig
+    )
+
 }

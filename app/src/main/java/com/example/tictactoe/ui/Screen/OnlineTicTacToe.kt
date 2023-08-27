@@ -153,7 +153,8 @@ fun OnlineButtonGrid(game: OnlineGameUiState, myTurn: String?, gameStarted: Bool
         }
         //show tie
         else if (game.times == 9){
-            ShowOnlineWinner(text1 = "Tie")
+            ShowOnlineWinner(text1 = "Draw")
+            updateScore(playerName = playerName, context = LocalContext.current, addedScore = 0)
         }
 
     }
@@ -290,6 +291,15 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
     var player by remember {
         mutableStateOf(MainPlayerUiState())
     }
+    var wins by remember {
+        mutableStateOf(0)
+    }
+    var loses by remember {
+        mutableStateOf(0)
+    }
+    var draws by remember {
+        mutableStateOf(0)
+    }
     //get database
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -305,6 +315,13 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
                     //find player using database
                     if (p?.name == playerName){
                         player = p
+                        if (addedScore > 0) {
+                            wins = player.wins + 1
+                        } else if (addedScore < 0) {
+                            loses = player.loses + 1
+                        } else if (addedScore == 0) {
+                            draws = player.draws + 1
+                        }
                         val updatedPlayer = MainPlayerUiState(
                             name = player.name,
                             email = player.email,
@@ -312,7 +329,10 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
                             password = player.password,
                             currentImage = player.currentImage,
                             unlockedImages = player.unlockedImages,
-                            lockedImages = player.lockedImages
+                            lockedImages = player.lockedImages,
+                            wins = wins,
+                            loses = loses,
+                            draws = draws
                         )
 
                         db.collection("Players")

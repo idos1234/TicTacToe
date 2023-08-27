@@ -81,7 +81,7 @@ fun ButtonGrid(
         }
         //show tie
         else if (uiState.times == 9){
-            showWinner(winner = "Tie", text = "Try to win next time", onPlayAgain = onPlayAgain)
+            showWinner(winner = "Draw", text = "Try to win next time", onPlayAgain = onPlayAgain)
         }
 
     } else {

@@ -35,7 +35,10 @@ data class MainPlayerUiState(
         R.drawable.xo_14,
         R.drawable.xo_15_1,
         R.drawable.xo_15_2
-    )
+    ),
+    var wins: Int = 0,
+    var loses: Int = 0,
+    var draws: Int = 0
 )
 
 //check if name and password is valid in sign in and log in
