@@ -198,7 +198,7 @@ fun PlayerGraph(
             PieChartData.Slice("Loses", profile.loses.toFloat(), losesColor),
             PieChartData.Slice("Draws", profile.draws.toFloat(), drawsColor),
         ),
-        plotType = PlotType.Donut
+        plotType = PlotType.Pie
     )
     val donutChartConfig = PieChartConfig(
         strokeWidth = 100f,

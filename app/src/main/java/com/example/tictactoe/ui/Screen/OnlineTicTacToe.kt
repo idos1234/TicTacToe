@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tictactoe.R
 import com.example.tictactoe.data.Boxes
 import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.data.OnlineGameUiState
@@ -300,6 +301,25 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
     var draws by remember {
         mutableStateOf(0)
     }
+    var score by remember {
+        mutableStateOf(0)
+    }
+    var levelUp by remember {
+        mutableStateOf(false)
+    }
+    var lockedPhotos by remember {
+        mutableStateOf<List<Int>>(listOf())
+    }
+    var unlockedPhotos by remember {
+        mutableStateOf<List<Int>>(listOf())
+    }
+    var updatedPlayer by remember {
+        mutableStateOf(MainPlayerUiState())
+    }
+    var newLevel by remember {
+        mutableStateOf(0)
+    }
+
     //get database
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -322,18 +342,126 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
                         } else if (addedScore == 0) {
                             draws = player.draws + 1
                         }
-                        val updatedPlayer = MainPlayerUiState(
-                            name = player.name,
-                            email = player.email,
-                            score = (if (player.score + addedScore < 0) 0 else player.score + addedScore),
-                            password = player.password,
-                            currentImage = player.currentImage,
-                            unlockedImages = player.unlockedImages,
-                            lockedImages = player.lockedImages,
-                            wins = wins,
-                            loses = loses,
-                            draws = draws
-                        )
+                        score = if (player.score + addedScore < 0) 0 else player.score + addedScore
+
+                        if (addedScore == 1) {
+                            when (score) {
+                                25 -> if ((player.lockedImages.contains(R.drawable.xo_2)) && !(player.unlockedImages.contains(R.drawable.xo_2))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_2)
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_2)
+                                    newLevel = 2
+                                    levelUp = true
+                                }
+                                50 -> if ((player.lockedImages.contains(R.drawable.xo_3)) && !(player.unlockedImages.contains(R.drawable.xo_3))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_3)
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_3)
+                                    newLevel = 3
+                                    levelUp = true
+                                }
+                                100 -> if ((player.lockedImages.contains(R.drawable.xo_4)) && !(player.unlockedImages.contains(R.drawable.xo_4))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_4)
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_4)
+                                    newLevel = 4
+                                    levelUp = true
+                                }
+                                150 -> if ((player.lockedImages.contains(R.drawable.xo_5_1)) && (player.lockedImages.contains(R.drawable.xo_5_2)) && !(player.unlockedImages.contains(R.drawable.xo_5_1)) && !(player.unlockedImages.contains(R.drawable.xo_5_2))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_5_1) - R.drawable.xo_5_2
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_5_1) + R.drawable.xo_5_2
+                                    newLevel = 5
+                                    levelUp = true
+                                }
+                                200 -> if ((player.lockedImages.contains(R.drawable.xo_6)) && !(player.unlockedImages.contains(R.drawable.xo_6))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_6)
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_6)
+                                    newLevel = 6
+                                    levelUp = true
+                                }
+                                300 -> if ((player.lockedImages.contains(R.drawable.xo_7)) && !(player.unlockedImages.contains(R.drawable.xo_7))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_7)
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_7)
+                                    newLevel = 7
+                                    levelUp = true
+                                }
+                                400 -> if ((player.lockedImages.contains(R.drawable.xo_8)) && !(player.unlockedImages.contains(R.drawable.xo_8))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_8)
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_8)
+                                    newLevel = 8
+                                    levelUp = true
+                                }
+                                500 -> if ((player.lockedImages.contains(R.drawable.xo_9)) && !(player.unlockedImages.contains(R.drawable.xo_9))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_9)
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_9)
+                                    newLevel = 9
+                                    levelUp = true
+                                }
+                                600 -> if ((player.lockedImages.contains(R.drawable.xo_10_1)) && (player.lockedImages.contains(R.drawable.xo_10_2)) && !(player.unlockedImages.contains(R.drawable.xo_10_1)) && !(player.unlockedImages.contains(R.drawable.xo_10_2))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_10_1) - R.drawable.xo_10_2
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_10_1) + R.drawable.xo_10_2
+                                    newLevel = 10
+                                    levelUp = true
+                                }
+                                700 -> if ((player.lockedImages.contains(R.drawable.xo_11)) && !(player.unlockedImages.contains(R.drawable.xo_11))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_11)
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_11)
+                                    newLevel = 11
+                                    levelUp = true
+                                }
+                                800 -> if ((player.lockedImages.contains(R.drawable.xo_12)) && !(player.unlockedImages.contains(R.drawable.xo_12))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_12)
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_12)
+                                    newLevel = 12
+                                    levelUp = true
+                                }
+                                900 -> if ((player.lockedImages.contains(R.drawable.xo_13)) && !(player.unlockedImages.contains(R.drawable.xo_13))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_13)
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_13)
+                                    newLevel = 13
+                                    levelUp = true
+                                }
+                                1000 -> if ((player.lockedImages.contains(R.drawable.xo_14)) && !(player.unlockedImages.contains(R.drawable.xo_14))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_14)
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_14)
+                                    newLevel = 14
+                                    levelUp = true
+                                }
+                                1200 -> if ((player.lockedImages.contains(R.drawable.xo_15_1)) && (player.lockedImages.contains(R.drawable.xo_15_2)) && !(player.unlockedImages.contains(R.drawable.xo_15_1)) && !(player.unlockedImages.contains(R.drawable.xo_15_2))) {
+                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_15_1) - R.drawable.xo_15_2
+                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_15_1) + R.drawable.xo_15_2
+                                    newLevel = 15
+                                    levelUp = true
+                                }
+
+                            }
+                            if (levelUp) {
+                                updatedPlayer = MainPlayerUiState(
+                                    name = player.name,
+                                    email = player.email,
+                                    score = score,
+                                    password = player.password,
+                                    currentImage = player.currentImage,
+                                    unlockedImages = unlockedPhotos,
+                                    lockedImages = lockedPhotos,
+                                    wins = player.wins + 1,
+                                    loses = player.loses,
+                                    draws = player.draws,
+                                    level = newLevel
+                                )
+                            } else {
+                                updatedPlayer = MainPlayerUiState(
+                                    name = player.name,
+                                    email = player.email,
+                                    score = score,
+                                    password = player.password,
+                                    currentImage = player.currentImage,
+                                    unlockedImages = player.unlockedImages,
+                                    lockedImages = player.lockedImages,
+                                    wins = player.wins + 1,
+                                    loses = player.wins,
+                                    draws = player.draws,
+                                    level = player.level
+                                )
+                            }
+                        }
 
                         db.collection("Players")
                             .whereEqualTo("name", playerName)
@@ -359,3 +487,5 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
             ).show()
         }
 }
+
+

@@ -38,7 +38,8 @@ data class MainPlayerUiState(
     ),
     var wins: Int = 0,
     var loses: Int = 0,
-    var draws: Int = 0
+    var draws: Int = 0,
+    var level: Int = 1
 )
 
 //check if name and password is valid in sign in and log in
