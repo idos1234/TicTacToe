@@ -39,7 +39,43 @@ data class MainPlayerUiState(
     var wins: Int = 0,
     var loses: Int = 0,
     var draws: Int = 0,
-    var level: Int = 1
+    var level: Int = 1,
+    var unlockedX: List<Int> = listOf(R.drawable.x_1),
+    var unlockedO: List<Int> = listOf(R.drawable.o_1),
+    var lockedX: List<Int> = listOf(
+        R.drawable.x_2,
+        R.drawable.x_3,
+        R.drawable.x_4,
+        R.drawable.x_5_6,
+        R.drawable.x_5_6,
+        R.drawable.x_7,
+        R.drawable.x_8,
+        R.drawable.x_9,
+        R.drawable.x_10,
+        R.drawable.x_11,
+        R.drawable.x_12,
+        R.drawable.x_13,
+        R.drawable.x_14,
+        R.drawable.x_15
+        ),
+    var lockedO: List<Int> = listOf(
+        R.drawable.o_2,
+        R.drawable.o_3,
+        R.drawable.o_4,
+        R.drawable.o_5,
+        R.drawable.o_6,
+        R.drawable.o_7,
+        R.drawable.o_8,
+        R.drawable.o_9,
+        R.drawable.o_10,
+        R.drawable.o_11,
+        R.drawable.o_12,
+        R.drawable.o_13,
+        R.drawable.o_14,
+        R.drawable.o_15
+    ),
+    var currentX: Int = R.drawable.x_1,
+    var currentO: Int = R.drawable.o_1
 )
 
 //check if name and password is valid in sign in and log in

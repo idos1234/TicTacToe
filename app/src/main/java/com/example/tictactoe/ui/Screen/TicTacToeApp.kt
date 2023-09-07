@@ -169,7 +169,7 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: s
                 modifier = Modifier
                     .size(90.dp)
             ) {
-                Image(painter = painterResource(id = player.currentImage), contentDescription = null, contentScale = ContentScale.FillBounds)
+                Image(painter = painterResource(id = player.currentImage), contentDescription = null, contentScale = ContentScale.Crop)
                 }
 
             Spacer(modifier = Modifier.width(15.dp))
@@ -550,7 +550,8 @@ fun TicTacToeApp(
                                 viewModel.botTurn(uiState)
                             }
                         }
-                    }
+                    },
+                    playerName = signupUiState.name
                 )
             }
 
@@ -581,11 +582,9 @@ fun resetGame(
     screen: GameScreen,
 ) {
     if (screen == GameScreen.SinglePlayer) {
-        val isBotTurn =
-            times % 2 != 1
-        viewModel.resetGame(isBotTurn, times)
+        viewModel.resetGame(times)
     } else {
-        viewModel.resetGame(times = times)
+        viewModel.resetGame(times)
     }
     navController
 }

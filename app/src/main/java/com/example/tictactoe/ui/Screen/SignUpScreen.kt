@@ -36,7 +36,6 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 
 
-@RequiresApi(Build.VERSION_CODES.M)
 @Composable
 fun SignUpScreen(
     viewModel: SignUpViewModel,
@@ -151,10 +150,10 @@ fun SignUpScreen(
                                      val dbPlayers: CollectionReference = db.collection("Players")
 
                                      val player = MainPlayerUiState(
-                                         uiState.name,
-                                         uiState.email,
-                                         0,
-                                         uiState.password,
+                                         name = uiState.name,
+                                         email = uiState.email,
+                                         score = 0,
+                                         password = uiState.password
                                      )
 
                                      dbPlayers.add(player)

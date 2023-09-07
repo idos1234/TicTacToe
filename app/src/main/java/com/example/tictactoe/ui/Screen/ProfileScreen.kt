@@ -2,9 +2,7 @@ package com.example.tictactoe.ui.Screen
 
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -36,7 +34,9 @@ import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Primery
 import com.example.tictactoe.ui.theme.Secondery
+import com.example.tictactoe.ui.theme.Shapes
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 @Composable
 fun ProfileScreen(player: String, context: Context) {
@@ -46,6 +46,13 @@ fun ProfileScreen(player: String, context: Context) {
     var showPhotos by remember {
         mutableStateOf(false)
     }
+    var showPlayerX by remember {
+        mutableStateOf(false)
+    }
+    var showPlayerO by remember {
+        mutableStateOf(false)
+    }
+
     //get database
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -89,7 +96,7 @@ fun ProfileScreen(player: String, context: Context) {
                             modifier = Modifier
                                 .size(90.dp)
                         ) {
-                            Image(painter = painterResource(id = profile.currentImage), contentDescription = null, contentScale = ContentScale.FillBounds)
+                            Image(painter = painterResource(id = profile.currentImage), contentDescription = null, contentScale = ContentScale.Crop)
                             }
                         Icon(imageVector = Icons.Default.Edit, contentDescription = "edit icon", modifier = Modifier.clickable(onClick = { showPhotos = true }))
                     }
@@ -101,6 +108,36 @@ fun ProfileScreen(player: String, context: Context) {
                 }
             }
         }
+
+        item {
+            Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                Card(modifier = Modifier
+                    .weight(1f)
+                    .size(120.dp)
+                    .padding(20.dp), shape = Shapes.small, backgroundColor = Secondery) {
+                    Image(
+                        painter = painterResource(id = profile.currentX),
+                        contentDescription = "player's current X",
+                        contentScale = ContentScale.Inside,
+                        modifier = Modifier.clickable(
+                            onClick = { showPlayerX = true }
+                        ))
+                }
+                Card(modifier = Modifier
+                    .weight(1f)
+                    .size(120.dp)
+                    .padding(20.dp), shape = Shapes.small, backgroundColor = Secondery) {
+                    Image(
+                        painter = painterResource(id = profile.currentO),
+                        contentDescription = "player's current O",
+                        contentScale = ContentScale.Inside,
+                        modifier = Modifier.clickable(
+                            onClick = { showPlayerO = true }
+                        ))
+                }
+            }
+        }
+
         item {
             Column(horizontalAlignment = Alignment.Start) {
                 Row(horizontalArrangement = Arrangement.Start) {
@@ -131,10 +168,22 @@ fun ProfileScreen(player: String, context: Context) {
     if (showPhotos) {
         ShowPlayersImages(player = profile, onCloseClicked = { showPhotos = false })
     }
+    if (showPlayerX) {
+        ShowPlayerX(player = profile, onCloseClicked = { showPlayerX = false })
+    }
+    if (showPlayerO) {
+        ShowPlayerO(player = profile, onCloseClicked = { showPlayerO = false })
+    }
 }
 
 @Composable
 fun ShowPlayersImages(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
+    var changeImage by remember {
+        mutableStateOf(false)
+    }
+    var Image by remember {
+        mutableStateOf(player.currentImage)
+    }
     Dialog(onDismissRequest = {}) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxWidth(0.9f)
@@ -151,10 +200,19 @@ fun ShowPlayersImages(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .wrapContentHeight()
+                                .border(
+                                    BorderStroke(if (photo == Image) 2.dp else 0.dp, Primery),
+                                    shape = RoundedCornerShape(0)
+                                )
+                                .clickable(onClick = {
+                                    changeImage = true
+                                    Image = photo
+                                })
+
                         )
                     }
                 },
-                modifier = Modifier.padding(10.dp)
+                modifier = Modifier.padding(10.dp).height(200.dp)
             )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
@@ -174,13 +232,219 @@ fun ShowPlayersImages(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                         }
                     }
                 },
-                modifier = Modifier.padding(10.dp)
+                modifier = Modifier.padding(10.dp).height(200.dp)
             )
 
             OutlinedButton(onClick = onCloseClicked) {
                 Text(text = "Close")
             }
         }
+    }
+    if (changeImage) {
+        ChangeImage(image = Image, player = player)
+    }
+}
+@Composable
+fun ShowPlayerX(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
+    var changeImage by remember {
+        mutableStateOf(false)
+    }
+    var Image by remember {
+        mutableStateOf(player.currentX)
+    }
+    Dialog(onDismissRequest = {}) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .background(Secondery)
+            .fillMaxHeight(0.87f)) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(4),
+                content = {
+                    items(player.unlockedX) { X ->
+                        AsyncImage(
+                            model = X,
+                            contentScale = ContentScale.Crop,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .border(
+                                    BorderStroke(if (X == Image) 2.dp else 0.dp, Primery),
+                                    shape = RoundedCornerShape(0)
+                                )
+                                .clickable(onClick = {
+                                    changeImage = true
+                                    Image = X
+                                })
+
+                        )
+                    }
+                },
+                modifier = Modifier.padding(10.dp).height(200.dp)
+            )
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(4),
+                content = {
+                    items(player.lockedX) { X ->
+                        Box(contentAlignment = Alignment.Center) {
+                            AsyncImage(
+                                model = X,
+                                contentScale = ContentScale.Crop,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight(),
+                                colorFilter = tint(color = Color.LightGray, blendMode = BlendMode.Darken)
+                            )
+                            Icon(imageVector = Icons.Default.Lock, contentDescription = "locked X")
+                        }
+                    }
+                },
+                modifier = Modifier.padding(10.dp).height(200.dp)
+            )
+
+            OutlinedButton(onClick = onCloseClicked) {
+                Text(text = "Close")
+            }
+        }
+    }
+    if (changeImage) {
+        val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+        val updatedPlayer = MainPlayerUiState(
+            name = player.name,
+            email = player.email,
+            score = player.score,
+            password = player.password,
+            currentImage = player.currentImage,
+            lockedImages = player.lockedImages,
+            unlockedImages = player.unlockedImages,
+            wins = player.wins,
+            loses = player.loses,
+            draws = player.draws,
+            level = player.level,
+            lockedX = player.lockedX,
+            unlockedX = player.unlockedX,
+            lockedO = player.lockedO,
+            unlockedO = player.unlockedO,
+            currentO = player.currentO,
+            currentX = Image
+        )
+
+
+        db.collection("Players")
+            .whereEqualTo("name", player.name)
+            .get()
+            .addOnSuccessListener {
+                for (document in it) {
+                    db.collection("Players").document(document.id).set(
+                        updatedPlayer,
+                        SetOptions.merge()
+                    )
+                }
+            }
+    }
+}
+
+@Composable
+fun ShowPlayerO(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
+    var changeImage by remember {
+        mutableStateOf(false)
+    }
+    var Image by remember {
+        mutableStateOf(player.currentO)
+    }
+    Dialog(onDismissRequest = {}) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .background(Secondery)
+            .fillMaxHeight(0.87f)) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(4),
+                content = {
+                    items(player.unlockedO) { O ->
+                        AsyncImage(
+                            model = O,
+                            contentScale = ContentScale.Crop,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .border(
+                                    BorderStroke(if (O == Image) 2.dp else 0.dp, Primery),
+                                    shape = RoundedCornerShape(0)
+                                )
+                                .clickable(onClick = {
+                                    changeImage = true
+                                    Image = O
+                                })
+
+                        )
+                    }
+                },
+                modifier = Modifier.padding(10.dp).height(200.dp)
+            )
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(4),
+                content = {
+                    items(player.lockedO) { O ->
+                        Box(contentAlignment = Alignment.Center) {
+                            AsyncImage(
+                                model = O,
+                                contentScale = ContentScale.Crop,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight(),
+                                colorFilter = tint(color = Color.LightGray, blendMode = BlendMode.Darken)
+                            )
+                            Icon(imageVector = Icons.Default.Lock, contentDescription = "locked O")
+                        }
+                    }
+                },
+                modifier = Modifier.padding(10.dp).height(200.dp)
+            )
+
+            OutlinedButton(onClick = onCloseClicked) {
+                Text(text = "Close")
+            }
+        }
+    }
+    if (changeImage) {
+        val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+        val updatedPlayer = MainPlayerUiState(
+            name = player.name,
+            email = player.email,
+            score = player.score,
+            password = player.password,
+            currentImage = player.currentImage,
+            lockedImages = player.lockedImages,
+            unlockedImages = player.unlockedImages,
+            wins = player.wins,
+            loses = player.loses,
+            draws = player.draws,
+            level = player.level,
+            lockedO = player.lockedO,
+            unlockedO = player.unlockedO,
+            lockedX = player.lockedX,
+            unlockedX = player.unlockedX,
+            currentX = player.currentX,
+            currentO = Image
+        )
+
+
+        db.collection("Players")
+            .whereEqualTo("name", player.name)
+            .get()
+            .addOnSuccessListener {
+                for (document in it) {
+                    db.collection("Players").document(document.id).set(
+                        updatedPlayer,
+                        SetOptions.merge()
+                    )
+                }
+            }
     }
 }
 
@@ -213,4 +477,23 @@ fun PlayerGraph(
         donutChartConfig
     )
 
+}
+
+@Composable
+fun ChangeImage(image: Int, player: MainPlayerUiState) {
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    val updatedPlayer = player.copy(currentImage = image)
+
+    db.collection("Players")
+        .whereEqualTo("name", player.name)
+        .get()
+        .addOnSuccessListener {
+            for (document in it) {
+                db.collection("Players").document(document.id).set(
+                    updatedPlayer,
+                    SetOptions.merge()
+                )
+            }
+        }
 }
