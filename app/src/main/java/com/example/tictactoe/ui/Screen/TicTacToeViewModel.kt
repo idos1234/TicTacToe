@@ -30,7 +30,9 @@ class TicTacToeViewModel: ViewModel() {
     }
 
     fun resetGame(times: Int) {
-        _uiState.value = UiState(player_Turn = if (times % 2 == 1) { "O" } else { "X" }
+        _uiState.value = UiState(
+            player_Turn = if (times % 2 == 1) { "O" } else { "X" },
+            isenabled = times % 2 != 1
         )
     }
 
