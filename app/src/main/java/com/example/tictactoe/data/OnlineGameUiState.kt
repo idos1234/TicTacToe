@@ -7,7 +7,9 @@ data class OnlineGameUiState (
     var winner: String = "",
     var boxes: Boxes = Boxes(),
     var playerTurn: String = "X",
-    var times: Int = 0
+    var times: Int = 0,
+    var player1Score: Int = 0,
+    var player2Score: Int = 0
 )
 
 data class Boxes (

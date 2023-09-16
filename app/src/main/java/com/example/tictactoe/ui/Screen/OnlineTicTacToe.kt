@@ -9,7 +9,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,16 +23,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tictactoe.R
-import com.example.tictactoe.data.*
+import com.example.tictactoe.data.Boxes
+import com.example.tictactoe.data.MainPlayerUiState
+import com.example.tictactoe.data.OnlineGameUiState
 import com.example.tictactoe.ui.theme.BackGround
 import com.example.tictactoe.ui.theme.Primery
 import com.example.tictactoe.ui.theme.Secondery
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun SetBoxOnline(game: OnlineGameUiState, boxNumber: Int, playerTurn: String) {
@@ -143,14 +147,20 @@ fun OnlineGameButton(game: OnlineGameUiState, boxNumber: Int, box: String, enabl
     }
 }
 
-@SuppressLint("UnrememberedMutableState")
+@SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @Composable
-fun OnlineButtonGrid(game: OnlineGameUiState, myTurn: String?, gameStarted: Boolean, player: String) {
-
+fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player: String) {
+    var game by remember {
+        mutableStateOf(OnlineGameUiState())
+    }
     val enabled = if (gameStarted) {
         myTurn == game.playerTurn
     } else {
         false
+    }
+    val scope = rememberCoroutineScope()
+    var foundWinner by remember {
+        mutableStateOf(false)
     }
 
     Column {
@@ -175,26 +185,98 @@ fun OnlineButtonGrid(game: OnlineGameUiState, myTurn: String?, gameStarted: Bool
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("Games")
 
+    game = findGame(gameId = gameId, databaseReference = databaseReference)
     if(game.times >= 5) {
         databaseReference.child(game.id.toString()).child("winner").setValue(CheckOnlineWinner(game.boxes))
         if(game.winner.isNotEmpty()) {
-            if (game.winner == myTurn) {
-                //show winner
-                ShowOnlineWinner(text1 = "You won")
-                updateScore(playerName = player, addedScore = 1, context = LocalContext.current)
-            } else if (game.winner != myTurn) {
-                //show winner
-                ShowOnlineWinner(text1 = "You lose")
-                updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
+            if (!foundWinner) {
+                if (game.winner == "X" && !foundWinner) {
+                    databaseReference.child(game.id.toString()).child("player1Score").setValue(game.player1Score.plus(1))
+                    foundWinner = true
+                }
+                if (game.winner == "O" && !foundWinner) {
+                    databaseReference.child(game.id.toString()).child("player2Score").setValue(game.player2Score.plus(1))
+                    foundWinner = true
+                }
+            }
+            if (game.player1Score == 2) {
+                if (myTurn == "X") {
+                    //show winner
+                    ShowOnlineWinner(text1 = "You won")
+                    updateScore(playerName = player, addedScore = 1, context = LocalContext.current)
+                } else if (myTurn == "O") {
+                    //show winner
+                    ShowOnlineWinner(text1 = "You lose")
+                    updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
+                }
+            } else if (game.player2Score == 2) {
+                if (myTurn == "O") {
+                    //show winner
+                    ShowOnlineWinner(text1 = "You won")
+                    updateScore(playerName = player, addedScore = 1, context = LocalContext.current)
+                } else if (myTurn == "X") {
+                    //show winner
+                    ShowOnlineWinner(text1 = "You lose")
+                    updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
+                }
+            } else if (foundWinner) {
+                scope.launch {
+                    delay(3000)
+                    ResetGame(game = game, databaseReference = databaseReference)
+                    foundWinner = false
+                }
             }
         }
         //show tie
         else if (game.times == 9){
-            ShowOnlineWinner(text1 = "Draw")
-            updateScore(playerName = player, addedScore = 0, context = LocalContext.current)
+            if (foundWinner) {
+                scope.launch {
+                    delay(3000)
+                    ResetGame(game = game, databaseReference = databaseReference)
+                    foundWinner = false
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun findGame(gameId: Int, databaseReference: DatabaseReference, context: Context = LocalContext.current): OnlineGameUiState {
+    var foundGame by remember {
+        mutableStateOf(OnlineGameUiState())
+    }
+    //get Players collection from database
+    databaseReference.addValueEventListener(object : ValueEventListener {
+        //on success
+        override fun onDataChange(snapshot: DataSnapshot) {
+            for (Game in snapshot.children) {
+                var game = Game.getValue(OnlineGameUiState::class.java)
+                if (game!!.id == gameId) {
+                    foundGame = game
+                    break
+                }
+            }
         }
 
-    }
+        override fun onCancelled(error: DatabaseError) {
+            Toast.makeText(
+                context,
+                "Fail to get the data.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    })
+    return foundGame
+}
+
+fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
+    val resetGame = game.copy(
+        winner = "",
+        boxes = Boxes(),
+        times = 0,
+    )
+    databaseReference.child(game.id.toString()).setValue(resetGame)
+
 }
 
 @Composable
@@ -304,7 +386,7 @@ fun OnlineTicTacToe(player: String, context: Context) {
             }
         }
         Spacer(modifier = Modifier.weight(2f))
-        OnlineButtonGrid(game = currentGame, myTurn = myTurn, gameStarted = foundPlayer, player = player)
+        OnlineButtonGrid(gameId = currentGame.id, myTurn = myTurn, gameStarted = foundPlayer, player = player)
         Spacer(modifier = Modifier.weight(4f))
     }
 }

@@ -522,10 +522,10 @@ fun TicTacToeApp(
                         resetGame(
                             viewModel,
                             navController.popBackStack(GameScreen.TwoPlayers.name, inclusive = false),
-                            timesPlayed,
-                            GameScreen.TwoPlayers,
+                            timesPlayed
                         )
-                    }
+                    },
+                    playerName = signupUiState.name
                 )
             }
 
@@ -542,11 +542,10 @@ fun TicTacToeApp(
                                 GameScreen.SinglePlayer.name,
                                 inclusive = false,
                             ),
-                            timesPlayed,
-                            GameScreen.SinglePlayer,
+                            timesPlayed
                         )
                         Timer().schedule(1000) {
-                            if (timesPlayed % 2 == 1) {
+                            if ((timesPlayed % 2 == 1) && uiState.player_Turn == "O"){
                                 viewModel.botTurn(uiState)
                             }
                         }
@@ -579,12 +578,7 @@ fun resetGame(
     viewModel: TicTacToeViewModel,
     navController: Boolean,
     times: Int,
-    screen: GameScreen,
 ) {
-    if (screen == GameScreen.SinglePlayer) {
-        viewModel.resetGame(times)
-    } else {
-        viewModel.resetGame(times)
-    }
+    viewModel.resetGame(times)
     navController
 }

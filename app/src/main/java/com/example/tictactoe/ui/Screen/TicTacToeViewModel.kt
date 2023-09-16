@@ -29,19 +29,9 @@ class TicTacToeViewModel: ViewModel() {
         }
     }
 
-    fun resetGame(isBotTurn: Boolean = true, times: Int) {
-        _uiState.value = UiState(isenabled = isBotTurn)
-
-        _uiState.update { currentState ->
-            currentState.copy(
-                player_Turn =
-                if (times % 2 == 1) {
-                    "O"
-                } else {
-                    "X"
-                }
-            )
-        }
+    fun resetGame(times: Int) {
+        _uiState.value = UiState(player_Turn = if (times % 2 == 1) { "O" } else { "X" }
+        )
     }
 
     fun onClick() {
