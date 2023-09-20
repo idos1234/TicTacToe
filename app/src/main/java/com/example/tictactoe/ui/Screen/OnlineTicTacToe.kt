@@ -192,13 +192,13 @@ fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player:
     if(game.times >= 5) {
         databaseReference.child(game.id.toString()).child("winner").setValue(CheckOnlineWinner(game.boxes))
         if(game.winner.isNotEmpty()) {
-            if (game.foundWinner) {
-                if (game.winner == "X" && game.foundWinner) {
+            if (!game.foundWinner) {
+                if (game.winner == "X") {
                     databaseReference.child(game.id.toString()).child("player1Score").setValue(game.player1Score.plus(1))
                     databaseReference.child(game.id.toString()).child("foundWinner").setValue(true)
                     enabled = false
                 }
-                if ((game.winner == "O") && game.foundWinner) {
+                if ((game.winner == "O")) {
                     databaseReference.child(game.id.toString()).child("player2Score").setValue(game.player2Score.plus(1))
                     databaseReference.child(game.id.toString()).child("foundWinner").setValue(true)
                     enabled = false
