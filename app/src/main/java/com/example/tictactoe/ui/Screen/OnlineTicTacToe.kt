@@ -16,12 +16,15 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultAlpha
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.example.tictactoe.R
 import com.example.tictactoe.data.Boxes
 import com.example.tictactoe.data.MainPlayerUiState
@@ -151,7 +154,7 @@ fun OnlineGameButton(game: OnlineGameUiState, boxNumber: Int, box: String, enabl
     "SuspiciousIndentation"
 )
 @Composable
-fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player: String) {
+fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player: String, player1: MainPlayerUiState, player2: MainPlayerUiState) {
     var game by remember {
         mutableStateOf(OnlineGameUiState())
     }
@@ -239,12 +242,95 @@ fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player:
         //show tie
         else if (game.times == 9){
             game = findGame(gameId = gameId, databaseReference = databaseReference)
-            if (game.foundWinner) {
+            if (game.foundWinner && game.player1Score != 2 && game.player2Score != 2) {
                 scope.launch {
                     delay(3000)
                     ResetGame(game = game, databaseReference = databaseReference)
                     databaseReference.child(game.id.toString()).child("foundWinner").setValue(false)
                     enabled = true
+                }
+            }
+        }
+    }
+    if (game.foundWinner && game.player1Score != 2 && game.player2Score != 2) {
+        NextRoundDialog(game = findGame(gameId = gameId, databaseReference = databaseReference), player1 = player1, player2 = player2)
+    }
+}
+
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
+fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2: MainPlayerUiState) {
+    var secondsToNextRound by remember {
+        mutableStateOf(3)
+    }
+
+    LaunchedEffect(key1 = secondsToNextRound) {
+        delay(1000L)
+        secondsToNextRound--
+    }
+
+    Dialog(onDismissRequest = {}) {
+        Column(modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .background(Color.White), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "Next round in: $secondsToNextRound", fontWeight = FontWeight.Bold, fontSize = 30.sp, color = Color.Black)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(modifier = Modifier.weight(2f)) {
+                    Column() {
+                        Card(
+                            shape = RoundedCornerShape(125.dp),
+                            elevation = 10.dp,
+                            modifier = Modifier
+                                .size(90.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = player1.currentImage),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                        Text(
+                            text = player1.name,
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                        Text(
+                            text = game.player1Score.toString(),
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Box(modifier = Modifier.weight(2f)) {
+                    Column() {
+                        Card(
+                            shape = RoundedCornerShape(125.dp),
+                            elevation = 10.dp,
+                            modifier = Modifier
+                                .size(90.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = player2.currentImage),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                        Text(
+                            text = player2.name,
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                        Text(
+                            text = game.player2Score.toString(),
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
                 }
             }
         }
@@ -285,6 +371,8 @@ fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
         winner = "",
         boxes = Boxes(),
         times = 0,
+        rounds = game.rounds.plus(1),
+        playerTurn = if (game.rounds.plus(1) % 2 == 0) "O" else "X"
     )
     databaseReference.child(game.id.toString()).setValue(resetGame)
 
@@ -304,11 +392,17 @@ fun OnlineTicTacToe(player: String, context: Context) {
     var myTurn by remember {
         mutableStateOf<String?>(null)
     }
-
+    var player1 by remember {
+        mutableStateOf(MainPlayerUiState())
+    }
+    var player2 by remember {
+        mutableStateOf(MainPlayerUiState())
+    }
 
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("Games")
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     //get Players collection from database
     databaseReference.addValueEventListener(object : ValueEventListener {
@@ -325,6 +419,34 @@ fun OnlineTicTacToe(player: String, context: Context) {
                             winner = game.winner,
                             boxes = game.boxes
                         )
+                        //get Players collection from database
+                        db.collection("Players").get()
+                            //on success
+                            .addOnSuccessListener { queryDocumentSnapshots ->
+                                //check if collection is empty
+                                if (!queryDocumentSnapshots.isEmpty) {
+                                    val list = queryDocumentSnapshots.documents
+                                    for (d in list) {
+                                        val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
+                                        //find player using database
+                                        if (p?.name == game.player1){
+                                            player1 = p
+                                        }
+                                        if (p?.name == player){
+                                            player2 = p
+                                        }
+
+                                    }
+                                }
+                            }
+                            //on failure
+                            .addOnFailureListener {
+                                Toast.makeText(
+                                    context,
+                                    "Fail to get the data.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         databaseReference.child(game.id.toString()).child("player2").setValue(player)
                         currentGame = updatedGame
                         foundPlayer = true
@@ -340,6 +462,30 @@ fun OnlineTicTacToe(player: String, context: Context) {
                         winner = "",
                         boxes = Boxes()
                     )
+                    //get Players collection from database
+                    db.collection("Players").get()
+                        //on success
+                        .addOnSuccessListener { queryDocumentSnapshots ->
+                            //check if collection is empty
+                            if (!queryDocumentSnapshots.isEmpty) {
+                                val list = queryDocumentSnapshots.documents
+                                for (d in list) {
+                                    val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
+                                    //find player using database
+                                    if (p?.name == player){
+                                        player1 = p
+                                    }
+                                }
+                            }
+                        }
+                        //on failure
+                        .addOnFailureListener {
+                            Toast.makeText(
+                                context,
+                                "Fail to get the data.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     databaseReference.child(snapshot.children.toList().size.plus(1).toString()).setValue(newGame)
                     currentGame = newGame
                     myTurn = "X"
@@ -352,6 +498,30 @@ fun OnlineTicTacToe(player: String, context: Context) {
                     currentGame = game
                     if (currentGame.player2 != "") {
                         foundPlayer = true
+                        //get Players collection from database
+                        db.collection("Players").get()
+                            //on success
+                            .addOnSuccessListener { queryDocumentSnapshots ->
+                                //check if collection is empty
+                                if (!queryDocumentSnapshots.isEmpty) {
+                                    val list = queryDocumentSnapshots.documents
+                                    for (d in list) {
+                                        val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
+                                        if (p?.name == currentGame.player2){
+                                            player2 = p
+                                        }
+
+                                    }
+                                }
+                            }
+                            //on failure
+                            .addOnFailureListener {
+                                Toast.makeText(
+                                    context,
+                                    "Fail to get the data.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                     }
                 }
             }
@@ -368,36 +538,95 @@ fun OnlineTicTacToe(player: String, context: Context) {
     }
     )
 
-    foundPlayer = currentGame.player2 != ""
-
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
         Spacer(modifier = Modifier.weight(1f))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Card(modifier = Modifier
-                .size(150.dp)
-                .padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (currentGame.playerTurn == "X") Primery else { Secondery})) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("X", fontWeight = FontWeight.Bold, fontSize = 35.sp)
-                    Text(currentGame.player1, fontSize = 10.sp)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (player1 != MainPlayerUiState()) {
+                    Card(
+                        modifier = Modifier
+                            .size(150.dp)
+                            .padding(20.dp),
+                        elevation = 5.dp,
+                        backgroundColor = Secondery,
+                        border = BorderStroke(
+                            2.dp,
+                            if (currentGame.playerTurn == "X") Primery else {
+                                Secondery
+                            }
+                        )
+                    ) {
+                        Image(
+                            painter = painterResource(id = player1.currentImage),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    Text(player1.name, fontSize = 10.sp, color = Color.White)
+                } else {
+                    Card(
+                        modifier = Modifier
+                            .size(150.dp)
+                            .padding(20.dp),
+                        elevation = 5.dp,
+                        backgroundColor = Secondery,
+                        border = BorderStroke(
+                            2.dp,
+                            if (currentGame.playerTurn == "O") Primery else {
+                                Secondery
+                            }
+                        )
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
             }
-            Card(modifier = Modifier
-                .size(150.dp)
-                .padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (currentGame.playerTurn == "O") Primery else { Secondery})) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    if (foundPlayer) {
-                        Text("O", fontWeight = FontWeight.Bold, fontSize = 35.sp)
-                        Text(currentGame.player2, fontSize = 10.sp)
-                    } else {
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (foundPlayer) {
+                    Card(
+                        modifier = Modifier
+                            .size(150.dp)
+                            .padding(20.dp),
+                        elevation = 5.dp,
+                        backgroundColor = Secondery,
+                        border = BorderStroke(
+                            2.dp,
+                            if (currentGame.playerTurn == "O") Primery else {
+                                Secondery
+                            }
+                        )
+                    ) {
+                        Image(
+                            painter = painterResource(id = player2.currentImage),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    Text(player2.name, fontSize = 10.sp, color = Color.White)
+                } else {
+                    Card(
+                        modifier = Modifier
+                            .size(150.dp)
+                            .padding(20.dp),
+                        elevation = 5.dp,
+                        backgroundColor = Secondery,
+                        border = BorderStroke(
+                            2.dp,
+                            if (currentGame.playerTurn == "O") Primery else {
+                                Secondery
+                            }
+                        )
+                    ) {
                         CircularProgressIndicator()
                     }
                 }
             }
         }
         Spacer(modifier = Modifier.weight(2f))
-        OnlineButtonGrid(gameId = currentGame.id, myTurn = myTurn, gameStarted = foundPlayer, player = player)
+        OnlineButtonGrid(gameId = currentGame.id, myTurn = myTurn, gameStarted = foundPlayer, player = player, player1 = player1, player2 = player2)
         Spacer(modifier = Modifier.weight(4f))
     }
 }
