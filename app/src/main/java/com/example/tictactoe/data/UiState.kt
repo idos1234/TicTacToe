@@ -28,10 +28,6 @@ data class UiState (
 
     //show whose turn X/O
     var player_Turn: String = "X",
-    //player1
-    var player1: Player = Player(),
-    //player2
-    var player2: Player = Player(),
     //who is the winner
     var winner: String = "",
     //show if need to check winner

@@ -22,6 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -270,9 +271,9 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
     }
 
     Dialog(onDismissRequest = {}) {
-        Column(modifier = Modifier
-            .fillMaxWidth(0.9f)
-            .background(Color.White), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+            .fillMaxWidth(0.98f)
+            .background(Color.White)) {
             Text(text = "Next round in: $secondsToNextRound", fontWeight = FontWeight.Bold, fontSize = 30.sp, color = Color.Black)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(modifier = Modifier.weight(2f)) {
@@ -552,7 +553,7 @@ fun OnlineTicTacToe(player: String, context: Context) {
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
-                            2.dp,
+                            5.dp,
                             if (currentGame.playerTurn == "X") Primery else {
                                 Secondery
                             }
@@ -584,6 +585,8 @@ fun OnlineTicTacToe(player: String, context: Context) {
                 }
             }
 
+            Text("${currentGame.player1Score} : ${currentGame.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
+
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 if (foundPlayer) {
                     Card(
@@ -593,7 +596,7 @@ fun OnlineTicTacToe(player: String, context: Context) {
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
-                            2.dp,
+                            5.dp,
                             if (currentGame.playerTurn == "O") Primery else {
                                 Secondery
                             }
@@ -950,4 +953,8 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
         }
 }
 
-
+@Composable
+@Preview
+fun preview() {
+    NextRoundDialog(game = OnlineGameUiState(), player1 = MainPlayerUiState(), player2 = MainPlayerUiState())
+}
