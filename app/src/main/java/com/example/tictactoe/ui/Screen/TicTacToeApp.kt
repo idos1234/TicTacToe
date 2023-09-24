@@ -52,7 +52,9 @@ enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val tit
     SinglePlayer(title = "Single Player"),
     Online(title = "Online"),
     LeaderBoard(title = "LeaderBoard"),
-    ProfileScreen(title = "ProfileScreen")
+    ProfileScreen(title = "ProfileScreen"),
+    CodeGame(title = "CodeGame"),
+    GameWithCode(title = "GameWithCode")
 }
 
 /**
@@ -210,7 +212,13 @@ fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, o
             navController.navigate(GameScreen.LeaderBoard.name)
             onChangeScreen()},
             modifier = Modifier.fillMaxWidth()) {
-            Text(text = "LeaderBoard")
+            Text(text = "Leader Board")
+        }
+        Button(onClick = {
+            navController.navigate(GameScreen.CodeGame.name)
+            onChangeScreen()},
+            modifier = Modifier.fillMaxWidth()) {
+            Text(text = "Play with code")
         }
         Button(onClick = {
             navController.navigate(GameScreen.AboutUs.name)
@@ -293,6 +301,7 @@ fun CheckExit(onQuitClick: () -> Unit, onCancelClick: () -> Unit) {
 fun TicTacToeApp(
     viewModel: TicTacToeViewModel = TicTacToeViewModel(),
     signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    codeGameViewModel: CodeGameViewModel = CodeGameViewModel()
 ) {
     //nav controller
     val context = LocalContext.current
@@ -307,6 +316,7 @@ fun TicTacToeApp(
     val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
     val signupUiState = signUpViewModel.emailsharedPreferences
+    val codeGameUiState by codeGameViewModel.codeGameUiState.collectAsState()
 
 
     var timesPlayed by remember {
@@ -354,6 +364,15 @@ fun TicTacToeApp(
                     icon = Icons.Default.Menu
                 )
             GameScreen.AboutUs ->
+                TopAppBar(
+                    onClick = {
+                        scope.launch {
+                            scaffoldState.drawerState.open()
+                        }
+                    },
+                    icon = Icons.Default.Menu
+                )
+            GameScreen.CodeGame ->
                 TopAppBar(
                     onClick = {
                         scope.launch {
@@ -569,6 +588,15 @@ fun TicTacToeApp(
                 ProfileScreen(player = signupUiState.name, context = LocalContext.current)
             }
 
+            //codeGame
+            composable(route = GameScreen.CodeGame.name) {
+                codeGameScreen(codeGameViewModel = codeGameViewModel, codeGameUiState = codeGameUiState, navController = navController)
+            }
+
+            //game with code
+            composable(route = GameScreen.GameWithCode.name) {
+                OnlineGameWithCode(gameId = codeGameUiState.gameCode, context = LocalContext.current, openGame = codeGameUiState.openGame, player = signupUiState.name)
+            }
         }
     }
 
