@@ -411,7 +411,7 @@ fun OnlineTicTacToe(player: String, context: Context) {
             while (times == 1) {
                 Loop@ for (Game in snapshot.children) {
                     val game = Game.getValue(OnlineGameUiState::class.java)
-                    if ((game!!.player2 == "") && (game.winner == "")) {
+                    if ((game!!.player2 == "")) {
                         val updatedGame = OnlineGameUiState(
                             id = game.id,
                             player1 = game.player1,

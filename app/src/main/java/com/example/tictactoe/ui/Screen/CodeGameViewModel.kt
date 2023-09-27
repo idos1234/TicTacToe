@@ -14,14 +14,8 @@ class CodeGameViewModel {
             it.copy(gameCode = newGameCode)
         }
     }
-    fun openGame(openGame: Boolean) {
-        _codeGameUiState.update {
-            it.copy(openGame = openGame)
-        }
-    }
 }
 
 data class CodeGame(
-    var gameCode: String = "",
-    var openGame: Boolean = true
+    var gameCode: String = ""
 )

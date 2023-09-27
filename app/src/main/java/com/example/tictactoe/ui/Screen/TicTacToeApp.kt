@@ -54,7 +54,8 @@ enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val tit
     LeaderBoard(title = "LeaderBoard"),
     ProfileScreen(title = "ProfileScreen"),
     CodeGame(title = "CodeGame"),
-    GameWithCode(title = "GameWithCode")
+    OpenGameWithCode(title = "OpenGameWithCode"),
+    EnterGameWithCode(title = "EnterGameWithCode")
 }
 
 /**
@@ -593,10 +594,16 @@ fun TicTacToeApp(
                 codeGameScreen(codeGameViewModel = codeGameViewModel, codeGameUiState = codeGameUiState, navController = navController)
             }
 
-            //game with code
-            composable(route = GameScreen.GameWithCode.name) {
-                OnlineGameWithCode(gameId = codeGameUiState.gameCode, context = LocalContext.current, openGame = codeGameUiState.openGame, player = signupUiState.name)
+            //open game with code
+            composable(route = GameScreen.OpenGameWithCode.name) {
+                OpenOnlineGameWithCode(context = LocalContext.current, player = signupUiState.name)
             }
+
+            //enter game with code
+            composable(route = GameScreen.EnterGameWithCode.name) {
+                EnterOnlineGameWithCode(context = LocalContext.current, player = signupUiState.name, gameId = codeGameUiState.gameCode)
+            }
+
         }
     }
 
