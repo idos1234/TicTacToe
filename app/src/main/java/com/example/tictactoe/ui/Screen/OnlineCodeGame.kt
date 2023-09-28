@@ -523,23 +523,13 @@ fun CheckForGame(gameId: String, context: Context, onFindGame: () -> Unit, onNot
                     if (game.player2 == "") {
                         onFindGame()
                     } else {
-                        Toast.makeText(
-                            context,
-                            "The game already started.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        onNotFindGame()
+
                     }
                     break
                 }
             }
             if (!foundGame) {
-                Toast.makeText(
-                    context,
-                    "Did not find game.",
-                    Toast.LENGTH_SHORT
-                ).show()
-                onNotFindGame()
+
             }
         }
 

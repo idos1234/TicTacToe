@@ -186,17 +186,13 @@ fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player:
         if(game.winner.isNotEmpty()) {
             if (!game.foundWinner) {
                 if (game.winner == "X") {
-                    if (myTurn == "X") {
-                        databaseReference.child(game.id.toString()).child("player1Score").setValue(game.player1Score.plus(1))
-                        databaseReference.child(game.id.toString()).child("foundWinner").setValue(true)
-                    }
+                    databaseReference.child(game.id.toString()).child("foundWinner").setValue(true)
+                    databaseReference.child(game.id.toString()).child("player1Score").setValue(game.player1Score.plus(1))
                     enabled = false
                 }
                 if ((game.winner == "O")) {
-                    if (myTurn == "X") {
-                        databaseReference.child(game.id.toString()).child("player2Score").setValue(game.player2Score.plus(1))
-                        databaseReference.child(game.id.toString()).child("foundWinner").setValue(true)
-                    }
+                    databaseReference.child(game.id.toString()).child("foundWinner").setValue(true)
+                    databaseReference.child(game.id.toString()).child("player2Score").setValue(game.player2Score.plus(1))
                     enabled = false
                 }
             }
@@ -226,10 +222,8 @@ fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player:
                 if (game.foundWinner && game.player1Score != 2 && game.player2Score != 2) {
                     scope.launch {
                         delay(3000)
-                        if (myTurn == "X") {
-                            ResetGame(game = game, databaseReference = databaseReference)
-                            databaseReference.child(game.id.toString()).child("foundWinner").setValue(false)
-                        }
+                        ResetGame(game = game, databaseReference = databaseReference)
+                        databaseReference.child(game.id.toString()).child("foundWinner").setValue(false)
                         enabled = true
                     }
             }
@@ -240,10 +234,8 @@ fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player:
             if (game.player1Score != 2 && game.player2Score != 2) {
                 scope.launch {
                     delay(3000)
-                    if (myTurn == "X") {
-                        ResetGame(game = game, databaseReference = databaseReference)
-                        databaseReference.child(game.id.toString()).child("foundWinner").setValue(false)
-                    }
+                    ResetGame(game = game, databaseReference = databaseReference)
+                    databaseReference.child(game.id.toString()).child("foundWinner").setValue(false)
                     enabled = true
                 }
             }
