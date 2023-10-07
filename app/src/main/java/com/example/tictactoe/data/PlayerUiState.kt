@@ -38,7 +38,6 @@ data class MainPlayerUiState(
     ),
     var wins: Int = 0,
     var loses: Int = 0,
-    var draws: Int = 0,
     var level: Int = 1,
     var unlockedX: List<Int> = listOf(R.drawable.x_1),
     var unlockedO: List<Int> = listOf(R.drawable.o_1),

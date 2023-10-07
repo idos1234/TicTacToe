@@ -884,70 +884,14 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
                                     unlockedO = unlockedO,
                                     wins = player.wins + 1,
                                     loses = player.loses,
-                                    draws = player.draws,
                                     level = newLevel
                                 )
-                            } else {
-                                updatedPlayer = MainPlayerUiState(
-                                    name = player.name,
-                                    email = player.email,
-                                    score = score,
-                                    password = player.password,
-                                    currentImage = player.currentImage,
-                                    unlockedImages = player.unlockedImages,
-                                    lockedImages = player.lockedImages,
-                                    currentX = player.currentX,
-                                    currentO = player.currentO,
-                                    lockedX = player.lockedX,
-                                    lockedO = player.lockedX,
-                                    unlockedX = player.lockedX,
-                                    unlockedO = player.lockedX,
-                                    wins = player.wins + 1,
-                                    loses = player.loses,
-                                    draws = player.draws,
-                                    level = player.level
-                                )
+                            } else if (addedScore == 1) {
+                                updatedPlayer = player.copy(score = score, wins = player.wins + 1)
                             }
                         } else if (addedScore == -1) {
-                            updatedPlayer = MainPlayerUiState(
-                                name = player.name,
-                                email = player.email,
-                                score = score,
-                                password = player.password,
-                                currentImage = player.currentImage,
-                                unlockedImages = player.unlockedImages,
-                                lockedImages = player.lockedImages,
-                                currentX = player.currentX,
-                                currentO = player.currentO,
-                                lockedX = player.lockedX,
-                                lockedO = player.lockedX,
-                                unlockedX = player.lockedX,
-                                unlockedO = player.lockedX,
-                                wins = player.wins,
-                                loses = player.loses + 1,
-                                draws = player.draws,
-                                level = player.level
-                            )
-                        } else if (addedScore == 0) {
-                            updatedPlayer = MainPlayerUiState(
-                                name = player.name,
-                                email = player.email,
-                                score = score,
-                                password = player.password,
-                                currentImage = player.currentImage,
-                                unlockedImages = player.unlockedImages,
-                                lockedImages = player.lockedImages,
-                                currentX = player.currentX,
-                                currentO = player.currentO,
-                                lockedX = player.lockedX,
-                                lockedO = player.lockedX,
-                                unlockedX = player.lockedX,
-                                unlockedO = player.lockedX,
-                                wins = player.wins,
-                                loses = player.loses,
-                                draws = player.draws + 1,
-                                level = player.level
-                            )
+                            updatedPlayer = player.copy(score = score, wins = player.loses + 1)
+
                         }
 
                         db.collection("Players")

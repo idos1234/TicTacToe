@@ -149,11 +149,6 @@ fun ProfileScreen(player: String, context: Context) {
                     Card(Modifier.size(15.dp), backgroundColor = Color.Yellow){}
                     Text(text = "Loses = ${profile.loses}", Modifier.padding(start = 4.dp))
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.Start) {
-                    Card(Modifier.size(15.dp), backgroundColor = Color.Green){}
-                    Text(text = "Draws = ${profile.draws}", Modifier.padding(start = 4.dp))
-                }
             }
             Spacer(modifier = Modifier.height(10.dp))
             PlayerGraph(
@@ -321,7 +316,6 @@ fun ShowPlayerX(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
             unlockedImages = player.unlockedImages,
             wins = player.wins,
             loses = player.loses,
-            draws = player.draws,
             level = player.level,
             lockedX = player.lockedX,
             unlockedX = player.unlockedX,
@@ -423,7 +417,6 @@ fun ShowPlayerO(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
             unlockedImages = player.unlockedImages,
             wins = player.wins,
             loses = player.loses,
-            draws = player.draws,
             level = player.level,
             lockedO = player.lockedO,
             unlockedO = player.unlockedO,
@@ -460,7 +453,6 @@ fun PlayerGraph(
         slices = listOf(
             PieChartData.Slice("Wins", profile.wins.toFloat(), winsColor),
             PieChartData.Slice("Loses", profile.loses.toFloat(), losesColor),
-            PieChartData.Slice("Draws", profile.draws.toFloat(), drawsColor),
         ),
         plotType = PlotType.Pie
     )
