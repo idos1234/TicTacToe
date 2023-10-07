@@ -393,10 +393,10 @@ fun findGame(gameId: Int, databaseReference: DatabaseReference, context: Context
 }
 
 fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
-    databaseReference.child(game.id.toString()).child("foundWinner").setValue(false)
     databaseReference.child(game.id.toString()).child("winner").setValue("")
     databaseReference.child(game.id.toString()).child("boxes").setValue(Boxes())
     databaseReference.child(game.id.toString()).child("times").setValue(0)
+    databaseReference.child(game.id.toString()).child("foundWinner").setValue(false)
     databaseReference.child(game.id.toString()).child("startedPlayer").setValue(if (game.startedPlayer == "X") {"O"} else {"X"})
     databaseReference.child(game.id.toString()).child("playerTurn").setValue(if (game.startedPlayer == "X") {"O"} else {"X"})
 }
