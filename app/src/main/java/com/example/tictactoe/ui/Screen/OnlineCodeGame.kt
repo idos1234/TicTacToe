@@ -497,14 +497,13 @@ fun enterGameWithCodeButton(modifier: Modifier, codeGameViewModel: CodeGameViewM
             onFindGame = {
                 enterGame = false
                 navController.navigate(GameScreen.EnterGameWithCode.name)
-            },
-            onNotFindGame = { enterGame = false }
+            }
         )
     }
 }
 
 @Composable
-fun CheckForGame(gameId: String, context: Context, onFindGame: () -> Unit, onNotFindGame: () -> Unit) {
+fun CheckForGame(gameId: String, context: Context, onFindGame: () -> Unit) {
     var foundGame by remember {
         mutableStateOf(false)
     }

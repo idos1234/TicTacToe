@@ -11,7 +11,7 @@ data class OnlineGameUiState (
     var player1Score: Int = 0,
     var player2Score: Int = 0,
     var foundWinner: Boolean = false,
-    var rounds: Int = 1
+    var startedPlayer: String = "X"
 )
 
 data class Boxes (

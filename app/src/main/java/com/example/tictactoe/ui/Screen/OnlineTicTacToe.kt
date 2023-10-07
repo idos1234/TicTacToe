@@ -159,6 +159,15 @@ fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player:
     var enabled by remember {
         mutableStateOf(true)
     }
+    var foundWinner by remember {
+        mutableStateOf(false)
+    }
+    var times by remember {
+        mutableStateOf(0)
+    }
+    var startedCountDown by remember {
+        mutableStateOf(false)
+    }
 
     val scope = rememberCoroutineScope()
 
@@ -218,12 +227,10 @@ fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player:
                 }
             } else
                 game = findGame(gameId = gameId, databaseReference = databaseReference)
-
                 if (game.foundWinner && game.player1Score != 2 && game.player2Score != 2) {
                     scope.launch {
                         delay(3000)
                         ResetGame(game = game, databaseReference = databaseReference)
-                        databaseReference.child(game.id.toString()).child("foundWinner").setValue(false)
                         enabled = true
                     }
             }
@@ -235,23 +242,47 @@ fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player:
                 scope.launch {
                     delay(3000)
                     ResetGame(game = game, databaseReference = databaseReference)
-                    databaseReference.child(game.id.toString()).child("foundWinner").setValue(false)
                     enabled = true
                 }
             }
         }
     }
-    if (game.foundWinner && game.player1Score != 2 && game.player2Score != 2) {
-        NextRoundDialog(game = findGame(gameId = gameId, databaseReference = databaseReference), player1 = player1, player2 = player2)
+
+    if (!startedCountDown) {
+        foundWinner = game.foundWinner
     }
-    if (game.times == 9 && game.player1Score != 2 && game.player2Score != 2) {
-        NextRoundDialog(game = findGame(gameId = gameId, databaseReference = databaseReference), player1 = player1, player2 = player2)
+    if (foundWinner && (game.player1Score != 2) && (game.player2Score != 2)) {
+        startedCountDown = true
+        NextRoundDialog(
+            game = findGame(gameId = gameId, databaseReference = databaseReference),
+            player1 = player1,
+            player2 = player2,
+            onZeroSecs = {
+                foundWinner = false
+                startedCountDown = false
+            }
+        )
+    }
+    if (!startedCountDown) {
+        times = game.times
+    }
+    if ((times == 9) && (game.player1Score != 2) && (game.player2Score != 2)) {
+        startedCountDown = true
+        NextRoundDialog(
+            game = findGame(gameId = gameId, databaseReference = databaseReference),
+            player1 = player1,
+            player2 = player2,
+            onZeroSecs = {
+                times = 0
+                startedCountDown = false
+            }
+        )
     }
 }
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2: MainPlayerUiState) {
+fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2: MainPlayerUiState, onZeroSecs: () -> Unit) {
     var secondsToNextRound by remember {
         mutableStateOf(3)
     }
@@ -259,6 +290,9 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
     LaunchedEffect(key1 = secondsToNextRound) {
         delay(1000L)
         secondsToNextRound--
+        if (secondsToNextRound <= 0) {
+            onZeroSecs()
+        }
     }
 
     Dialog(onDismissRequest = {}) {
@@ -359,15 +393,12 @@ fun findGame(gameId: Int, databaseReference: DatabaseReference, context: Context
 }
 
 fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
-    val resetGame = game.copy(
-        winner = "",
-        boxes = Boxes(),
-        times = 0,
-        rounds = game.rounds.plus(1),
-        playerTurn = if (game.rounds.plus(1) % 2 == 0) "O" else "X"
-    )
-    databaseReference.child(game.id.toString()).setValue(resetGame)
-
+    databaseReference.child(game.id.toString()).child("foundWinner").setValue(false)
+    databaseReference.child(game.id.toString()).child("winner").setValue("")
+    databaseReference.child(game.id.toString()).child("boxes").setValue(Boxes())
+    databaseReference.child(game.id.toString()).child("times").setValue(0)
+    databaseReference.child(game.id.toString()).child("startedPlayer").setValue(if (game.startedPlayer == "X") {"O"} else {"X"})
+    databaseReference.child(game.id.toString()).child("playerTurn").setValue(if (game.startedPlayer == "X") {"O"} else {"X"})
 }
 
 @Composable
