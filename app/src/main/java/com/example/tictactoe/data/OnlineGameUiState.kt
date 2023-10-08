@@ -1,7 +1,7 @@
 package com.example.tictactoe.data
 
-data class OnlineGameUiState (
-    var id: Int = 0,
+data class OnlineGameUiState(
+    var id: String = "",
     var player1: String = "",
     var player2: String = "",
     var winner: String = "",
@@ -11,7 +11,7 @@ data class OnlineGameUiState (
     var player1Score: Int = 0,
     var player2Score: Int = 0,
     var foundWinner: Boolean = false,
-    var startedPlayer: String = "X"
+    var rounds: Int = 1
 )
 
 data class Boxes (

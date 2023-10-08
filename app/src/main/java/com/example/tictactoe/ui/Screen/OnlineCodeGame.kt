@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.tictactoe.data.Boxes
 import com.example.tictactoe.data.MainPlayerUiState
@@ -62,14 +63,15 @@ fun OpenOnlineGameWithCode(context: Context, player: String) {
         override fun onDataChange(snapshot: DataSnapshot) {
             while (times == 1) {
                 if (currentGame == OnlineGameUiState()) {
+                    val key: String = databaseReference.push().key!!.takeLast(5)
                     val newGame = OnlineGameUiState(
-                        id = snapshot.children.toList().size.plus(1),
+                        id = key,
                         player1 = player,
                         player2 = "",
                         winner = "",
                         boxes = Boxes()
                     )
-                    databaseReference.child(snapshot.children.toList().size.plus(1).toString())
+                    databaseReference.child(key)
                         .setValue(newGame)
                     currentGame = newGame
                     myTurn = "X"
@@ -102,7 +104,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String) {
                 times++
             }
             for (Game in snapshot.children) {
-                var game = Game.getValue(OnlineGameUiState::class.java)
+                val game = Game.getValue(OnlineGameUiState::class.java)
                 if (game!!.id == currentGame.id) {
                     currentGame = game
                     if (currentGame.player2 != "") {
@@ -241,14 +243,22 @@ fun OpenOnlineGameWithCode(context: Context, player: String) {
     }
     
     if(!foundPlayer) {
-        AlertDialog(
-            onDismissRequest = {},
-            confirmButton = {},
-            dismissButton = {},
-            text = {
-                Text(text = "Game code: ${currentGame.id}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Dialog(
+            onDismissRequest = {}
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.background(Color.White)) {
+                Text(
+                    text = "Game code:",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Normal
+                )
+                Text(
+                    text = currentGame.id,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
-        )
+        }
     }
 }
 
@@ -283,7 +293,7 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String) {
             while (times == 1) {
                 for (Game in snapshot.children) {
                     val game = Game.getValue(OnlineGameUiState::class.java)
-                    if ((game!!.id.toString() == gameId)) {
+                    if ((game!!.id == gameId)) {
                         val updatedGame = OnlineGameUiState(
                             id = game.id,
                             player1 = game.player1,
@@ -319,7 +329,7 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String) {
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
-                        databaseReference.child(game.id.toString()).child("player2").setValue(player)
+                        databaseReference.child(game.id).child("player2").setValue(player)
                         foundPlayer = true
                         currentGame = updatedGame
                         myTurn = "O"
@@ -329,7 +339,7 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String) {
                 times++
             }
             for (Game in snapshot.children) {
-                var game = Game.getValue(OnlineGameUiState::class.java)
+                val game = Game.getValue(OnlineGameUiState::class.java)
                 if (game!!.id == currentGame.id) {
                     currentGame = game
                     }
@@ -516,8 +526,8 @@ fun CheckForGame(gameId: String, context: Context, onFindGame: () -> Unit) {
         //on success
         override fun onDataChange(snapshot: DataSnapshot) {
             for (Game in snapshot.children) {
-                var game = Game.getValue(OnlineGameUiState::class.java)
-                if (game!!.id.toString() == gameId) {
+                val game = Game.getValue(OnlineGameUiState::class.java)
+                if (game!!.id == gameId) {
                     foundGame = true
                     if (game.player2 == "") {
                         onFindGame()

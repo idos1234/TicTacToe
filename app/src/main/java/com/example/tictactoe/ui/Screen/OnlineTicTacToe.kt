@@ -54,8 +54,8 @@ fun SetBoxOnline(game: OnlineGameUiState, boxNumber: Int, playerTurn: String, da
         else -> null
     }
 
-    databaseReference.child(game.id.toString()).child("boxes").setValue(boxes)
-    databaseReference.child(game.id.toString()).child("times").setValue(game.times.plus(1))
+    databaseReference.child(game.id).child("boxes").setValue(boxes)
+    databaseReference.child(game.id).child("times").setValue(game.times.plus(1))
 
 }
 
@@ -67,7 +67,7 @@ fun changePlayerTurn(game: OnlineGameUiState, databaseReference: DatabaseReferen
         "X"
     }
 
-    databaseReference.child(game.id.toString()).child("playerTurn").setValue(PlayerTurn)
+    databaseReference.child(game.id).child("playerTurn").setValue(PlayerTurn)
 
 }
 
@@ -147,7 +147,7 @@ fun OnlineGameButton(game: OnlineGameUiState, boxNumber: Int, box: String, enabl
     "SuspiciousIndentation"
 )
 @Composable
-fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player: String, player1: MainPlayerUiState, player2: MainPlayerUiState, databaseReference: DatabaseReference) {
+fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, player: String, player1: MainPlayerUiState, player2: MainPlayerUiState, databaseReference: DatabaseReference) {
     var game by remember {
         mutableStateOf(OnlineGameUiState())
     }
@@ -191,17 +191,19 @@ fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player:
 
     game = findGame(gameId = gameId, databaseReference = databaseReference)
     if(game.times >= 5) {
-        databaseReference.child(game.id.toString()).child("winner").setValue(CheckOnlineWinner(game.boxes))
+        databaseReference.child(game.id).child("winner").setValue(CheckOnlineWinner(game.boxes))
         if(game.winner.isNotEmpty()) {
             if (!game.foundWinner) {
                 if (game.winner == "X") {
-                    databaseReference.child(game.id.toString()).child("foundWinner").setValue(true)
-                    databaseReference.child(game.id.toString()).child("player1Score").setValue(game.player1Score.plus(1))
+                    databaseReference.child(game.id).child("foundWinner").setValue(true)
+                    databaseReference.child(game.id).child("player1Score").setValue(game.player1Score.plus(1))
+                    databaseReference.child(game.id).child("rounds").setValue(game.rounds.plus(1))
                     enabled = false
                 }
                 if ((game.winner == "O")) {
-                    databaseReference.child(game.id.toString()).child("foundWinner").setValue(true)
-                    databaseReference.child(game.id.toString()).child("player2Score").setValue(game.player2Score.plus(1))
+                    databaseReference.child(game.id).child("foundWinner").setValue(true)
+                    databaseReference.child(game.id).child("player2Score").setValue(game.player2Score.plus(1))
+                    databaseReference.child(game.id).child("rounds").setValue(game.rounds.plus(1))
                     enabled = false
                 }
             }
@@ -235,7 +237,7 @@ fun OnlineButtonGrid(gameId: Int, myTurn: String?, gameStarted: Boolean, player:
                     }
             }
         }
-        //show tie
+        //tie
         else if (game.times == 9){
             game = findGame(gameId = gameId, databaseReference = databaseReference)
             if (game.player1Score != 2 && game.player2Score != 2) {
@@ -364,7 +366,7 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
 }
 
 @Composable
-fun findGame(gameId: Int, databaseReference: DatabaseReference, context: Context = LocalContext.current): OnlineGameUiState {
+fun findGame(gameId: String, databaseReference: DatabaseReference, context: Context = LocalContext.current): OnlineGameUiState {
     var foundGame by remember {
         mutableStateOf(OnlineGameUiState())
     }
@@ -373,7 +375,7 @@ fun findGame(gameId: Int, databaseReference: DatabaseReference, context: Context
         //on success
         override fun onDataChange(snapshot: DataSnapshot) {
             for (Game in snapshot.children) {
-                var game = Game.getValue(OnlineGameUiState::class.java)
+                val game = Game.getValue(OnlineGameUiState::class.java)
                 if (game!!.id == gameId) {
                     foundGame = game
                     break
@@ -393,12 +395,16 @@ fun findGame(gameId: Int, databaseReference: DatabaseReference, context: Context
 }
 
 fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
-    databaseReference.child(game.id.toString()).child("winner").setValue("")
-    databaseReference.child(game.id.toString()).child("boxes").setValue(Boxes())
-    databaseReference.child(game.id.toString()).child("times").setValue(0)
-    databaseReference.child(game.id.toString()).child("foundWinner").setValue(false)
-    databaseReference.child(game.id.toString()).child("startedPlayer").setValue(if (game.startedPlayer == "X") {"O"} else {"X"})
-    databaseReference.child(game.id.toString()).child("playerTurn").setValue(if (game.startedPlayer == "X") {"O"} else {"X"})
+    databaseReference.child(game.id).child("winner").setValue("")
+    databaseReference.child(game.id).child("boxes").setValue(Boxes())
+    databaseReference.child(game.id).child("times").setValue(0)
+    databaseReference.child(game.id).child("foundWinner").setValue(false)
+    val playerTurn = if ((game.rounds % 2) == 0) {
+        "O"
+    } else if ((game.rounds % 2) == 1) {
+        "X"
+    } else null
+    databaseReference.child(game.id).child("playerTurn").setValue(playerTurn)
 }
 
 @Composable
@@ -470,7 +476,7 @@ fun OnlineTicTacToe(player: String, context: Context) {
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
-                        databaseReference.child(game.id.toString()).child("player2").setValue(player)
+                        databaseReference.child(game.id).child("player2").setValue(player)
                         currentGame = updatedGame
                         foundPlayer = true
                         myTurn = "O"
@@ -478,8 +484,9 @@ fun OnlineTicTacToe(player: String, context: Context) {
                     }
                 }
                 if (currentGame == OnlineGameUiState()) {
+                    val key: String = databaseReference.push().key!!.takeLast(5)
                     val newGame = OnlineGameUiState(
-                        id = snapshot.children.toList().size.plus(1),
+                        id = key,
                         player1 = player,
                         player2 = "",
                         winner = "",
@@ -509,7 +516,7 @@ fun OnlineTicTacToe(player: String, context: Context) {
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
-                    databaseReference.child(snapshot.children.toList().size.plus(1).toString()).setValue(newGame)
+                    databaseReference.child(key).setValue(newGame)
                     currentGame = newGame
                     myTurn = "X"
                 }
@@ -886,7 +893,7 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
                                     loses = player.loses,
                                     level = newLevel
                                 )
-                            } else if (addedScore == 1) {
+                            } else {
                                 updatedPlayer = player.copy(score = score, wins = player.wins + 1)
                             }
                         } else if (addedScore == -1) {
