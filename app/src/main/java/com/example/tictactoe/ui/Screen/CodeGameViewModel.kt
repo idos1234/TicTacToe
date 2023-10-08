@@ -6,16 +6,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 class CodeGameViewModel {
-    private val _codeGameUiState = MutableStateFlow(CodeGame())
-    val codeGameUiState: StateFlow<CodeGame> = _codeGameUiState.asStateFlow()
+    private val _onlineGameValuesUiState = MutableStateFlow(OnlineGameRememberedValues())
+    val onlineGameValuesUiState: StateFlow<OnlineGameRememberedValues> = _onlineGameValuesUiState.asStateFlow()
 
     fun updateGameCode(newGameCode: String) {
-        _codeGameUiState.update {
+        _onlineGameValuesUiState.update {
             it.copy(gameCode = newGameCode)
         }
     }
 }
 
-data class CodeGame(
-    var gameCode: String = ""
+data class OnlineGameRememberedValues(
+    var gameCode: String = "",
+    var FinalScoreText: String = ""
 )

@@ -472,7 +472,7 @@ fun openNewGameButton(modifier: Modifier, navController: NavController) {
 }
 
 @Composable
-fun enterGameWithCodeButton(modifier: Modifier, codeGameViewModel: CodeGameViewModel, codeGameUiState: CodeGame, navController: NavController) {
+fun enterGameWithCodeButton(modifier: Modifier, codeGameViewModel: CodeGameViewModel, codeGameUiState: OnlineGameRememberedValues, navController: NavController) {
     var enterGame by remember {
         mutableStateOf(false)
     }
@@ -553,7 +553,7 @@ fun CheckForGame(gameId: String, context: Context, onFindGame: () -> Unit) {
 }
 
 @Composable
-fun codeGameScreen(codeGameViewModel: CodeGameViewModel, codeGameUiState: CodeGame, navController: NavController) {
+fun codeGameScreen(codeGameViewModel: CodeGameViewModel, codeGameUiState: OnlineGameRememberedValues, navController: NavController) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier

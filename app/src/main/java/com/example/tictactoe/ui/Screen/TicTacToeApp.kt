@@ -5,7 +5,6 @@ package com.example.tictactoe.ui.Screen
 import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,19 +42,19 @@ import java.util.*
 import kotlin.concurrent.schedule
 
 //game screens
-enum class GameScreen(@SuppressLint("SupportAnnotationUsage") @StringRes val title: String) {
-    SignUp(title = "Sign Up"),
-    LogIn(title = "Log In"),
-    Start(title = "Home"),
-    AboutUs(title = "About Us"),
-    TwoPlayers(title = "Two players"),
-    SinglePlayer(title = "Single Player"),
-    Online(title = "Online"),
-    LeaderBoard(title = "LeaderBoard"),
-    ProfileScreen(title = "ProfileScreen"),
-    CodeGame(title = "CodeGame"),
-    OpenGameWithCode(title = "OpenGameWithCode"),
-    EnterGameWithCode(title = "EnterGameWithCode")
+enum class GameScreen {
+    SignUp,
+    LogIn,
+    Start,
+    AboutUs,
+    TwoPlayers,
+    SinglePlayer,
+    Online,
+    LeaderBoard,
+    ProfileScreen,
+    CodeGame,
+    OpenGameWithCode,
+    EnterGameWithCode
 }
 
 /**
@@ -317,7 +316,7 @@ fun TicTacToeApp(
     val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
     val signupUiState = signUpViewModel.emailsharedPreferences
-    val codeGameUiState by codeGameViewModel.codeGameUiState.collectAsState()
+    val onlineGameValuesUiState by codeGameViewModel.onlineGameValuesUiState.collectAsState()
 
 
     var timesPlayed by remember {
@@ -591,7 +590,7 @@ fun TicTacToeApp(
 
             //codeGame
             composable(route = GameScreen.CodeGame.name) {
-                codeGameScreen(codeGameViewModel = codeGameViewModel, codeGameUiState = codeGameUiState, navController = navController)
+                codeGameScreen(codeGameViewModel = codeGameViewModel, codeGameUiState = onlineGameValuesUiState, navController = navController)
             }
 
             //open game with code
@@ -601,7 +600,7 @@ fun TicTacToeApp(
 
             //enter game with code
             composable(route = GameScreen.EnterGameWithCode.name) {
-                EnterOnlineGameWithCode(context = LocalContext.current, player = signupUiState.name, gameId = codeGameUiState.gameCode)
+                EnterOnlineGameWithCode(context = LocalContext.current, player = signupUiState.name, gameId = onlineGameValuesUiState.gameCode)
             }
 
         }
