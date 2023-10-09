@@ -21,9 +21,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.tictactoe.data.MainPlayerUiState
 import com.example.tictactoe.data.OnlineGameUiState
 import com.example.tictactoe.ui.theme.BackGround
@@ -31,7 +31,7 @@ import com.example.tictactoe.ui.theme.Primery
 import com.example.tictactoe.ui.theme.Secondery
 
 @Composable
-fun ShowGameFinalScore(Text: String, game: OnlineGameUiState, player1: MainPlayerUiState, player2: MainPlayerUiState) {
+fun ShowGameFinalScore(Text: String, game: OnlineGameUiState, player1: MainPlayerUiState, player2: MainPlayerUiState, navController: NavController) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
@@ -65,7 +65,8 @@ fun ShowGameFinalScore(Text: String, game: OnlineGameUiState, player1: MainPlaye
                         .padding(20.dp),
                     elevation = 5.dp,
                     backgroundColor = Secondery,
-                    shape = RoundedCornerShape(125.dp)                ) {
+                    shape = RoundedCornerShape(125.dp)
+                ) {
                     Image(
                         painter = painterResource(id = player2.currentImage),
                         contentDescription = null,
@@ -76,14 +77,8 @@ fun ShowGameFinalScore(Text: String, game: OnlineGameUiState, player1: MainPlaye
             }
         }
         Spacer(modifier = Modifier.height(200.dp))
-        Button(onClick = {}, colors = ButtonDefaults.buttonColors(backgroundColor = Primery)) {
+        Button(onClick = {navController.navigate(GameScreen.Start.name)}, colors = ButtonDefaults.buttonColors(backgroundColor = Primery)) {
             Text(text = "Home", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.White)
         }
     }
-}
-
-@Composable
-@Preview
-fun preview() {
-    ShowGameFinalScore(Text = "You Won!", game = OnlineGameUiState(), player1 = MainPlayerUiState(), player2 = MainPlayerUiState())
 }

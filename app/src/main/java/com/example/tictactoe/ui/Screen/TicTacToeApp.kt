@@ -5,6 +5,12 @@ package com.example.tictactoe.ui.Screen
 import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -54,7 +60,8 @@ enum class GameScreen {
     ProfileScreen,
     CodeGame,
     OpenGameWithCode,
-    EnterGameWithCode
+    EnterGameWithCode,
+    ShowGameFinalScore
 }
 
 /**
@@ -297,6 +304,8 @@ fun CheckExit(onQuitClick: () -> Unit, onCancelClick: () -> Unit) {
     )
 }
 
+@OptIn(ExperimentalAnimationApi::class)
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun TicTacToeApp(
     viewModel: TicTacToeViewModel = TicTacToeViewModel(),
@@ -455,7 +464,6 @@ fun TicTacToeApp(
             )
         }
     ) {
-        innerPadding ->
 
         val startedDestination = if(signupUiState.name == "") {
             GameScreen.LogIn.name
@@ -466,9 +474,7 @@ fun TicTacToeApp(
         NavHost(
             navController = navController,
             startDestination = startedDestination,
-            modifier = Modifier.padding(innerPadding)
         ){
-
             //sign up screen
             composable(route = GameScreen.SignUp.name) {
                 SignUpScreen(
@@ -575,7 +581,7 @@ fun TicTacToeApp(
 
             //online game screen
             composable(route = GameScreen.Online.name) {
-                OnlineTicTacToe(player = signupUiState.name, context = LocalContext.current)
+                OnlineTicTacToe(player = signupUiState.name, context = LocalContext.current, viewModel = codeGameViewModel, navController = navController)
             }
 
             //leaderboard screen
@@ -595,14 +601,26 @@ fun TicTacToeApp(
 
             //open game with code
             composable(route = GameScreen.OpenGameWithCode.name) {
-                OpenOnlineGameWithCode(context = LocalContext.current, player = signupUiState.name)
+                OpenOnlineGameWithCode(context = LocalContext.current, player = signupUiState.name, viewModel = codeGameViewModel, navController = navController)
             }
 
             //enter game with code
             composable(route = GameScreen.EnterGameWithCode.name) {
-                EnterOnlineGameWithCode(context = LocalContext.current, player = signupUiState.name, gameId = onlineGameValuesUiState.gameCode)
+                EnterOnlineGameWithCode(context = LocalContext.current, player = signupUiState.name, gameId = onlineGameValuesUiState.gameCode, viewModel = codeGameViewModel, navController = navController)
             }
 
+            //show game final score
+            composable(
+                route = GameScreen.ShowGameFinalScore.name,
+                exitTransition = {
+                    slideOutVertically(animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+                },
+                enterTransition = {
+                    slideInVertically(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
+                }
+            ) {
+                ShowGameFinalScore(Text = onlineGameValuesUiState.FinalScoreText, game = onlineGameValuesUiState.game, player1 = onlineGameValuesUiState.player1, player2 = onlineGameValuesUiState.player2, navController = navController)
+            }
         }
     }
 

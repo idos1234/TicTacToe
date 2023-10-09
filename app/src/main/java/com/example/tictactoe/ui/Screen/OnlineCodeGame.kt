@@ -34,7 +34,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun OpenOnlineGameWithCode(context: Context, player: String) {
+fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGameViewModel, navController: NavController) {
     var currentGame by remember {
         mutableStateOf(OnlineGameUiState())
     }
@@ -238,7 +238,17 @@ fun OpenOnlineGameWithCode(context: Context, player: String) {
             }
         }
         Spacer(modifier = Modifier.weight(2f))
-        OnlineButtonGrid(gameId = currentGame.id, myTurn = myTurn, gameStarted = foundPlayer, player = player, player1 = player1, player2 = player2, databaseReference = databaseReference)
+        OnlineButtonGrid(
+            gameId = currentGame.id,
+            myTurn = myTurn,
+            gameStarted = foundPlayer,
+            player = player,
+            player1 = player1,
+            player2 = player2,
+            databaseReference = databaseReference,
+            viewModel = viewModel,
+            navController = navController
+        )
         Spacer(modifier = Modifier.weight(4f))
     }
     
@@ -263,7 +273,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String) {
 }
 
 @Composable
-fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String) {
+fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, viewModel: CodeGameViewModel, navController: NavController) {
     var currentGame by remember {
         mutableStateOf(OnlineGameUiState())
     }
@@ -445,7 +455,17 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String) {
             }
         }
         Spacer(modifier = Modifier.weight(2f))
-        OnlineButtonGrid(gameId = currentGame.id, myTurn = myTurn, gameStarted = foundPlayer, player = player, player1 = player1, player2 = player2, databaseReference = databaseReference)
+        OnlineButtonGrid(
+            gameId = currentGame.id,
+            myTurn = myTurn,
+            gameStarted = foundPlayer,
+            player = player,
+            player1 = player1,
+            player2 = player2,
+            databaseReference = databaseReference,
+            viewModel = viewModel,
+            navController = navController
+        )
         Spacer(modifier = Modifier.weight(4f))
     }
 }

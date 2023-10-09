@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
 import com.example.tictactoe.R
 import com.example.tictactoe.data.Boxes
 import com.example.tictactoe.data.MainPlayerUiState
@@ -147,7 +148,7 @@ fun OnlineGameButton(game: OnlineGameUiState, boxNumber: Int, box: String, enabl
     "SuspiciousIndentation"
 )
 @Composable
-fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, player: String, player1: MainPlayerUiState, player2: MainPlayerUiState, databaseReference: DatabaseReference) {
+fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, player: String, player1: MainPlayerUiState, player2: MainPlayerUiState, databaseReference: DatabaseReference, viewModel: CodeGameViewModel, navController: NavController) {
     var game by remember {
         mutableStateOf(OnlineGameUiState())
     }
@@ -210,23 +211,25 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
             if (game.player1Score == 2) {
                 if (myTurn == "X") {
                     //show winner
-                    ShowOnlineWinner(text1 = "You won")
                     updateScore(playerName = player, addedScore = 1, context = LocalContext.current)
+                    viewModel.updateFinalScoreScreenData(Text = "You won!", game = game, player1 = player1, player2 = player2)
                 } else if (myTurn == "O") {
                     //show winner
-                    ShowOnlineWinner(text1 = "You lose")
                     updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
+                    viewModel.updateFinalScoreScreenData(Text = "You lose", game = game, player1 = player1, player2 = player2)
                 }
+                navController.navigate(GameScreen.ShowGameFinalScore.name)
             } else if (game.player2Score == 2) {
                 if (myTurn == "O") {
                     //show winner
-                    ShowOnlineWinner(text1 = "You won")
                     updateScore(playerName = player, addedScore = 1, context = LocalContext.current)
+                    viewModel.updateFinalScoreScreenData(Text = "You won!", game = game, player1 = player1, player2 = player2)
                 } else if (myTurn == "X") {
                     //show winner
-                    ShowOnlineWinner(text1 = "You lose")
                     updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
+                    viewModel.updateFinalScoreScreenData(Text = "You lose", game = game, player1 = player1, player2 = player2)
                 }
+                navController.navigate(GameScreen.ShowGameFinalScore.name)
             } else
                 game = findGame(gameId = gameId, databaseReference = databaseReference)
                 if (game.foundWinner && game.player1Score != 2 && game.player2Score != 2) {
@@ -408,7 +411,7 @@ fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
 }
 
 @Composable
-fun OnlineTicTacToe(player: String, context: Context) {
+fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewModel, navController: NavController) {
     var currentGame by remember {
         mutableStateOf(OnlineGameUiState())
     }
@@ -658,23 +661,9 @@ fun OnlineTicTacToe(player: String, context: Context) {
             }
         }
         Spacer(modifier = Modifier.weight(2f))
-        OnlineButtonGrid(gameId = currentGame.id, myTurn = myTurn, gameStarted = foundPlayer, player = player, player1 = player1, player2 = player2, databaseReference = databaseReference)
+        OnlineButtonGrid(gameId = currentGame.id, myTurn = myTurn, gameStarted = foundPlayer, player = player, player1 = player1, player2 = player2, databaseReference = databaseReference, viewModel = viewModel, navController = navController)
         Spacer(modifier = Modifier.weight(4f))
     }
-}
-
-@Composable
-fun ShowOnlineWinner(text1: String) {
-    AlertDialog(
-        onDismissRequest = {},
-        dismissButton = {},
-        confirmButton = {},
-        text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = text1, fontSize = 25.sp, fontWeight = FontWeight.Bold)
-            }
-        }
-    )
 }
 
 @Composable

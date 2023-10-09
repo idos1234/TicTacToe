@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace 'com.example.tictactoe'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.tictactoe"
@@ -62,7 +62,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-database-ktx:20.2.2'
     implementation 'com.google.firebase:firebase-firestore:24.7.0'
     implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha06'
-    def nav_version = "2.5.3"
+    def nav_version = "2.7.4"
 
     //noinspection GradleDependency
     implementation "androidx.navigation:navigation-compose:$nav_version"
@@ -89,4 +89,5 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation 'com.google.code.gson:gson:2.9.0'
     implementation 'co.yml:ycharts:2.1.0'
+
 }
