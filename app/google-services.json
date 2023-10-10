@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:315349484101:android:65f9f48296c5ad529a592c",
         "android_client_info": {
-          "package_name": "com.example.tictactoe"
+          "package_name": "com.idos.tictactoe"
         }
       },
       "oauth_client": [
