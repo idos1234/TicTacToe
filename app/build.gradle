@@ -34,11 +34,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
     buildFeatures {
         compose true
@@ -61,8 +61,8 @@ dependencies {
 
     // FireBase Dependency
     implementation 'com.google.firebase:firebase-database-ktx:20.2.2'
-    implementation 'com.google.firebase:firebase-firestore:24.8.1'
     implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha06'
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.8.1'
     def nav_version = "2.7.4"
 
     //noinspection GradleDependency
