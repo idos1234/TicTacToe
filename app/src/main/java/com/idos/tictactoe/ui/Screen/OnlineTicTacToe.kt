@@ -33,11 +33,13 @@ import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.idos.tictactoe.R
+import com.idos.tictactoe.data.MainPlayerUiState
+import com.idos.tictactoe.data.OnlineGameUiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun SetBoxOnline(game: com.idos.tictactoe.data.OnlineGameUiState, boxNumber: Int, playerTurn: String, databaseReference: DatabaseReference) {
+fun SetBoxOnline(game: OnlineGameUiState, boxNumber: Int, playerTurn: String, databaseReference: DatabaseReference) {
 
     val boxes: com.idos.tictactoe.data.Boxes? = when(boxNumber) {
         1 -> game.boxes.copy(Box1 = playerTurn)
@@ -58,7 +60,7 @@ fun SetBoxOnline(game: com.idos.tictactoe.data.OnlineGameUiState, boxNumber: Int
 }
 
 @Composable
-fun changePlayerTurn(game: com.idos.tictactoe.data.OnlineGameUiState, databaseReference: DatabaseReference) {
+fun changePlayerTurn(game: OnlineGameUiState, databaseReference: DatabaseReference) {
     val PlayerTurn = if(game.playerTurn == "X") {
         "O"
     } else {
@@ -70,12 +72,12 @@ fun changePlayerTurn(game: com.idos.tictactoe.data.OnlineGameUiState, databaseRe
 }
 
 @Composable
-fun OnlineGameButton(game: com.idos.tictactoe.data.OnlineGameUiState, boxNumber: Int, box: String, enabled: Boolean, context: Context = LocalContext.current, databaseReference: DatabaseReference) {
+fun OnlineGameButton(game: OnlineGameUiState, boxNumber: Int, box: String, enabled: Boolean, context: Context = LocalContext.current, databaseReference: DatabaseReference) {
     var player1 by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
     var player2 by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
     //get database
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -88,7 +90,7 @@ fun OnlineGameButton(game: com.idos.tictactoe.data.OnlineGameUiState, boxNumber:
             if (!queryDocumentSnapshots.isEmpty) {
                 val list = queryDocumentSnapshots.documents
                 for (d in list) {
-                    val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(com.idos.tictactoe.data.MainPlayerUiState::class.java)
+                    val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
                     //find player using database
                     if (p?.name == game.player1){
                         player1 = p
@@ -145,9 +147,9 @@ fun OnlineGameButton(game: com.idos.tictactoe.data.OnlineGameUiState, boxNumber:
     "SuspiciousIndentation"
 )
 @Composable
-fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, player: String, player1: com.idos.tictactoe.data.MainPlayerUiState, player2: com.idos.tictactoe.data.MainPlayerUiState, databaseReference: DatabaseReference, viewModel: CodeGameViewModel, navController: NavController) {
+fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, player: String, player1: MainPlayerUiState, player2: MainPlayerUiState, databaseReference: DatabaseReference, viewModel: CodeGameViewModel, navController: NavController) {
     var game by remember {
-        mutableStateOf(com.idos.tictactoe.data.OnlineGameUiState())
+        mutableStateOf(OnlineGameUiState())
     }
     val isMyTurn = if (gameStarted) {
         myTurn == game.playerTurn
@@ -209,22 +211,22 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
                 if (myTurn == "X") {
                     //show winner
                     updateScore(playerName = player, addedScore = 1, context = LocalContext.current)
-                    viewModel.updateFinalScoreScreenData(Text = "You won!", game = game, player1 = player1, player2 = player2)
+                    viewModel.updateFinalScoreScreenData("You won!", game, player1,  player2)
                 } else if (myTurn == "O") {
                     //show winner
                     updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
-                    viewModel.updateFinalScoreScreenData(Text = "You lose", game = game, player1 = player1, player2 = player2)
+                    viewModel.updateFinalScoreScreenData("You lose", game, player1,  player2)
                 }
                 navController.navigate(GameScreen.ShowGameFinalScore.name)
             } else if (game.player2Score == 2) {
                 if (myTurn == "O") {
                     //show winner
                     updateScore(playerName = player, addedScore = 1, context = LocalContext.current)
-                    viewModel.updateFinalScoreScreenData(Text = "You won!", game = game, player1 = player1, player2 = player2)
+                    viewModel.updateFinalScoreScreenData("You won!", game, player1,  player2)
                 } else if (myTurn == "X") {
                     //show winner
                     updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
-                    viewModel.updateFinalScoreScreenData(Text = "You lose", game = game, player1 = player1, player2 = player2)
+                    viewModel.updateFinalScoreScreenData("You lose", game, player1,  player2)
                 }
                 navController.navigate(GameScreen.ShowGameFinalScore.name)
             } else
@@ -284,7 +286,7 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun NextRoundDialog(game: com.idos.tictactoe.data.OnlineGameUiState, player1: com.idos.tictactoe.data.MainPlayerUiState, player2: com.idos.tictactoe.data.MainPlayerUiState, onZeroSecs: () -> Unit) {
+fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2: MainPlayerUiState, onZeroSecs: () -> Unit) {
     var secondsToNextRound by remember {
         mutableStateOf(3)
     }
@@ -366,16 +368,16 @@ fun NextRoundDialog(game: com.idos.tictactoe.data.OnlineGameUiState, player1: co
 }
 
 @Composable
-fun findGame(gameId: String, databaseReference: DatabaseReference, context: Context = LocalContext.current): com.idos.tictactoe.data.OnlineGameUiState {
+fun findGame(gameId: String, databaseReference: DatabaseReference, context: Context = LocalContext.current): OnlineGameUiState {
     var foundGame by remember {
-        mutableStateOf(com.idos.tictactoe.data.OnlineGameUiState())
+        mutableStateOf(OnlineGameUiState())
     }
     //get Players collection from database
     databaseReference.addValueEventListener(object : ValueEventListener {
         //on success
         override fun onDataChange(snapshot: DataSnapshot) {
             for (Game in snapshot.children) {
-                val game = Game.getValue(com.idos.tictactoe.data.OnlineGameUiState::class.java)
+                val game = Game.getValue(OnlineGameUiState::class.java)
                 if (game!!.id == gameId) {
                     foundGame = game
                     break
@@ -394,7 +396,7 @@ fun findGame(gameId: String, databaseReference: DatabaseReference, context: Cont
     return foundGame
 }
 
-fun ResetGame(game: com.idos.tictactoe.data.OnlineGameUiState, databaseReference: DatabaseReference) {
+fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
     databaseReference.child(game.id).child("winner").setValue("")
     databaseReference.child(game.id).child("boxes").setValue(com.idos.tictactoe.data.Boxes())
     databaseReference.child(game.id).child("times").setValue(0)
@@ -410,7 +412,7 @@ fun ResetGame(game: com.idos.tictactoe.data.OnlineGameUiState, databaseReference
 @Composable
 fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewModel, navController: NavController) {
     var currentGame by remember {
-        mutableStateOf(com.idos.tictactoe.data.OnlineGameUiState())
+        mutableStateOf(OnlineGameUiState())
     }
     var foundPlayer by remember {
         mutableStateOf(false)
@@ -422,10 +424,10 @@ fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewMod
         mutableStateOf<String?>(null)
     }
     var player1 by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
     var player2 by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
 
     //get database
@@ -439,9 +441,9 @@ fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewMod
         override fun onDataChange(snapshot: DataSnapshot) {
             while (times == 1) {
                 Loop@ for (Game in snapshot.children) {
-                    val game = Game.getValue(com.idos.tictactoe.data.OnlineGameUiState::class.java)
+                    val game = Game.getValue(OnlineGameUiState::class.java)
                     if ((game!!.player2 == "")) {
-                        val updatedGame = com.idos.tictactoe.data.OnlineGameUiState(
+                        val updatedGame = OnlineGameUiState(
                             id = game.id,
                             player1 = game.player1,
                             player2 = player,
@@ -456,8 +458,8 @@ fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewMod
                                 if (!queryDocumentSnapshots.isEmpty) {
                                     val list = queryDocumentSnapshots.documents
                                     for (d in list) {
-                                        val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(
-                                            com.idos.tictactoe.data.MainPlayerUiState::class.java)
+                                        val p: MainPlayerUiState? = d.toObject(
+                                            MainPlayerUiState::class.java)
                                         //find player using database
                                         if (p?.name == game.player1){
                                             player1 = p
@@ -484,9 +486,9 @@ fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewMod
                         break@Loop
                     }
                 }
-                if (currentGame == com.idos.tictactoe.data.OnlineGameUiState()) {
+                if (currentGame == OnlineGameUiState()) {
                     val key: String = databaseReference.push().key!!.takeLast(5)
-                    val newGame = com.idos.tictactoe.data.OnlineGameUiState(
+                    val newGame = OnlineGameUiState(
                         id = key,
                         player1 = player,
                         player2 = "",
@@ -501,8 +503,8 @@ fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewMod
                             if (!queryDocumentSnapshots.isEmpty) {
                                 val list = queryDocumentSnapshots.documents
                                 for (d in list) {
-                                    val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(
-                                        com.idos.tictactoe.data.MainPlayerUiState::class.java)
+                                    val p: MainPlayerUiState? = d.toObject(
+                                        MainPlayerUiState::class.java)
                                     //find player using database
                                     if (p?.name == player){
                                         player1 = p
@@ -525,7 +527,7 @@ fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewMod
                 times++
             }
             for (Game in snapshot.children) {
-                val game = Game.getValue(com.idos.tictactoe.data.OnlineGameUiState::class.java)
+                val game = Game.getValue(OnlineGameUiState::class.java)
                 if (game!!.id == currentGame.id) {
                     currentGame = game
                     if (currentGame.player2 != "") {
@@ -538,8 +540,8 @@ fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewMod
                                 if (!queryDocumentSnapshots.isEmpty) {
                                     val list = queryDocumentSnapshots.documents
                                     for (d in list) {
-                                        val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(
-                                            com.idos.tictactoe.data.MainPlayerUiState::class.java)
+                                        val p: MainPlayerUiState? = d.toObject(
+                                            MainPlayerUiState::class.java)
                                         if (p?.name == currentGame.player2){
                                             player2 = p
                                         }
@@ -577,7 +579,7 @@ fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewMod
         Spacer(modifier = Modifier.weight(1f))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                if (player1 != com.idos.tictactoe.data.MainPlayerUiState()) {
+                if (player1 != MainPlayerUiState()) {
                     Card(
                         modifier = Modifier
                             .size(150.dp)
@@ -669,7 +671,7 @@ fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewMod
 @Composable
 fun updateScore(playerName: String, context: Context, addedScore: Int) {
     var player by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
     var score by remember {
         mutableStateOf(0)
@@ -684,7 +686,7 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
         mutableStateOf<List<Int>>(listOf())
     }
     var updatedPlayer by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
     var newLevel by remember {
         mutableStateOf(0)
@@ -713,7 +715,7 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
             if (!queryDocumentSnapshots.isEmpty) {
                 val list = queryDocumentSnapshots.documents
                 Loop@ for (d in list) {
-                    val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(com.idos.tictactoe.data.MainPlayerUiState::class.java)
+                    val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
                     //find player using database
                     if (p?.name == playerName){
                         player = p
@@ -864,7 +866,7 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
 
                             }
                             if (levelUp) {
-                                updatedPlayer = com.idos.tictactoe.data.MainPlayerUiState(
+                                updatedPlayer = MainPlayerUiState(
                                     name = player.name,
                                     email = player.email,
                                     score = score,

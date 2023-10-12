@@ -309,7 +309,7 @@ fun CheckExit(onQuitClick: () -> Unit, onCancelClick: () -> Unit) {
 fun TicTacToeApp(
     viewModel: TicTacToeViewModel = TicTacToeViewModel(),
     signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    codeGameViewModel: CodeGameViewModel = CodeGameViewModel()
+    codeGameViewModel: CodeGameViewModel = viewModel()
 ) {
     //nav controller
     val context = LocalContext.current
@@ -407,6 +407,12 @@ fun TicTacToeApp(
                         open = true
                     },
                     icon = Icons.Default.ArrowBack
+                )
+            GameScreen.ShowGameFinalScore ->
+                TopAppBar(
+                    icon = null,
+                    onClick = {},
+                    isBar = false
                 )
             else ->{
                 TopAppBar(
@@ -618,7 +624,7 @@ fun TicTacToeApp(
                     slideInVertically(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
                 }
             ) {
-                ShowGameFinalScore(Text = onlineGameValuesUiState.FinalScoreText, game = onlineGameValuesUiState.game, player1 = onlineGameValuesUiState.player1, player2 = onlineGameValuesUiState.player2, navController = navController)
+                ShowGameFinalScore(uiState = onlineGameValuesUiState, navController = navController)
             }
         }
     }

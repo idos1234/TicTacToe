@@ -1,5 +1,6 @@
 package com.idos.tictactoe.ui.Screen
 
+import androidx.lifecycle.ViewModel
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class CodeGameViewModel {
+class CodeGameViewModel: ViewModel() {
     private val _onlineGameValuesUiState = MutableStateFlow(OnlineGameRememberedValues())
     val onlineGameValuesUiState: StateFlow<OnlineGameRememberedValues> = _onlineGameValuesUiState.asStateFlow()
 

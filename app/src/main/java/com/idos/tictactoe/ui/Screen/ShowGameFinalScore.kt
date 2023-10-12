@@ -29,12 +29,13 @@ import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
 
 @Composable
-fun ShowGameFinalScore(Text: String, game: com.idos.tictactoe.data.OnlineGameUiState, player1: com.idos.tictactoe.data.MainPlayerUiState, player2: com.idos.tictactoe.data.MainPlayerUiState, navController: NavController) {
+fun ShowGameFinalScore(uiState: OnlineGameRememberedValues, navController: NavController) {
+
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
         Spacer(modifier = Modifier.height(100.dp))
-        Text(text = Text, fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(text = uiState.FinalScoreText, fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.White)
         Spacer(modifier = Modifier.height(40.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -47,14 +48,14 @@ fun ShowGameFinalScore(Text: String, game: com.idos.tictactoe.data.OnlineGameUiS
                     shape = RoundedCornerShape(125.dp)
                     ) {
                     Image(
-                        painter = painterResource(id = player1.currentImage),
+                        painter = painterResource(id = uiState.player1.currentImage),
                         contentDescription = null,
                         contentScale = ContentScale.Crop
                     )
                 }
-                Text(player1.name, fontSize = 10.sp, color = Color.White)
+                Text(uiState.player1.name, fontSize = 10.sp, color = Color.White)
                 }
-            Text("${game.player1Score} : ${game.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
+            Text("${uiState.game.player1Score} : ${uiState.game.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Card(
@@ -66,12 +67,12 @@ fun ShowGameFinalScore(Text: String, game: com.idos.tictactoe.data.OnlineGameUiS
                     shape = RoundedCornerShape(125.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = player2.currentImage),
+                        painter = painterResource(id = uiState.player2.currentImage),
                         contentDescription = null,
                         contentScale = ContentScale.Crop
                     )
                 }
-                Text(player2.name, fontSize = 10.sp, color = Color.White)
+                Text(uiState.player2.name, fontSize = 10.sp, color = Color.White)
             }
         }
         Spacer(modifier = Modifier.height(200.dp))
