@@ -168,6 +168,9 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
     var startedCountDown by remember {
         mutableStateOf(false)
     }
+    var editedRounds by remember {
+        mutableStateOf(false)
+    }
 
     val scope = rememberCoroutineScope()
 
@@ -242,11 +245,16 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
         //tie
         else if (game.times == 9){
             game = findGame(gameId = gameId, databaseReference = databaseReference)
+            if (!editedRounds) {
+                databaseReference.child(game.id).child("rounds").setValue(game.rounds.plus(1))
+                editedRounds = true
+            }
             if (game.player1Score != 2 && game.player2Score != 2) {
                 scope.launch {
                     delay(3000)
                     ResetGame(game = game, databaseReference = databaseReference)
                     enabled = true
+                    editedRounds = false
                 }
             }
         }
