@@ -14,22 +14,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.TagFaces
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import com.idos.tictactoe.ui.theme.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.idos.tictactoe.data.MainPlayerUiState
+import com.idos.tictactoe.ui.theme.*
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
@@ -95,7 +93,9 @@ fun ShowTopPlayers(
     Card(modifier = Modifier.fillMaxWidth(.9f), border = BorderStroke(1.dp, Color.Black), shape = RoundedCornerShape(10)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally,) {
             Row(
-                modifier = Modifier.fillMaxWidth().background(Primery),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Primery),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -182,13 +182,10 @@ fun ShowTopPlayers(
 @Composable
 fun showPlayer(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
     Dialog(
-        onDismissRequest = {},
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false
-        )
+        onDismissRequest = onCloseClicked
     ) {
-        Card(backgroundColor = Secondery, elevation = 10.dp) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Card(backgroundColor = Secondery, elevation = 10.dp, modifier = Modifier.fillMaxWidth(0.9f)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
                 Row(modifier = Modifier.align(Alignment.Start)) {
                     IconButton(onClick = onCloseClicked) {
                         Icon(
@@ -198,25 +195,56 @@ fun showPlayer(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                         )
                     }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Card(
-                        shape = RoundedCornerShape(125.dp),
-                        elevation = 10.dp,
-                        modifier = Modifier
-                            .size(90.dp)
-                    ) {
-                        Image(imageVector = Icons.Default.TagFaces, contentDescription = null, contentScale = ContentScale.FillBounds)
-                    }
-
-                    Spacer(modifier = Modifier.width(15.dp))
-
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Image(
+                            painter = painterResource(player.currentImage),
+                            contentDescription = null,
+                            Modifier
+                                .size(110.dp)
+                                .weight(1f)
+                        )
                         Text(text = player.name, fontSize = 30.sp, fontWeight = FontWeight.SemiBold)
-                        Text(text = "Score: ${player.score}", fontSize = 20.sp, fontWeight = FontWeight.W500)
-
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+                        .weight(1f)
+                        .height(130.dp)) {
+                        Image(painter = painterResource(id = player.currentX) , contentDescription = "Player's X", modifier = Modifier
+                            .weight(1f)
+                            .background(BackGround))
+                        Spacer(modifier = Modifier.height(5.dp))
+                        Image(painter = painterResource(id = player.currentO) , contentDescription = "Player's O", modifier = Modifier
+                            .weight(1f)
+                            .background(BackGround))
+                        Spacer(modifier = Modifier.height(30.dp))
                     }
                 }
+                Spacer(modifier = Modifier.height(15.dp))
+                Column(horizontalAlignment = Alignment.Start, modifier = Modifier.weight(1f)) {
+                    Row(horizontalArrangement = Arrangement.Start) {
+                        Card(Modifier.size(15.dp), backgroundColor = Color.Red){}
+                        Text(text = "Wins = ${player.wins}", Modifier.padding(start = 4.dp))
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.Start) {
+                        Card(Modifier.size(15.dp), backgroundColor = Color.Yellow){}
+                        Text(text = "Loses = ${player.loses}", Modifier.padding(start = 4.dp))
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.Start) {
+                        Card(Modifier.size(15.dp), backgroundColor = Color.Green){}
+                        Text(text = "Score: ${player.score}", Modifier.padding(start = 4.dp))
+                    }
+                }
+                PlayerGraph(
+                    profile = player,
+                    winsColor = Color.Red,
+                    losesColor = Color.Yellow,
+                    modifier = Modifier.fillMaxWidth(),
+                    backGroundColor = Secondery
+                )
             }
         }
     }
 }
+

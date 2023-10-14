@@ -36,11 +36,12 @@ import com.idos.tictactoe.ui.theme.Secondery
 import com.idos.tictactoe.ui.theme.Shapes
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.idos.tictactoe.data.MainPlayerUiState
 
 @Composable
 fun ProfileScreen(player: String, context: Context) {
     var profile by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
     var showPhotos by remember {
         mutableStateOf(false)
@@ -63,7 +64,7 @@ fun ProfileScreen(player: String, context: Context) {
             if (!queryDocumentSnapshots.isEmpty) {
                 val list = queryDocumentSnapshots.documents
                 for (d in list) {
-                    val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(com.idos.tictactoe.data.MainPlayerUiState::class.java)
+                    val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
                     //find player using database
                     if (p?.name == player){
                         profile = p
@@ -154,6 +155,10 @@ fun ProfileScreen(player: String, context: Context) {
                 profile = profile,
                 winsColor = Color.Red,
                 losesColor = Color.Yellow,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(380.dp),
+                backGroundColor = BackGround
             )
 
         }
@@ -170,14 +175,14 @@ fun ProfileScreen(player: String, context: Context) {
 }
 
 @Composable
-fun ShowPlayersImages(player: com.idos.tictactoe.data.MainPlayerUiState, onCloseClicked: () -> Unit) {
+fun ShowPlayersImages(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
     var changeImage by remember {
         mutableStateOf(false)
     }
     var Image by remember {
         mutableIntStateOf(player.currentImage)
     }
-    Dialog(onDismissRequest = {}) {
+    Dialog(onDismissRequest = onCloseClicked) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxWidth(0.9f)
             .background(Secondery)
@@ -238,14 +243,14 @@ fun ShowPlayersImages(player: com.idos.tictactoe.data.MainPlayerUiState, onClose
     }
 }
 @Composable
-fun ShowPlayerX(player: com.idos.tictactoe.data.MainPlayerUiState, onCloseClicked: () -> Unit) {
+fun ShowPlayerX(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
     var changeImage by remember {
         mutableStateOf(false)
     }
     var Image by remember {
         mutableStateOf(player.currentX)
     }
-    Dialog(onDismissRequest = {}) {
+    Dialog(onDismissRequest = onCloseClicked) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxWidth(0.9f)
             .background(Secondery)
@@ -304,7 +309,7 @@ fun ShowPlayerX(player: com.idos.tictactoe.data.MainPlayerUiState, onCloseClicke
     if (changeImage) {
         val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-        val updatedPlayer = com.idos.tictactoe.data.MainPlayerUiState(
+        val updatedPlayer = MainPlayerUiState(
             name = player.name,
             email = player.email,
             score = player.score,
@@ -339,14 +344,14 @@ fun ShowPlayerX(player: com.idos.tictactoe.data.MainPlayerUiState, onCloseClicke
 }
 
 @Composable
-fun ShowPlayerO(player: com.idos.tictactoe.data.MainPlayerUiState, onCloseClicked: () -> Unit) {
+fun ShowPlayerO(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
     var changeImage by remember {
         mutableStateOf(false)
     }
     var Image by remember {
         mutableStateOf(player.currentO)
     }
-    Dialog(onDismissRequest = {}) {
+    Dialog(onDismissRequest = onCloseClicked) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxWidth(0.9f)
             .background(Secondery)
@@ -405,7 +410,7 @@ fun ShowPlayerO(player: com.idos.tictactoe.data.MainPlayerUiState, onCloseClicke
     if (changeImage) {
         val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-        val updatedPlayer = com.idos.tictactoe.data.MainPlayerUiState(
+        val updatedPlayer = MainPlayerUiState(
             name = player.name,
             email = player.email,
             score = player.score,
@@ -442,9 +447,11 @@ fun ShowPlayerO(player: com.idos.tictactoe.data.MainPlayerUiState, onCloseClicke
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PlayerGraph(
-    profile: com.idos.tictactoe.data.MainPlayerUiState,
+    profile: MainPlayerUiState,
     winsColor: Color,
     losesColor: Color,
+    modifier: Modifier,
+    backGroundColor: Color
     ) {
     val donutChartData = PieChartData(
         slices = listOf(
@@ -455,13 +462,11 @@ fun PlayerGraph(
     )
     val donutChartConfig = PieChartConfig(
         strokeWidth = 100f,
-        backgroundColor = BackGround,
+        backgroundColor = backGroundColor,
         sliceLabelTextColor = BackGround
     )
     DonutPieChart(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(380.dp),
+        modifier = modifier,
         donutChartData,
         donutChartConfig
     )
@@ -469,7 +474,7 @@ fun PlayerGraph(
 }
 
 @Composable
-fun ChangeImage(image: Int, player: com.idos.tictactoe.data.MainPlayerUiState) {
+fun ChangeImage(image: Int, player: MainPlayerUiState) {
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     val updatedPlayer = player.copy(currentImage = image)
