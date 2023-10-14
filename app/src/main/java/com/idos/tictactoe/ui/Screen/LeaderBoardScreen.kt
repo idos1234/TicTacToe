@@ -29,6 +29,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.idos.tictactoe.ui.theme.*
 import com.google.firebase.firestore.FirebaseFirestore
+import com.idos.tictactoe.data.MainPlayerUiState
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
@@ -37,7 +38,7 @@ fun LeaderBoardScreen(
     yourPlayer: String
 ) {
     //players list in database
-    var playerlist = mutableStateListOf<com.idos.tictactoe.data.MainPlayerUiState?>()
+    var playerlist = mutableStateListOf<MainPlayerUiState?>()
     //database
     var db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -50,12 +51,12 @@ fun LeaderBoardScreen(
                 val list = queryDocumentSnapshots.documents
                 for (d in list) {
                     //add every player to player list
-                    val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(com.idos.tictactoe.data.MainPlayerUiState::class.java)
+                    val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
                     playerlist.add(p)
 
                 }
                 //sort players list by players' score
-                playerlist.sortBy {
+                playerlist.sortByDescending  {
                     it?.score
                 }
             }
@@ -80,7 +81,7 @@ fun LeaderBoardScreen(
 
 @Composable
 fun ShowTopPlayers(
-    Players: SnapshotStateList<com.idos.tictactoe.data.MainPlayerUiState?>,
+    Players: SnapshotStateList<MainPlayerUiState?>,
     yourPlayer: String
 ) {
 
@@ -88,7 +89,7 @@ fun ShowTopPlayers(
         mutableStateOf(false)
     }
     var player by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
     //table header
     Card(modifier = Modifier.fillMaxWidth(.9f), border = BorderStroke(1.dp, Color.Black), shape = RoundedCornerShape(10)) {
@@ -179,7 +180,7 @@ fun ShowTopPlayers(
 
 //show player's information
 @Composable
-fun showPlayer(player: com.idos.tictactoe.data.MainPlayerUiState, onCloseClicked: () -> Unit) {
+fun showPlayer(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
     Dialog(
         onDismissRequest = {},
         properties = DialogProperties(
