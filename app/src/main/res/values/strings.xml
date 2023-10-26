@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">TicTacToe</string>
+    <string name="default_notification_channel_id">Global</string>
 </resources>

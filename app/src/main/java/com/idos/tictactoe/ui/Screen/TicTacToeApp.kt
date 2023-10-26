@@ -4,8 +4,8 @@ package com.idos.tictactoe.ui.Screen
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -42,6 +42,7 @@ import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
 import com.idos.tictactoe.ui.theme.Shapes
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.concurrent.schedule
@@ -303,7 +304,6 @@ fun CheckExit(onQuitClick: () -> Unit, onCancelClick: () -> Unit) {
     )
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun TicTacToeApp(
@@ -348,6 +348,17 @@ fun TicTacToeApp(
     val emailStr = sharedPreferences.getString("name", "")
 
     signupUiState.name = emailStr!!
+
+    FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+        if (!task.isSuccessful) {
+            return@addOnCompleteListener
+        }
+
+        // fetching the token
+        val token = task.result
+        Log.println(Log.ASSERT, "Tag", token)
+    }
+
 
     Scaffold(
         scaffoldState = scaffoldState,
