@@ -4,7 +4,6 @@ package com.idos.tictactoe.ui.Screen
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -42,7 +41,6 @@ import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
 import com.idos.tictactoe.ui.theme.Shapes
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.concurrent.schedule
@@ -63,6 +61,12 @@ enum class GameScreen {
     EnterGameWithCode,
     ShowGameFinalScore
 }
+
+data class sharedPreferences(
+    var lastTimeSeen: Long = 0,
+    var messageSent: Boolean = false,
+    var messagingSendingTime: Long = 0
+)
 
 /**
  * Provides Navigation graph for the application.
@@ -96,7 +100,7 @@ fun CheckLogOut(
 }
 
 @Composable
-fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChangeScreen: () -> Unit = {}, sharedPreferences: sharedPreferences, onLogOutClick: () -> Unit) {
+fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChangeScreen: () -> Unit = {}, sharedPreferences: SignUpName, onLogOutClick: () -> Unit) {
 
     Box(modifier = Modifier
         .background(Secondery)
@@ -127,7 +131,7 @@ fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChang
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: sharedPreferences, navController: NavHostController, onChangeScreen: () -> Unit) {
+fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: SignUpName, navController: NavHostController, onChangeScreen: () -> Unit) {
 
     var player by remember {
         mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
@@ -304,7 +308,7 @@ fun CheckExit(onQuitClick: () -> Unit, onCancelClick: () -> Unit) {
     )
 }
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "UnrememberedMutableState")
 @Composable
 fun TicTacToeApp(
     viewModel: TicTacToeViewModel = TicTacToeViewModel(),
@@ -323,14 +327,18 @@ fun TicTacToeApp(
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
-    val signupUiState = signUpViewModel.emailsharedPreferences
+    val signupUiState = signUpViewModel.signUpName
     val onlineGameValuesUiState by codeGameViewModel.onlineGameValuesUiState.collectAsState()
+    val sharedPreferencesUiState by mutableStateOf(sharedPreferences())
 
 
     var timesPlayed by remember {
         mutableStateOf(0)
     }
     var open by remember {
+        mutableStateOf(false)
+    }
+    var updateSharedPreferences by remember {
         mutableStateOf(false)
     }
 
@@ -346,19 +354,21 @@ fun TicTacToeApp(
     )
 
     val emailStr = sharedPreferences.getString("name", "")
+    val messageSent = sharedPreferences.getBoolean("messageSent", false)
+    val lastTimeSeen = sharedPreferences.getLong("lastTimeSeen", 0)
+
 
     signupUiState.name = emailStr!!
+    sharedPreferencesUiState.messageSent = messageSent
+    sharedPreferencesUiState.lastTimeSeen = lastTimeSeen
 
-    FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-        if (!task.isSuccessful) {
-            return@addOnCompleteListener
-        }
+    if (!updateSharedPreferences) {
+        sharedPreferencesUiState.messageSent = false
+        sharedPreferencesUiState.lastTimeSeen = (System.currentTimeMillis()/1000)
 
-        // fetching the token
-        val token = task.result
-        Log.println(Log.ASSERT, "Tag", token)
+        sharedPreferences.edit().putBoolean("messageSent", sharedPreferencesUiState.messageSent).apply()
+        sharedPreferences.edit().putLong("lastTimeSeen", sharedPreferencesUiState.lastTimeSeen).apply()
     }
-
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -469,7 +479,7 @@ fun TicTacToeApp(
                         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
                     )
-                    signUpViewModel.emailsharedPreferences.name = ""
+                    signUpViewModel.signUpName.name = ""
 
                     sharedPreferences.edit().putString("name", signupUiState.name).apply()
 
@@ -507,7 +517,7 @@ fun TicTacToeApp(
                             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
                         )
-                        signUpViewModel.emailsharedPreferences.name = signUpViewModel.emailsharedPreferences.name2
+                        signUpViewModel.signUpName.name = signUpViewModel.signUpName.name2
 
                         sharedPreferences.edit().putString("name", signupUiState.name).apply()
 
@@ -534,7 +544,7 @@ fun TicTacToeApp(
                             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
                         )
-                        signUpViewModel.emailsharedPreferences.name = signUpViewModel.emailsharedPreferences.name2
+                        signUpViewModel.signUpName.name = signUpViewModel.signUpName.name2
 
                         sharedPreferences.edit().putString("name", signupUiState.name).apply()
 
@@ -549,7 +559,21 @@ fun TicTacToeApp(
                 HomeScreen(
                     onTwoPlayersClick = {navController.navigate(GameScreen.TwoPlayers.name)},
                     onSinglePlayerClick = {navController.navigate(GameScreen.SinglePlayer.name)},
-                    onOnlineClick = {navController.navigate(GameScreen.Online.name)}
+                    onOnlineClick = {navController.navigate(GameScreen.Online.name)},
+                    onBackClick = {
+                        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+
+                        val sharedPreferences = EncryptedSharedPreferences.create(
+                            "preferences",
+                            masterKeyAlias,
+                            context,
+                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                        )
+                        sharedPreferencesUiState.lastTimeSeen = (System.currentTimeMillis()/1000)
+
+                        sharedPreferences.edit().putLong("lastTimeSeen", sharedPreferencesUiState.lastTimeSeen).apply()
+                    }
                 )
             }
 

@@ -7,24 +7,69 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.idos.tictactoe.MainActivity
 import com.idos.tictactoe.R
 import com.idos.tictactoe.dataStore
+import com.idos.tictactoe.ui.Screen.sharedPreferences
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+data class notificationData(
+    var days: Int = 0,
+    var DaysAfterNotification: Int = 0
+)
 
 class FireBaseMessagingService: FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
+        val sharedPreferencesUiState by mutableStateOf(sharedPreferences())
+        var notificationData = mutableStateOf(notificationData())
+
+        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+
+        val sharedPreferences = EncryptedSharedPreferences.create(
+            "preferences",
+            masterKeyAlias,
+            this,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+
+        var db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+        //get Players collection from database
+        db.collection("NotificationData").get()
+            //on success
+            .addOnSuccessListener { queryDocumentSnapshots ->
+                //check if collection is empty
+                if (!queryDocumentSnapshots.isEmpty) {
+                    val list = queryDocumentSnapshots.documents
+                    for (d in list) {
+                        //add every player to player list
+                        val p: MutableState<notificationData>? = d.toObject(notificationData::class.java)
+                        notificationData = p!!
+
+                    }
+                    //sort players list by players' score
+                }
+            }
+            //on failure
+            .addOnFailureListener {
+            }
 
         //When App in background notification is handle by system
         // and it used notification payload and used title and body
@@ -47,8 +92,21 @@ class FireBaseMessagingService: FirebaseMessagingService() {
         message.data.let {
             Log.v("CloudMessage", "Message Data Body ${it["body"]}")
             Log.v("CloudMessage", "Message Data Title  ${it["title"]}")
-            showNotificationOnStatusBar(message.data["title"], message.data["body"])
-
+            if (!sharedPreferencesUiState.messageSent){
+                if (sharedPreferencesUiState.lastTimeSeen <= (System.currentTimeMillis()/1000) - notificationData.value.days*3600) {
+                    showNotificationOnStatusBar(message.data["title"], message.data["body"])
+                    sharedPreferencesUiState.messageSent = true
+                    sharedPreferencesUiState.messagingSendingTime = (System.currentTimeMillis()/1000)
+                    sharedPreferences.edit().putBoolean("messageSent", sharedPreferencesUiState.messageSent).apply()
+                    sharedPreferences.edit().putLong("messagingSendingTime", sharedPreferencesUiState.messagingSendingTime).apply()
+                }
+            } else {
+                if (sharedPreferencesUiState.messagingSendingTime <= (System.currentTimeMillis()/1000) - notificationData.value.DaysAfterNotification*3600) {
+                    showNotificationOnStatusBar(message.data["title"], message.data["body"])
+                    sharedPreferencesUiState.messagingSendingTime = (System.currentTimeMillis()/1000)
+                    sharedPreferences.edit().putLong("messagingSendingTime", sharedPreferencesUiState.messagingSendingTime).apply()
+                }
+            }
         }
     }
     

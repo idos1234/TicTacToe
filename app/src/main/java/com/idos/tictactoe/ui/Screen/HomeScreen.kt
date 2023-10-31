@@ -1,5 +1,6 @@
 package com.idos.tictactoe.ui.Screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -13,7 +14,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -23,13 +23,20 @@ import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
 import com.idos.tictactoe.ui.theme.Shapes
+import kotlin.system.exitProcess
 
 /**
  * [HomeScreen] Show the home screen
  */
 
 @Composable
-fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Unit = {}, onOnlineClick: () -> Unit = {}) {
+fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Unit = {}, onOnlineClick: () -> Unit = {}, onBackClick: () -> Unit) {
+    BackHandler(
+        onBack = {
+            onBackClick()
+            exitProcess(0)
+        }
+    )
     var showTrainingGames by remember {
         mutableStateOf(false)
     }
@@ -95,7 +102,11 @@ fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () ->
             usePlatformDefaultWidth = false
         )
     ) {
-        Card(backgroundColor = Secondery, elevation = 4.dp, modifier = Modifier.fillMaxWidth(0.60f)) {
+        Card(
+            backgroundColor = Secondery,
+            elevation = 4.dp,
+            modifier = Modifier.fillMaxWidth(0.60f)
+        ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
                 Row(modifier = Modifier.align(Alignment.Start)) {
@@ -154,11 +165,4 @@ fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () ->
             }
         }
     }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun Preview() {
-    HomeScreen()
 }

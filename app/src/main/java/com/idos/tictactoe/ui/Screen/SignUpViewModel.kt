@@ -15,11 +15,11 @@ class SignUpViewModel(): ViewModel() {
     var playerUiState by mutableStateOf(MainPlayerUiState())
         private set
 
-    var emailsharedPreferences by mutableStateOf(sharedPreferences())
+    var signUpName by mutableStateOf(SignUpName())
         private set
 
-    fun updateEmail(newEmail: sharedPreferences) {
-        emailsharedPreferences = newEmail.copy()
+    fun updateEmail(newEmail: SignUpName) {
+        signUpName = newEmail.copy()
     }
 
     fun updateUiState(newPlayerUiState: MainPlayerUiState) {
@@ -32,7 +32,7 @@ class SignUpViewModel(): ViewModel() {
 }
 
 
-data class sharedPreferences(
+data class SignUpName(
     var name: String = "",
     var name2: String = "",
 )

@@ -34,7 +34,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 fun LogInScreen(
     viewModel: SignUpViewModel,
     context: Context,
-    emailsharedPreferences: sharedPreferences,
+    emailsharedPreferences: SignUpName,
     onSignInClick: () -> Unit,
     onClick: () -> Unit
 ) {
@@ -180,8 +180,8 @@ fun LogInScreen(
 fun LogINInputForm(
     onValueChange: (com.idos.tictactoe.data.MainPlayerUiState) -> Unit = {},
     playerUiState: com.idos.tictactoe.data.MainPlayerUiState,
-    emailsharedPreferences: sharedPreferences,
-    onEmailValueChange: (sharedPreferences) -> Unit,
+    emailsharedPreferences: SignUpName,
+    onEmailValueChange: (SignUpName) -> Unit,
 ) {
 
     val focusManager = LocalFocusManager.current
