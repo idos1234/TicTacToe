@@ -57,11 +57,15 @@ dependencies {
 
     // FireBase Dependency
     implementation 'com.google.firebase:firebase-database-ktx:20.3.0'
-    implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha06'
     implementation 'com.google.firebase:firebase-firestore-ktx:24.9.0'
     implementation 'com.google.firebase:firebase-messaging-ktx:23.3.0'
-    //preferences DataStore
-    implementation 'androidx.datastore:datastore-preferences:1.0.0'
+    // preferences DataStore
+     implementation 'androidx.security:security-crypto:1.1.0-alpha03'
+    implementation('com.google.crypto.tink:tink-android') {
+            version {
+                strictly '1.4.0'
+            }
+        }
 
     def nav_version = "2.7.4"
 

@@ -1,7 +1,6 @@
 package com.idos.tictactoe
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.google.firebase.ktx.Firebase
@@ -16,7 +15,6 @@ class MainActivity : ComponentActivity() {
             TicTacToeTheme {
                 TicTacToeApp()
                 Firebase.messaging.subscribeToTopic("Ido")
-                Log.println(Log.ASSERT, "Tag",  (System.currentTimeMillis()/1000).toString())
             }
         }
     }

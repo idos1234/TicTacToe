@@ -1,9 +1,10 @@
-@file:Suppress("DEPRECATION", "NAME_SHADOWING", "UNUSED_EXPRESSION")
+@file:Suppress("NAME_SHADOWING", "UNUSED_EXPRESSION")
 
 package com.idos.tictactoe.ui.Screen
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -35,7 +36,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import androidx.security.crypto.MasterKey
 import com.idos.tictactoe.ui.AppViewModelProvider
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
@@ -307,6 +308,13 @@ fun CheckExit(onQuitClick: () -> Unit, onCancelClick: () -> Unit) {
         }
     )
 }
+fun getSecuredSharedPreferences(context: Context, fileName: String): SharedPreferences {
+    val masterKey = MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
+    return EncryptedSharedPreferences.create(context, fileName, masterKey,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+}
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "UnrememberedMutableState")
 @Composable
@@ -343,15 +351,7 @@ fun TicTacToeApp(
     }
 
     //share preferences
-    val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-
-    val sharedPreferences = EncryptedSharedPreferences.create(
-        "preferences",
-        masterKeyAlias,
-        context,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
+    val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
 
     val emailStr = sharedPreferences.getString("name", "")
     val messageSent = sharedPreferences.getBoolean("messageSent", false)
@@ -470,15 +470,8 @@ fun TicTacToeApp(
                 },
                 sharedPreferences = signupUiState,
                 onLogOutClick = {
-                    val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+                    val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
 
-                    val sharedPreferences = EncryptedSharedPreferences.create(
-                        "preferences",
-                        masterKeyAlias,
-                        context,
-                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                    )
                     signUpViewModel.signUpName.name = ""
 
                     sharedPreferences.edit().putString("name", signupUiState.name).apply()
@@ -508,15 +501,8 @@ fun TicTacToeApp(
                     context,
                     emailsharedPreferences = signupUiState,
                     onClick = {
-                        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+                        val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
 
-                        val sharedPreferences = EncryptedSharedPreferences.create(
-                            "preferences",
-                            masterKeyAlias,
-                            context,
-                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                        )
                         signUpViewModel.signUpName.name = signUpViewModel.signUpName.name2
 
                         sharedPreferences.edit().putString("name", signupUiState.name).apply()
@@ -535,15 +521,8 @@ fun TicTacToeApp(
                     context,
                     emailsharedPreferences = signupUiState,
                     onClick = {
-                        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+                        val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
 
-                        val sharedPreferences = EncryptedSharedPreferences.create(
-                            "preferences",
-                            masterKeyAlias,
-                            context,
-                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                        )
                         signUpViewModel.signUpName.name = signUpViewModel.signUpName.name2
 
                         sharedPreferences.edit().putString("name", signupUiState.name).apply()
@@ -561,15 +540,8 @@ fun TicTacToeApp(
                     onSinglePlayerClick = {navController.navigate(GameScreen.SinglePlayer.name)},
                     onOnlineClick = {navController.navigate(GameScreen.Online.name)},
                     onBackClick = {
-                        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+                        val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
 
-                        val sharedPreferences = EncryptedSharedPreferences.create(
-                            "preferences",
-                            masterKeyAlias,
-                            context,
-                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-                        )
                         sharedPreferencesUiState.lastTimeSeen = (System.currentTimeMillis()/1000)
 
                         sharedPreferences.edit().putLong("lastTimeSeen", sharedPreferencesUiState.lastTimeSeen).apply()

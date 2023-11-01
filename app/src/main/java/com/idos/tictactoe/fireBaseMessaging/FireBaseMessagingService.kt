@@ -1,55 +1,42 @@
 package com.idos.tictactoe.fireBaseMessaging
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_MUTABLE
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.idos.tictactoe.MainActivity
 import com.idos.tictactoe.R
-import com.idos.tictactoe.dataStore
+import com.idos.tictactoe.ui.Screen.getSecuredSharedPreferences
 import com.idos.tictactoe.ui.Screen.sharedPreferences
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 data class notificationData(
     var days: Int = 0,
     var DaysAfterNotification: Int = 0
 )
 
+@SuppressLint("MissingFirebaseInstanceTokenRefresh")
 class FireBaseMessagingService: FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         val sharedPreferencesUiState by mutableStateOf(sharedPreferences())
-        var notificationData = mutableStateOf(notificationData())
+        var NotificationData by mutableStateOf(notificationData())
 
-        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+        val sharedPreferences = getSecuredSharedPreferences(this, "myPref")
 
-        val sharedPreferences = EncryptedSharedPreferences.create(
-            "preferences",
-            masterKeyAlias,
-            this,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-
-        var db: FirebaseFirestore = FirebaseFirestore.getInstance()
+        val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
         //get Players collection from database
         db.collection("NotificationData").get()
@@ -60,8 +47,8 @@ class FireBaseMessagingService: FirebaseMessagingService() {
                     val list = queryDocumentSnapshots.documents
                     for (d in list) {
                         //add every player to player list
-                        val p: MutableState<notificationData>? = d.toObject(notificationData::class.java)
-                        notificationData = p!!
+                        val p: notificationData? = d.toObject(notificationData::class.java)
+                        NotificationData = p!!
 
                     }
                     //sort players list by players' score
@@ -93,7 +80,7 @@ class FireBaseMessagingService: FirebaseMessagingService() {
             Log.v("CloudMessage", "Message Data Body ${it["body"]}")
             Log.v("CloudMessage", "Message Data Title  ${it["title"]}")
             if (!sharedPreferencesUiState.messageSent){
-                if (sharedPreferencesUiState.lastTimeSeen <= (System.currentTimeMillis()/1000) - notificationData.value.days*3600) {
+                if (sharedPreferencesUiState.lastTimeSeen <= (System.currentTimeMillis()/1000) - NotificationData.days*3600) {
                     showNotificationOnStatusBar(message.data["title"], message.data["body"])
                     sharedPreferencesUiState.messageSent = true
                     sharedPreferencesUiState.messagingSendingTime = (System.currentTimeMillis()/1000)
@@ -101,7 +88,7 @@ class FireBaseMessagingService: FirebaseMessagingService() {
                     sharedPreferences.edit().putLong("messagingSendingTime", sharedPreferencesUiState.messagingSendingTime).apply()
                 }
             } else {
-                if (sharedPreferencesUiState.messagingSendingTime <= (System.currentTimeMillis()/1000) - notificationData.value.DaysAfterNotification*3600) {
+                if (sharedPreferencesUiState.messagingSendingTime <= (System.currentTimeMillis()/1000) - NotificationData.DaysAfterNotification*3600) {
                     showNotificationOnStatusBar(message.data["title"], message.data["body"])
                     sharedPreferencesUiState.messagingSendingTime = (System.currentTimeMillis()/1000)
                     sharedPreferences.edit().putLong("messagingSendingTime", sharedPreferencesUiState.messagingSendingTime).apply()
@@ -121,8 +108,8 @@ class FireBaseMessagingService: FirebaseMessagingService() {
         intent.putExtra("body", body)
 
         // it should be unqiue when push comes.
-        var requestCode = System.currentTimeMillis().toInt()
-        var pendingIntent : PendingIntent
+        val requestCode = System.currentTimeMillis().toInt()
+        val pendingIntent : PendingIntent
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             pendingIntent =
                 PendingIntent.getActivity(this, requestCode,intent, FLAG_MUTABLE)
@@ -153,19 +140,4 @@ class FireBaseMessagingService: FirebaseMessagingService() {
 
 
     }
-    @OptIn(DelicateCoroutinesApi::class)
-    override fun onNewToken(token: String) {
-        super.onNewToken(token)
-        GlobalScope.launch {
-            saveGCMToken(token)
-        }
-    }
-
-    private suspend fun saveGCMToken(token: String) {
-        val gcmTokenKey = stringPreferencesKey("gcm_token")
-        baseContext.dataStore.edit {
-            it[gcmTokenKey] = token
-        }
-    }
-
 }
