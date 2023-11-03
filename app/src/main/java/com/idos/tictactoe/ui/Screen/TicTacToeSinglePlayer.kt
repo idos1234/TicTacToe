@@ -14,6 +14,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -83,7 +84,7 @@ fun SinglePlayerGameButton(box: String, onClick: () -> Unit = {}, viewModel: Tic
             contentDescription = null,
             alpha = if (box != "") DefaultAlpha else 0f,
             modifier = Modifier
-                .background(Primery)
+                .background(Color.Gray)
                 .size(100.dp)
                 .clickable(
                     onClick = {

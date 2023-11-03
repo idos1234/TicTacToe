@@ -83,7 +83,7 @@ fun GameButton(box: String, onClick: () -> Unit = {}, context: Context = LocalCo
             contentDescription = null,
             alpha = if (box != "") DefaultAlpha else 0f,
             modifier = Modifier
-                .background(Primery)
+                .background(Color.Gray)
                 .size(100.dp)
                 .clickable(
                     onClick = onClick,

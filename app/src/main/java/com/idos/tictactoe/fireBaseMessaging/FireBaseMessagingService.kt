@@ -124,7 +124,7 @@ class FireBaseMessagingService: FirebaseMessagingService() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setStyle(NotificationCompat.BigTextStyle().bigText((body)))
             .setContentIntent(pendingIntent)
-            .setSmallIcon(R.drawable.ic_game_icon)
+            .setSmallIcon(R.mipmap.ic_launcher_round)
 
 
         with(NotificationManagerCompat.from(this)){

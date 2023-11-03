@@ -127,7 +127,7 @@ fun OnlineGameButton(game: OnlineGameUiState, boxNumber: Int, box: String, enabl
             contentDescription = null,
             alpha = if (box != "") DefaultAlpha else 0f,
             modifier = Modifier
-                .background(Primery)
+                .background(Color.Gray)
                 .size(100.dp)
                 .clickable(
                     onClick = { setBox = true },
@@ -761,8 +761,8 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
                                 150 -> if (player.level == 4) {
                                     lockedPhotos = player.lockedImages.minus(R.drawable.xo_5_1) - R.drawable.xo_5_2
                                     unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_5_1) + R.drawable.xo_5_2
-                                    lockedX = player.lockedX.minus(R.drawable.x_5_6)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_5_6)
+                                    lockedX = player.lockedX.minus(R.drawable.x_5)
+                                    unlockedX = player.unlockedX.plus(R.drawable.x_5)
                                     lockedO = player.lockedO.minus(R.drawable.o_5)
                                     unlockedO = player.unlockedO.plus(R.drawable.o_5)
                                     newLevel = 5
@@ -771,8 +771,8 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
                                 200 -> if (player.level == 5) {
                                     lockedPhotos = player.lockedImages.minus(R.drawable.xo_6)
                                     unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_6)
-                                    lockedX = player.lockedX.minus(R.drawable.x_5_6)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_5_6)
+                                    lockedX = player.lockedX.minus(R.drawable.x_6)
+                                    unlockedX = player.unlockedX.plus(R.drawable.x_6)
                                     lockedO = player.lockedO.minus(R.drawable.o_6)
                                     unlockedO = player.unlockedO.plus(R.drawable.o_6)
                                     newLevel = 6
