@@ -507,7 +507,7 @@ fun enterGameWithCodeButton(modifier: Modifier, codeGameViewModel: CodeGameViewM
             onValueChange = { codeGameViewModel.updateGameCode(it) },
             placeholder = { Text(text = "Code:")},
             colors = TextFieldDefaults.textFieldColors(backgroundColor = Secondery),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password))
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
             if (codeGameUiState.gameCode != "") {

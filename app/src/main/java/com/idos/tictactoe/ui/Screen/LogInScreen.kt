@@ -35,7 +35,7 @@ fun LogInScreen(
     viewModel: SignUpViewModel,
     context: Context,
     emailsharedPreferences: SignUpName,
-    onSignInClick: () -> Unit,
+    onSignUpClick: () -> Unit,
     onClick: () -> Unit
 ) {
     val uiState = viewModel.playerUiState
@@ -53,10 +53,10 @@ fun LogInScreen(
         .fillMaxSize()
         .background(BackGround))
     {
-        Spacer(modifier = Modifier.height(80.dp))
+        Spacer(modifier = Modifier.weight(1f))
         Text(text = "Welcome again", fontSize = 30.sp, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)
 
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.weight(1.25f))
 
         //login input form(name + password)
         LogINInputForm(
@@ -72,14 +72,14 @@ fun LogInScreen(
             isPasswordOrNameEmpty = false
         }
 
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.weight(0.75f))
 
         //progressbar
         if (!isEnabled) {
             CircularProgressIndicator()
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.weight(0.25f))
 
 
         Button(
@@ -121,7 +121,7 @@ fun LogInScreen(
                                     //log in to app
                                     else {
                                         Toast.makeText(
-                                            context, "Welcome to (App Name)", Toast.LENGTH_SHORT
+                                            context, "Welcome", Toast.LENGTH_SHORT
                                         ).show()
 
                                         onClick()
@@ -156,23 +156,22 @@ fun LogInScreen(
             enabled = isEnabled,
             colors = ButtonDefaults.buttonColors(Secondery),
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 50.dp)
-
+                .fillMaxWidth(0.75f)
         ) {
             Text(text = "Next", fontWeight = FontWeight.SemiBold, fontSize = 30.sp)
         }
 
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.weight(0.1875f))
 
         //navigation to sign in
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(text = "Don't have an account?")
-            TextButton(onClick = onSignInClick) {
-                Text(text = "Sign in", color = Color.Yellow)
+            TextButton(onClick = onSignUpClick) {
+                Text(text = "Sign up", color = Color.Yellow)
             }
         }
 
+        Spacer(modifier = Modifier.weight(2f))
     }
 }
 

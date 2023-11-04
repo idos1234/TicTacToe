@@ -529,7 +529,7 @@ fun TicTacToeApp(
 
                         navController.navigate(GameScreen.Start.name)
                     },
-                    onSignInClick = { navController.navigate(GameScreen.SignUp.name) }
+                    onSignUpClick = { navController.navigate(GameScreen.SignUp.name) }
                 )
             }
 

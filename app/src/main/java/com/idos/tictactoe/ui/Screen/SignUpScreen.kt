@@ -57,10 +57,10 @@ fun SignUpScreen(
         .fillMaxSize()
         .background(BackGround))
     {
-        Spacer(modifier = Modifier.height(80.dp))
-        Text(text = "Welcome To (app name)", fontSize = 30.sp, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.weight(1f))
+        Text(text = "Welcome", fontSize = 30.sp, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)
 
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.weight(1.25f))
 
         //sign in input form
         SignUpInputForm(
@@ -77,14 +77,14 @@ fun SignUpScreen(
             isPasswordOrNameEmpty = false
         }
 
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.weight(0.75f))
 
         //progressbar
         if (!isEnabled) {
             CircularProgressIndicator()
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.weight(0.25f))
 
         Button(
             onClick = {
@@ -129,13 +129,11 @@ fun SignUpScreen(
                                      }
                                      //check if email already used
                                      if (p?.email == uiState.email) {
-                                         if (p.name == uiState.name) {
-                                             Toast.makeText(
-                                                 context,
-                                                 "This email already used",
-                                                 Toast.LENGTH_SHORT
-                                             ).show()
-                                         }
+                                         Toast.makeText(
+                                             context,
+                                             "This email already used",
+                                             Toast.LENGTH_SHORT
+                                         ).show()
 
                                          alreadyUsed = true
                                          isEnabled = true
@@ -156,7 +154,7 @@ fun SignUpScreen(
                                          //on success
                                          .addOnSuccessListener {
                                          Toast.makeText(
-                                             context, "Welcome to (App Name)", Toast.LENGTH_SHORT
+                                             context, "Welcome", Toast.LENGTH_SHORT
                                          ).show()
 
                                          onClick()
@@ -191,14 +189,12 @@ fun SignUpScreen(
             enabled = isEnabled,
             colors = ButtonDefaults.buttonColors(Secondery),
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 50.dp)
-
+                .fillMaxWidth(0.75f)
         ) {
             Text(text = "Sign in", fontWeight = FontWeight.SemiBold, fontSize = 30.sp)
             }
 
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.weight(0.1875f))
 
         //navigation to log in
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -207,6 +203,8 @@ fun SignUpScreen(
                 Text(text = "Log in", color = Color.Yellow)
             }
         }
+
+        Spacer(modifier = Modifier.weight(2f))
     }
 }
 
@@ -309,20 +307,7 @@ fun SignUpInputForm(
         ),
         colors = TextFieldDefaults.textFieldColors(backgroundColor = Secondery),
         shape = Shapes.large,
-        visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-        trailingIcon = {
-            val image = if (showPassword)
-                Icons.Default.Visibility
-            else Icons.Filled.VisibilityOff
-
-            // Localized description for accessibility services
-            val description = if (showPassword) "Hide password" else "Show password"
-
-            // Toggle button to hide or display password
-            IconButton(onClick = {showPassword = !showPassword}){
-                Icon(imageVector  = image, description)
-            }
-        }
+        visualTransformation = PasswordVisualTransformation(),
     )
     Spacer(modifier = Modifier.height(15.dp))
 }
