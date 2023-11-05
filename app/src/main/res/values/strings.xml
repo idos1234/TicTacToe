@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">TicTacToe</string>
     <string name="default_notification_channel_id">Global</string>
+    <string name="google_cloud_server_client_id" translatable="false">315349484101-f7859vgdr6qtsh07qar0q2i94uch5afb.apps.googleusercontent.com</string>
 </resources>
