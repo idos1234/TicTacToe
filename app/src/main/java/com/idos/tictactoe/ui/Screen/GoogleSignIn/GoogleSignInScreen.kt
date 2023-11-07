@@ -24,13 +24,11 @@ import androidx.compose.ui.Modifier
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.idos.tictactoe.ui.Screen.SignUpViewModel
 
 @Composable
-fun GoogleSignInScreen(viewModel: SignUpViewModel, onClick: () -> Unit) {
+fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit) {
     val signInRequestCode = 1
     val context = LocalContext.current
-    val uiState = viewModel.playerUiState
 
     val mSignInViewModel: GoogleSignInViewModel = viewModel(
         factory = SignInGoogleViewModelFactory(context.applicationContext as Application)
@@ -91,20 +89,22 @@ fun GoogleSignInScreen(viewModel: SignUpViewModel, onClick: () -> Unit) {
             }
 
         if (isPlayerExisted) {
+            viewModel.updateEmail(user.email)
             onClick()
         } else {
             val dbPlayers: CollectionReference = db.collection("Players")
 
             val player = com.idos.tictactoe.data.MainPlayerUiState(
-                name = uiState.name,
-                email = uiState.email,
+                name = "",
+                email = user.email!!,
                 score = 0,
-                password = uiState.password
+                password = ""
             )
 
             dbPlayers.add(player)
                 //on success
                 .addOnSuccessListener {
+                    viewModel.updateEmail(user.email)
                     onClick()
                 }
                 //on failure
@@ -126,18 +126,12 @@ fun ScreenView(
     mSignInViewModel: GoogleSignInViewModel,
     context: Context
 ) {
-    val state = mSignInViewModel.googleUser.observeAsState()
-    val user = state.value
-
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Button(onClick = {
-            mSignInViewModel.showLoading()
-            onClick()
-        }) {
+        Button(onClick = { onClick() }) {
             Text(text = "SignIn with Google")
         }
 

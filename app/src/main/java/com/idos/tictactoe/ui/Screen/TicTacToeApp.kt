@@ -42,6 +42,8 @@ import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
 import com.idos.tictactoe.ui.theme.Shapes
 import com.google.firebase.firestore.FirebaseFirestore
+import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInScreen
+import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInViewModel
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.concurrent.schedule
@@ -60,7 +62,8 @@ enum class GameScreen {
     CodeGame,
     OpenGameWithCode,
     EnterGameWithCode,
-    ShowGameFinalScore
+    ShowGameFinalScore,
+    GoogleSignIn
 }
 
 data class sharedPreferences(
@@ -321,7 +324,8 @@ fun getSecuredSharedPreferences(context: Context, fileName: String): SharedPrefe
 fun TicTacToeApp(
     viewModel: TicTacToeViewModel = TicTacToeViewModel(),
     signUpViewModel: SignUpViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    codeGameViewModel: CodeGameViewModel = viewModel()
+    codeGameViewModel: CodeGameViewModel = viewModel(),
+    googleSignInViewModel: GoogleSignInViewModel = viewModel(),
 ) {
     //nav controller
     val context = LocalContext.current
@@ -338,6 +342,7 @@ fun TicTacToeApp(
     val signupUiState = signUpViewModel.signUpName
     val onlineGameValuesUiState by codeGameViewModel.onlineGameValuesUiState.collectAsState()
     val sharedPreferencesUiState by mutableStateOf(sharedPreferences())
+    val emailState by googleSignInViewModel.emailState.collectAsState()
 
 
     var timesPlayed by remember {
@@ -354,11 +359,13 @@ fun TicTacToeApp(
     val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
 
     val emailStr = sharedPreferences.getString("name", "")
+    val googleEmail = sharedPreferences.getString("email", "")
     val messageSent = sharedPreferences.getBoolean("messageSent", false)
     val lastTimeSeen = sharedPreferences.getLong("lastTimeSeen", 0)
 
 
     signupUiState.name = emailStr!!
+    emailState.email = googleEmail
     sharedPreferencesUiState.messageSent = messageSent
     sharedPreferencesUiState.lastTimeSeen = lastTimeSeen
 
@@ -470,29 +477,20 @@ fun TicTacToeApp(
                 },
                 sharedPreferences = signupUiState,
                 onLogOutClick = {
-                    val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
-
-                    signUpViewModel.signUpName.name = ""
-
-                    sharedPreferences.edit().putString("name", signupUiState.name).apply()
-
-                    signUpViewModel.clearPlayer()
-
-                    navController.navigate(GameScreen.LogIn.name)
                 }
             )
         }
     ) {
 
-        val startedDestination = if(signupUiState.name == "") {
-            GameScreen.LogIn.name
-        } else {
+        val startedScreen = if (emailState.email != "") {
             GameScreen.Start.name
+        } else {
+            GameScreen.GoogleSignIn.name
         }
 
         NavHost(
             navController = navController,
-            startDestination = startedDestination,
+            startDestination = startedScreen,
         ){
             //sign up screen
             composable(route = GameScreen.SignUp.name) {
@@ -632,6 +630,18 @@ fun TicTacToeApp(
                 }
             ) {
                 ShowGameFinalScore(uiState = onlineGameValuesUiState, navController = navController)
+            }
+
+            composable(GameScreen.GoogleSignIn.name) {
+                GoogleSignInScreen(
+                    viewModel = googleSignInViewModel,
+                    onClick = {
+                    val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
+
+                    sharedPreferences.edit().putString("email", emailState.email).apply()
+
+                    navController.navigate(GameScreen.Start.name)
+                })
             }
         }
     }

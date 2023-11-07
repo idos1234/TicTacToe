@@ -7,6 +7,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class GoogleSignInViewModel(aplication: Application): AndroidViewModel(aplication) {
@@ -14,15 +18,17 @@ class GoogleSignInViewModel(aplication: Application): AndroidViewModel(aplicatio
     val googleUser: LiveData<GoogleUserModel> = _userState
 
     private var _loadingState = MutableLiveData(false)
-    val loading: LiveData<Boolean> = _loadingState
+
+    private val _emailState = MutableStateFlow(GoogleEmail())
+    val emailState: StateFlow<GoogleEmail> = _emailState.asStateFlow()
 
     fun fetchSignInUser(email: String?, name: String?) {
         _loadingState.value = true
 
         viewModelScope.launch {
             _userState.value = GoogleUserModel(
-                name,
-                email
+                email = email,
+                name = name,
             )
         }
 
@@ -32,10 +38,17 @@ class GoogleSignInViewModel(aplication: Application): AndroidViewModel(aplicatio
     fun hideLoading() {
         _loadingState.value = false
     }
-    fun showLoading() {
-        _loadingState.value = true
+
+    fun updateEmail(newEmail: String?) {
+        _emailState.update {
+            it.copy(email = newEmail)
+        }
     }
 }
+
+data class GoogleEmail(
+    var email: String? = ""
+)
 
 class SignInGoogleViewModelFactory(
     private val application: Application

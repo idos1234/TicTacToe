@@ -66,6 +66,7 @@ dependencies {
                 strictly '1.4.0'
             }
         }
+    implementation 'com.google.firebase:firebase-auth:22.2.0'
 
     def nav_version = "2.7.4"
     def moshi_version = "1.14.0"
@@ -99,8 +100,4 @@ dependencies {
     //google sign in
     implementation 'com.google.android.gms:play-services-auth:20.7.0'
     implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
-
-    // MOSHI
-    implementation "com.squareup.moshi:moshi:$moshi_version"
-    ksp("com.squareup.moshi:moshi-kotlin-codegen:$moshi_version")
 }
