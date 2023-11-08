@@ -1,8 +1,6 @@
 package com.idos.tictactoe.ui.Screen.GoogleSignIn
 
-import android.app.Application
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
@@ -11,58 +9,58 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 
 @Composable
 fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    var text by remember {
+        mutableStateOf<String?>(null)
+    }
+    val user by remember(viewModel) {
+        viewModel.googleUser
+    }.collectAsState()
     val signInRequestCode = 1
     val context = LocalContext.current
+    var isError by remember {
+        mutableStateOf(false)
+    }
 
-    val mSignInViewModel: GoogleSignInViewModel = viewModel(
-        factory = SignInGoogleViewModelFactory(context.applicationContext as Application)
-    )
-
-    val state = mSignInViewModel.googleUser.observeAsState()
-    val user = state.value
-
-    val isError = rememberSaveable { mutableStateOf(false) }
-
-    val authResultLauncher =
-        rememberLauncherForActivityResult(contract = GoogleApiContract()) { task ->
-            try {
-                val gsa = task?.getResult(ApiException::class.java)
-
-                if (gsa != null) {
-                    mSignInViewModel.fetchSignInUser(gsa.email, gsa.displayName)
-                } else {
-                    isError.value = true
+    val authResultLauncher = rememberLauncherForActivityResult(contract = GoogleApiContract()) {
+        try {
+            val account = it?.getResult(ApiException::class.java)
+            if (account == null) {
+                text = "Google sign in failed"
+                isError = true
+            } else {
+                scope.launch {
+                    viewModel.fetchSignInUser(email = account.email!!, name = account.displayName!!)
                 }
-            } catch (e: ApiException) {
-                Log.d("Error in AuthScreen%s", e.toString())
             }
+        } catch (e: ApiException) {
+            text = e.localizedMessage
         }
+    }
     
     ScreenView(
         onClick = { authResultLauncher.launch(signInRequestCode) },
-        isError = isError.value,
-        mSignInViewModel = mSignInViewModel,
+        isError = isError,
         context = context
     )
 
     user?.let {
-        mSignInViewModel.hideLoading()
 
         var isPlayerExisted by remember {
             mutableStateOf(false)
@@ -81,7 +79,7 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit) {
                             com.idos.tictactoe.data.MainPlayerUiState::class.java
                         )
                         //check if email already used
-                        if (p?.email == user.email) {
+                        if (p?.email == user!!.email) {
                             isPlayerExisted = true
                         }
                     }
@@ -89,14 +87,14 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit) {
             }
 
         if (isPlayerExisted) {
-            viewModel.updateEmail(user.email)
+            viewModel.updateEmail(user!!.email)
             onClick()
         } else {
             val dbPlayers: CollectionReference = db.collection("Players")
 
             val player = com.idos.tictactoe.data.MainPlayerUiState(
                 name = "",
-                email = user.email!!,
+                email = user!!.email!!,
                 score = 0,
                 password = ""
             )
@@ -104,7 +102,7 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit) {
             dbPlayers.add(player)
                 //on success
                 .addOnSuccessListener {
-                    viewModel.updateEmail(user.email)
+                    viewModel.updateEmail(user!!.email)
                     onClick()
                 }
                 //on failure
@@ -123,7 +121,6 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit) {
 fun ScreenView(
     onClick: () -> Unit,
     isError: Boolean = false,
-    mSignInViewModel: GoogleSignInViewModel,
     context: Context
 ) {
     Column(
@@ -138,7 +135,6 @@ fun ScreenView(
         when {
             isError -> {
                 isError.let {
-                    mSignInViewModel.hideLoading()
                     Toast.makeText(
                         context,
                         "Something went wrong...",
