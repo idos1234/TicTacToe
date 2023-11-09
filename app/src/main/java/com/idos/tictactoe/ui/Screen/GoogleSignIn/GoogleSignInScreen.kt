@@ -14,18 +14,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.launch
 
 @Composable
 fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit) {
-    val scope = rememberCoroutineScope()
     var text by remember {
         mutableStateOf<String?>(null)
     }
@@ -37,6 +34,9 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit) {
     var isError by remember {
         mutableStateOf(false)
     }
+    var checkedPlayer by remember {
+        mutableStateOf(false)
+    }
 
     val authResultLauncher = rememberLauncherForActivityResult(contract = GoogleApiContract()) {
         try {
@@ -45,9 +45,7 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit) {
                 text = "Google sign in failed"
                 isError = true
             } else {
-                scope.launch {
-                    viewModel.fetchSignInUser(email = account.email!!, name = account.displayName!!)
-                }
+                viewModel.fetchSignInUser(email = account.email!!, name = account.displayName!!)
             }
         } catch (e: ApiException) {
             text = e.localizedMessage
@@ -61,7 +59,6 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit) {
     )
 
     user?.let {
-
         var isPlayerExisted by remember {
             mutableStateOf(false)
         }
@@ -84,12 +81,14 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit) {
                         }
                     }
                 }
+                checkedPlayer = true
+
             }
 
         if (isPlayerExisted) {
             viewModel.updateEmail(user!!.email)
             onClick()
-        } else {
+        } else if (!isPlayerExisted && checkedPlayer){
             val dbPlayers: CollectionReference = db.collection("Players")
 
             val player = com.idos.tictactoe.data.MainPlayerUiState(

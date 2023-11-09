@@ -375,6 +375,7 @@ fun TicTacToeApp(
 
         sharedPreferences.edit().putBoolean("messageSent", sharedPreferencesUiState.messageSent).apply()
         sharedPreferences.edit().putLong("lastTimeSeen", sharedPreferencesUiState.lastTimeSeen).apply()
+        updateSharedPreferences = true
     }
 
     Scaffold(
@@ -638,7 +639,7 @@ fun TicTacToeApp(
                     onClick = {
                     val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
 
-                    sharedPreferences.edit().putString("email", emailState.email).apply()
+                    sharedPreferences.edit().putString("email", googleSignInViewModel.emailState.value.email).apply()
 
                     navController.navigate(GameScreen.Start.name)
                 })
