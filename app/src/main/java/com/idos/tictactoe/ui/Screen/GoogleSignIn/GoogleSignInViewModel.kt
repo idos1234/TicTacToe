@@ -1,26 +1,31 @@
 package com.idos.tictactoe.ui.Screen.GoogleSignIn
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 class GoogleSignInViewModel(): ViewModel() {
     private var _userState: MutableStateFlow<GoogleUserModel?> = MutableStateFlow(null)
     var googleUser: StateFlow<GoogleUserModel?> = _userState
 
-    private val _emailState = MutableStateFlow(GoogleEmail())
-    val emailState: StateFlow<GoogleEmail> = _emailState.asStateFlow()
+    var emailState by mutableStateOf(GoogleEmail())
+        private set
 
     fun fetchSignInUser(email: String?, name: String?) {
         _userState.value =  GoogleUserModel(name, email)
     }
 
-    fun updateEmail(newEmail: String?) {
-        _emailState.value = GoogleEmail(newEmail)
+    fun updateEmail(newEmail: GoogleEmail) {
+        emailState = newEmail.copy()
     }
+
 }
 
 data class GoogleEmail(
-    var email: String? = ""
+    var email: String? = "",
+    var email2: String? = "",
+    var name: String? = "",
 )

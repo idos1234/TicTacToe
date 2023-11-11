@@ -217,7 +217,7 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
                     updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
                     viewModel.updateFinalScoreScreenData("You lose", game, player1,  player2)
                 }
-                navController.navigate(GameScreen.ShowGameFinalScore.name)
+                navController.navigate(GameScreen.ShowGameFinalScore.title)
             } else if (game.player2Score == 2) {
                 if (myTurn == "O") {
                     //show winner
@@ -228,7 +228,7 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
                     updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
                     viewModel.updateFinalScoreScreenData("You lose", game, player1,  player2)
                 }
-                navController.navigate(GameScreen.ShowGameFinalScore.name)
+                navController.navigate(GameScreen.ShowGameFinalScore.title)
             } else
                 game = findGame(gameId = gameId, databaseReference = databaseReference)
                 if (game.foundWinner && game.player1Score != 2 && game.player2Score != 2) {

@@ -76,7 +76,7 @@ fun ShowGameFinalScore(uiState: OnlineGameRememberedValues, navController: NavCo
             }
         }
         Spacer(modifier = Modifier.height(200.dp))
-        Button(onClick = {navController.navigate(GameScreen.Start.name)}, colors = ButtonDefaults.buttonColors(backgroundColor = Primery)) {
+        Button(onClick = {navController.navigate(GameScreen.Start.title)}, colors = ButtonDefaults.buttonColors(backgroundColor = Primery)) {
             Text(text = "Home", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.White)
         }
     }

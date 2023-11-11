@@ -1,13 +1,17 @@
 package com.idos.tictactoe.ui.Screen.GoogleSignIn
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -17,12 +21,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavController
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.idos.tictactoe.ui.Screen.GameScreen
 
 @Composable
-fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit) {
+fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit, navController: NavController) {
     var text by remember {
         mutableStateOf<String?>(null)
     }
@@ -86,33 +93,76 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit) {
             }
 
         if (isPlayerExisted) {
-            viewModel.updateEmail(user!!.email)
+            viewModel.emailState.email = user?.email!!
             onClick()
         } else if (!isPlayerExisted && checkedPlayer){
-            val dbPlayers: CollectionReference = db.collection("Players")
-
-            val player = com.idos.tictactoe.data.MainPlayerUiState(
-                name = "",
-                email = user!!.email!!,
-                score = 0,
-                password = ""
-            )
-
-            dbPlayers.add(player)
-                //on success
-                .addOnSuccessListener {
-                    viewModel.updateEmail(user!!.email)
-                    onClick()
-                }
-                //on failure
-                .addOnFailureListener { e ->
-                    Toast.makeText(
-                        context,
-                        "Fail! Try again \n$e",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+            viewModel.updateEmail(viewModel.emailState.copy(email2 = user!!.email))
+            navController.navigate(GameScreen.NewName.name)
         }
+    }
+}
+
+@SuppressLint("StateFlowValueCalledInComposition")
+@Composable
+fun ChooseName(
+    onClick: () -> Unit,
+    viewModel: GoogleSignInViewModel,
+    context: Context,
+    emailState: GoogleEmail
+) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(Color.Black)) {
+        AlertDialog(
+            onDismissRequest = {},
+            text = {
+                   TextField(value = emailState.name!!, onValueChange = {viewModel.updateEmail(emailState.copy(name = it))})
+            },
+            buttons = {
+                Button(onClick = {
+                    if (viewModel.emailState.name!! == "") {
+                        Toast.makeText(
+                            context,
+                            "You have to fill the label",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else if (emailState.name!!.length > 8) {
+                        Toast.makeText(
+                            context,
+                            "Maximum chars: 8",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+                        val dbPlayers: CollectionReference = db.collection("Players")
+
+                        val player = com.idos.tictactoe.data.MainPlayerUiState(
+                            name = emailState.name!!,
+                            email = emailState.email2!!,
+                            score = 0,
+                            password = ""
+                        )
+
+                        dbPlayers.add(player)
+                            //on success
+                            .addOnSuccessListener {
+                                emailState.email = emailState.email2
+                                onClick()
+                            }
+                            //on failure
+                            .addOnFailureListener { e ->
+                                Toast.makeText(
+                                    context,
+                                    "Fail! Try again \n$e",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                    }
+                }) {
+                    Text(text = "Next")
+                }
+            }
+        )
     }
 }
 

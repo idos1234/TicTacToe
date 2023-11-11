@@ -486,7 +486,7 @@ fun openNewGameButton(modifier: Modifier, navController: NavController) {
     }
     if (openGame) {
         openGame = false
-        navController.navigate(GameScreen.OpenGameWithCode.name)
+        navController.navigate(GameScreen.OpenGameWithCode.title)
     }
 }
 
@@ -525,7 +525,7 @@ fun enterGameWithCodeButton(modifier: Modifier, codeGameViewModel: CodeGameViewM
             context = context,
             onFindGame = {
                 enterGame = false
-                navController.navigate(GameScreen.EnterGameWithCode.name)
+                navController.navigate(GameScreen.EnterGameWithCode.title)
             }
         )
     }
