@@ -1,20 +1,29 @@
 {
   "project_info": {
     "project_number": "315349484101",
+    "firebase_url": "https://kotlin-tictactoe-game-default-rtdb.firebaseio.com",
     "project_id": "kotlin-tictactoe-game",
     "storage_bucket": "kotlin-tictactoe-game.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:315349484101:android:65f9f48296c5ad529a592c",
+        "mobilesdk_app_id": "1:315349484101:android:e5fc1fd14677f8499a592c",
         "android_client_info": {
           "package_name": "com.idos.tictactoe"
         }
       },
       "oauth_client": [
         {
-          "client_id": "315349484101-20oalqrc531fbp43gk4l6cmc9utduocs.apps.googleusercontent.com",
+          "client_id": "315349484101-pndab4g3cbv13b8ha54739dk64vpf47i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.idos.tictactoe",
+            "certificate_hash": "53c52cd2cadb6ee77212e51c304e64e66444927b"
+          }
+        },
+        {
+          "client_id": "315349484101-faent7hqhsbq9jfbc55078mdmjpu9j3b.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,7 +36,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "315349484101-20oalqrc531fbp43gk4l6cmc9utduocs.apps.googleusercontent.com",
+              "client_id": "315349484101-faent7hqhsbq9jfbc55078mdmjpu9j3b.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

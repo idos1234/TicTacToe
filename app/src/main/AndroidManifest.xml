@@ -2,9 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.idos.tictactoe"
     xmlns:tools="http://schemas.android.com/tools">
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
+    <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" tools:ignore="ProtectedPermissions" />
 
     <application
+        android:launchMode="singleTop"
+        android:sharedUserId="android.uid.media"
         android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -15,9 +19,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TicTacToe"
         android:resizeableActivity="false"
-        tools:targetApi="31">
+        tools:targetApi="tiramisu"
+        android:sharedUserMaxSdkVersion="33">
         <activity
             android:name=".MainActivity"
+            android:launchMode="singleTop"
             android:exported="true"
             android:theme="@style/Theme.TicTacToe"
             android:screenOrientation="portrait">
@@ -25,6 +31,12 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
         </activity>
 
         <service android:name=".fireBaseMessaging.FireBaseMessagingService"
