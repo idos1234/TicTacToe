@@ -34,7 +34,7 @@ class FireBaseMessagingService: FirebaseMessagingService() {
         val sharedPreferencesUiState by mutableStateOf(sharedPreferences())
         var NotificationData by mutableStateOf(notificationData())
 
-        val sharedPreferences = getSecuredSharedPreferences(this, "myPref")
+        val sharedPreferences = getSecuredSharedPreferences(this, "myPref1")
 
         val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 

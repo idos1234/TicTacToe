@@ -346,6 +346,7 @@ fun TicTacToeApp(
     val onlineGameValuesUiState by codeGameViewModel.onlineGameValuesUiState.collectAsState()
     val sharedPreferencesUiState by mutableStateOf(sharedPreferences())
     val emailState = googleSignInViewModel.emailState
+    val emailState2 = googleSignInViewModel.email.collectAsState()
 
 
     var timesPlayed by remember {
@@ -359,7 +360,7 @@ fun TicTacToeApp(
     }
 
     //share preferences
-    val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
+    val sharedPreferences = getSecuredSharedPreferences(context, "myPref1")
 
     val emailStr = sharedPreferences.getString("name", "")
     val googleEmail = sharedPreferences.getString("email", "")
@@ -368,7 +369,7 @@ fun TicTacToeApp(
 
 
     signupUiState.name = emailStr!!
-    emailState.email = googleEmail
+    emailState2.value.email = googleEmail
     sharedPreferencesUiState.messageSent = messageSent
     sharedPreferencesUiState.lastTimeSeen = lastTimeSeen
 
@@ -487,17 +488,15 @@ fun TicTacToeApp(
                 },
                 sharedPreferences = emailState,
                 onLogOutClick = {
-                    val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
-                    googleSignInViewModel.emailState.email = ""
-
-                    sharedPreferences.edit().putString("email", emailState.email).apply()
-                    navController.navigate(GameScreen.GoogleSignIn.title)
+                    val sharedPreferences = getSecuredSharedPreferences(context, "myPref1")
+                    googleSignInViewModel.resetEmail()
+                    sharedPreferences.edit().putString("email", emailState2.value.email).apply()
                 }
             )
         }
     ) {
 
-        val startedScreen = if (emailState.email != "") {
+        val startedScreen = if (emailState2.value.email2 != "") {
             GameScreen.Start.title
         } else {
             GameScreen.GoogleSignIn.title
@@ -514,7 +513,7 @@ fun TicTacToeApp(
                     context,
                     emailsharedPreferences = signupUiState,
                     onClick = {
-                        val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
+                        val sharedPreferences = getSecuredSharedPreferences(context, "myPref1")
 
                         signUpViewModel.signUpName.name = signUpViewModel.signUpName.name2
 
@@ -534,7 +533,7 @@ fun TicTacToeApp(
                     context,
                     emailsharedPreferences = signupUiState,
                     onClick = {
-                        val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
+                        val sharedPreferences = getSecuredSharedPreferences(context, "myPref1")
 
                         signUpViewModel.signUpName.name = signUpViewModel.signUpName.name2
 
@@ -553,7 +552,7 @@ fun TicTacToeApp(
                     onSinglePlayerClick = {navController.navigate(GameScreen.SinglePlayer.title)},
                     onOnlineClick = {navController.navigate(GameScreen.Online.title)},
                     onBackClick = {
-                        val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
+                        val sharedPreferences = getSecuredSharedPreferences(context, "myPref1")
 
                         sharedPreferencesUiState.lastTimeSeen = (System.currentTimeMillis()/1000)
 
@@ -652,7 +651,7 @@ fun TicTacToeApp(
                 GoogleSignInScreen(
                     viewModel = googleSignInViewModel,
                     onClick = {
-                        val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
+                        val sharedPreferences = getSecuredSharedPreferences(context, "myPref1")
 
                         sharedPreferences.edit().putString("email", emailState.email).apply()
                         navController.navigate(GameScreen.Start.title)
@@ -667,7 +666,7 @@ fun TicTacToeApp(
             ) {
                 ChooseName(
                     onClick = {
-                        val sharedPreferences = getSecuredSharedPreferences(context, "myPref")
+                        val sharedPreferences = getSecuredSharedPreferences(context, "myPref1")
 
                         sharedPreferences.edit().putString("email", emailState.email).apply()
                         navController.navigate(GameScreen.Start.title)
