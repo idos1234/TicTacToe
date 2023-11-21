@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter.Companion.tint
@@ -25,10 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import co.yml.charts.common.model.PlotType
-import co.yml.charts.ui.piechart.charts.DonutPieChart
-import co.yml.charts.ui.piechart.models.PieChartConfig
-import co.yml.charts.ui.piechart.models.PieChartData
 import coil.compose.AsyncImage
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
@@ -66,7 +63,7 @@ fun ProfileScreen(player: String, context: Context) {
                 for (d in list) {
                     val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
                     //find player using database
-                    if (p?.name == player){
+                    if (p?.email == player){
                         profile = p
                     }
 
@@ -81,14 +78,21 @@ fun ProfileScreen(player: String, context: Context) {
                 Toast.LENGTH_SHORT
             ).show()
         }
-    LazyColumn(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-        .fillMaxSize()
-        .background(BackGround)) {
+    LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+            .fillMaxSize()
+            .background(BackGround)
+    ) {
         item {
-            Card(backgroundColor = Primery, modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            Card(
+                backgroundColor = Primery, modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Box(contentAlignment = Alignment.BottomEnd) {
                         Card(
                             shape = RoundedCornerShape(125.dp),
@@ -96,9 +100,17 @@ fun ProfileScreen(player: String, context: Context) {
                             modifier = Modifier
                                 .size(90.dp)
                         ) {
-                            Image(painter = painterResource(id = profile.currentImage), contentDescription = null, contentScale = ContentScale.Crop)
-                            }
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "edit icon", modifier = Modifier.clickable(onClick = { showPhotos = true }))
+                            Image(
+                                painter = painterResource(id = profile.currentImage),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "edit icon",
+                            modifier = Modifier.clickable(onClick = { showPhotos = true })
+                        )
                     }
                     Text(
                         text = profile.name,
@@ -110,11 +122,16 @@ fun ProfileScreen(player: String, context: Context) {
         }
 
         item {
-            Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                Card(modifier = Modifier
-                    .weight(1f)
-                    .size(120.dp)
-                    .padding(20.dp), shape = Shapes.small, backgroundColor = Secondery) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .size(120.dp)
+                        .padding(20.dp), shape = Shapes.small, backgroundColor = Secondery
+                ) {
                     Image(
                         painter = painterResource(id = profile.currentX),
                         contentDescription = "player's current X",
@@ -123,10 +140,12 @@ fun ProfileScreen(player: String, context: Context) {
                             onClick = { showPlayerX = true }
                         ))
                 }
-                Card(modifier = Modifier
-                    .weight(1f)
-                    .size(120.dp)
-                    .padding(20.dp), shape = Shapes.small, backgroundColor = Secondery) {
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .size(120.dp)
+                        .padding(20.dp), shape = Shapes.small, backgroundColor = Secondery
+                ) {
                     Image(
                         painter = painterResource(id = profile.currentO),
                         contentDescription = "player's current O",
@@ -141,12 +160,12 @@ fun ProfileScreen(player: String, context: Context) {
         item {
             Column(horizontalAlignment = Alignment.Start) {
                 Row(horizontalArrangement = Arrangement.Start) {
-                   Card(Modifier.size(15.dp), backgroundColor = Color.Red){}
+                    Card(Modifier.size(15.dp), backgroundColor = Color.Red) {}
                     Text(text = "Wins = ${profile.wins}", Modifier.padding(start = 4.dp))
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.Start) {
-                    Card(Modifier.size(15.dp), backgroundColor = Color.Yellow){}
+                    Card(Modifier.size(15.dp), backgroundColor = Color.Yellow) {}
                     Text(text = "Loses = ${profile.loses}", Modifier.padding(start = 4.dp))
                 }
             }
@@ -156,13 +175,14 @@ fun ProfileScreen(player: String, context: Context) {
                 winsColor = Color.Red,
                 losesColor = Color.Yellow,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(380.dp),
-                backGroundColor = BackGround
+                    .fillMaxWidth(0.9f)
+                    .height(10.dp)
+                    .clip(RoundedCornerShape(50)),
             )
 
         }
     }
+
     if (showPhotos) {
         ShowPlayersImages(player = profile, onCloseClicked = { showPhotos = false })
     }
@@ -210,7 +230,9 @@ fun ShowPlayersImages(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                         )
                     }
                 },
-                modifier = Modifier.padding(10.dp).height(200.dp)
+                modifier = Modifier
+                    .padding(10.dp)
+                    .height(200.dp)
             )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
@@ -230,7 +252,9 @@ fun ShowPlayersImages(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                         }
                     }
                 },
-                modifier = Modifier.padding(10.dp).height(200.dp)
+                modifier = Modifier
+                    .padding(10.dp)
+                    .height(200.dp)
             )
 
             OutlinedButton(onClick = onCloseClicked) {
@@ -278,7 +302,9 @@ fun ShowPlayerX(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                         )
                     }
                 },
-                modifier = Modifier.padding(10.dp).height(200.dp)
+                modifier = Modifier
+                    .padding(10.dp)
+                    .height(200.dp)
             )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
@@ -298,7 +324,9 @@ fun ShowPlayerX(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                         }
                     }
                 },
-                modifier = Modifier.padding(10.dp).height(200.dp)
+                modifier = Modifier
+                    .padding(10.dp)
+                    .height(200.dp)
             )
 
             OutlinedButton(onClick = onCloseClicked) {
@@ -379,7 +407,9 @@ fun ShowPlayerO(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                         )
                     }
                 },
-                modifier = Modifier.padding(10.dp).height(200.dp)
+                modifier = Modifier
+                    .padding(10.dp)
+                    .height(200.dp)
             )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
@@ -399,7 +429,9 @@ fun ShowPlayerO(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                         }
                     }
                 },
-                modifier = Modifier.padding(10.dp).height(200.dp)
+                modifier = Modifier
+                    .padding(10.dp)
+                    .height(200.dp)
             )
 
             OutlinedButton(onClick = onCloseClicked) {
@@ -444,33 +476,37 @@ fun ShowPlayerO(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PlayerGraph(
     profile: MainPlayerUiState,
     winsColor: Color,
     losesColor: Color,
     modifier: Modifier,
-    backGroundColor: Color
     ) {
-    val donutChartData = PieChartData(
-        slices = listOf(
-            PieChartData.Slice("Wins", profile.wins.toFloat(), winsColor),
-            PieChartData.Slice("Loses", profile.loses.toFloat(), losesColor),
-        ),
-        plotType = PlotType.Pie
-    )
-    val donutChartConfig = PieChartConfig(
-        strokeWidth = 100f,
-        backgroundColor = backGroundColor,
-        sliceLabelTextColor = BackGround
-    )
-    DonutPieChart(
-        modifier = modifier,
-        donutChartData,
-        donutChartConfig
-    )
-
+    Row(
+        modifier = modifier.background(Color.White)
+    ) {
+        if (profile.wins > 0) {
+            Card(
+                modifier = Modifier
+                    .weight(weight = profile.wins.toFloat()),
+                backgroundColor = winsColor,
+                shape = RoundedCornerShape(0)
+            ) {
+                Text(text = "")
+            }
+        }
+        if (profile.loses > 0) {
+            Card(
+                modifier = Modifier
+                    .weight(weight = profile.loses.toFloat()),
+                backgroundColor = losesColor,
+                shape = RoundedCornerShape(0)
+            ) {
+                Text(text = "")
+            }
+        }
+    }
 }
 
 @Composable

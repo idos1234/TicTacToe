@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,7 +39,7 @@ fun LeaderBoardScreen(
     //players list in database
     var playerlist = mutableStateListOf<MainPlayerUiState?>()
     //database
-    var db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     //get Players collection from database
     db.collection("Players").get()
@@ -139,7 +140,7 @@ fun ShowTopPlayers(
                                 }
                             ),
                         border = BorderStroke(1.dp, Color.Black),
-                        backgroundColor = if (item!!.name == yourPlayer) You else Secondery,
+                        backgroundColor = if (item!!.email == yourPlayer) You else Secondery,
                         shape = RoundedCornerShape(0),
                     ) {
                         Row {
@@ -240,8 +241,10 @@ fun showPlayer(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                     profile = player,
                     winsColor = Color.Red,
                     losesColor = Color.Yellow,
-                    modifier = Modifier.fillMaxWidth(),
-                    backGroundColor = Secondery
+                    modifier =Modifier
+                        .fillMaxWidth(0.9f)
+                        .height(10.dp)
+                        .clip(RoundedCornerShape(50)),
                 )
             }
         }

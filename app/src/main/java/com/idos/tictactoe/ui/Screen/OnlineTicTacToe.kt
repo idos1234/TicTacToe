@@ -466,10 +466,10 @@ fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewMod
                                         val p: MainPlayerUiState? = d.toObject(
                                             MainPlayerUiState::class.java)
                                         //find player using database
-                                        if (p?.name == game.player1){
+                                        if (p?.email == game.player1){
                                             player1 = p
                                         }
-                                        if (p?.name == player){
+                                        if (p?.email == player){
                                             player2 = p
                                         }
 
@@ -511,7 +511,7 @@ fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewMod
                                     val p: MainPlayerUiState? = d.toObject(
                                         MainPlayerUiState::class.java)
                                     //find player using database
-                                    if (p?.name == player){
+                                    if (p?.email == player){
                                         player1 = p
                                     }
                                 }

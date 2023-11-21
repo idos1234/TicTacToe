@@ -54,7 +54,7 @@ fun GameButton(box: String, onClick: () -> Unit = {}, context: Context = LocalCo
                 for (d in list) {
                     val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(com.idos.tictactoe.data.MainPlayerUiState::class.java)
                     //find player using database
-                    if (p?.name == playerName){
+                    if (p?.email == playerName){
                         player = p
                     }
 

@@ -82,7 +82,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
                                 for (d in list) {
                                     val p: com.idos.tictactoe.data.MainPlayerUiState? =
                                         d.toObject(com.idos.tictactoe.data.MainPlayerUiState::class.java)
-                                    if (p?.name == player) {
+                                    if (p?.email == player) {
                                         player1 = p
                                     }
 
@@ -320,10 +320,10 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
                                         val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(
                                             com.idos.tictactoe.data.MainPlayerUiState::class.java)
                                         //find player using database
-                                        if (p?.name == game.player1){
+                                        if (p?.email == game.player1){
                                             player1 = p
                                         }
-                                        if (p?.name == player){
+                                        if (p?.email == player){
                                             player2 = p
                                         }
 

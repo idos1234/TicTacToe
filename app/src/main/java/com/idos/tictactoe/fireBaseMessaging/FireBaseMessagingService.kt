@@ -19,8 +19,12 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.idos.tictactoe.MainActivity
 import com.idos.tictactoe.R
-import com.idos.tictactoe.ui.Screen.getSecuredSharedPreferences
+import com.idos.tictactoe.data.dataStore.SharedPreferencesDataStore
 import com.idos.tictactoe.ui.Screen.sharedPreferences
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class notificationData(
     var days: Int = 0,
@@ -31,10 +35,19 @@ data class notificationData(
 class FireBaseMessagingService: FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        val sharedPreferencesUiState by mutableStateOf(sharedPreferences())
+        var sharedPreferencesUiState by mutableStateOf(sharedPreferences())
         var NotificationData by mutableStateOf(notificationData())
 
-        val sharedPreferences = getSecuredSharedPreferences(this, "myPref1")
+        val sharedPreferences = SharedPreferencesDataStore(this)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            sharedPreferences.getDetails().collect {
+                withContext(Dispatchers.Main) {
+                    sharedPreferencesUiState = it
+                }
+            }
+        }
+
 
         val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -84,14 +97,14 @@ class FireBaseMessagingService: FirebaseMessagingService() {
                     showNotificationOnStatusBar(message.data["title"], message.data["body"])
                     sharedPreferencesUiState.messageSent = true
                     sharedPreferencesUiState.messagingSendingTime = (System.currentTimeMillis()/1000)
-                    sharedPreferences.edit().putBoolean("messageSent", sharedPreferencesUiState.messageSent).apply()
-                    sharedPreferences.edit().putLong("messagingSendingTime", sharedPreferencesUiState.messagingSendingTime).apply()
+                    sharedPreferences.setMessageSent(sharedPreferencesUiState.messageSent)
+                    sharedPreferences.setMessagingSendingTime(sharedPreferencesUiState.messagingSendingTime)
                 }
             } else {
                 if (sharedPreferencesUiState.messagingSendingTime <= (System.currentTimeMillis()/1000) - NotificationData.DaysAfterNotification*3600) {
                     showNotificationOnStatusBar(message.data["title"], message.data["body"])
                     sharedPreferencesUiState.messagingSendingTime = (System.currentTimeMillis()/1000)
-                    sharedPreferences.edit().putLong("messagingSendingTime", sharedPreferencesUiState.messagingSendingTime).apply()
+                    sharedPreferences.setMessagingSendingTime(sharedPreferencesUiState.messagingSendingTime)
                 }
             }
         }
