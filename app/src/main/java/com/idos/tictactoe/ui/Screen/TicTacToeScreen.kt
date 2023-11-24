@@ -139,9 +139,9 @@ fun ButtonGrid(
         Row() {
             //box1
             GameButton(
-                box = uiState.Box1,
+                box = uiState.boxes.Box1,
                 onClick = {
-                    if (uiState.Box1 == "") {
+                    if (uiState.boxes.Box1 == "") {
                         viewModel.SetBox(1)
                         onClick()
                     }
@@ -150,9 +150,9 @@ fun ButtonGrid(
             )
             //box2
             GameButton(
-                box = uiState.Box2,
+                box = uiState.boxes.Box2,
                 onClick = {
-                    if (uiState.Box2 == "") {
+                    if (uiState.boxes.Box2 == "") {
                         viewModel.SetBox(2)
                         onClick()
                     }
@@ -161,9 +161,9 @@ fun ButtonGrid(
             )
             //box3
             GameButton(
-                box = uiState.Box3,
+                box = uiState.boxes.Box3,
                 onClick = {
-                    if (uiState.Box3 == "") {
+                    if (uiState.boxes.Box3 == "") {
                         viewModel.SetBox(3)
                         onClick()
                     }
@@ -174,9 +174,9 @@ fun ButtonGrid(
         Row() {
             //box4
             GameButton(
-                box = uiState.Box4,
+                box = uiState.boxes.Box4,
                 onClick = {
-                    if (uiState.Box4 == "") {
+                    if (uiState.boxes.Box4 == "") {
                         viewModel.SetBox(4)
                         onClick()
                     }
@@ -185,9 +185,9 @@ fun ButtonGrid(
             )
             //box5
             GameButton(
-                box = uiState.Box5,
+                box = uiState.boxes.Box5,
                 onClick = {
-                    if (uiState.Box5 == "") {
+                    if (uiState.boxes.Box5 == "") {
                         viewModel.SetBox(5)
                         onClick()
                     }
@@ -196,9 +196,9 @@ fun ButtonGrid(
             )
             //box6
             GameButton(
-                box = uiState.Box6,
+                box = uiState.boxes.Box6,
                 onClick = {
-                    if (uiState.Box6 == "") {
+                    if (uiState.boxes.Box6 == "") {
                         viewModel.SetBox(6)
                         onClick()
                     }
@@ -209,9 +209,9 @@ fun ButtonGrid(
         Row() {
             //box7
             GameButton(
-                box = uiState.Box7,
+                box = uiState.boxes.Box7,
                 onClick = {
-                    if (uiState.Box7 == "") {
+                    if (uiState.boxes.Box7 == "") {
                         viewModel.SetBox(7)
                         onClick()
                     }
@@ -220,9 +220,9 @@ fun ButtonGrid(
             )
             //box8
             GameButton(
-                box = uiState.Box8,
+                box = uiState.boxes.Box8,
                 onClick = {
-                    if (uiState.Box8 == "") {
+                    if (uiState.boxes.Box8 == "") {
                         viewModel.SetBox(8)
                         onClick()
                     }
@@ -231,9 +231,9 @@ fun ButtonGrid(
             )
             //box9
             GameButton(
-                box = uiState.Box9,
+                box = uiState.boxes.Box9,
                 onClick = {
-                    if (uiState.Box9 == "") {
+                    if (uiState.boxes.Box9 == "") {
                         viewModel.SetBox(9)
                         onClick()
                     }

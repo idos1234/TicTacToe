@@ -65,15 +65,15 @@ class TicTacToeViewModel: ViewModel() {
 
         _uiState.update {
             when(box) {
-                1 -> it.copy(Box1 = _uiState.value.player_Turn)
-                2 -> it.copy(Box2 = _uiState.value.player_Turn)
-                3 -> it.copy(Box3 = _uiState.value.player_Turn)
-                4 -> it.copy(Box4 = _uiState.value.player_Turn)
-                5 -> it.copy(Box5 = _uiState.value.player_Turn)
-                6 -> it.copy(Box6 = _uiState.value.player_Turn)
-                7 -> it.copy(Box7 = _uiState.value.player_Turn)
-                8 -> it.copy(Box8 = _uiState.value.player_Turn)
-                9 -> it.copy(Box9 = _uiState.value.player_Turn)
+                1 -> it.copy(boxes = it.boxes.copy(Box1 = _uiState.value.player_Turn))
+                2 -> it.copy(boxes = it.boxes.copy(Box2 = _uiState.value.player_Turn))
+                3 -> it.copy(boxes = it.boxes.copy(Box3 = _uiState.value.player_Turn))
+                4 -> it.copy(boxes = it.boxes.copy(Box4 = _uiState.value.player_Turn))
+                5 -> it.copy(boxes = it.boxes.copy(Box5 = _uiState.value.player_Turn))
+                6 -> it.copy(boxes = it.boxes.copy(Box6 = _uiState.value.player_Turn))
+                7 -> it.copy(boxes = it.boxes.copy(Box7 = _uiState.value.player_Turn))
+                8 -> it.copy(boxes = it.boxes.copy(Box8 = _uiState.value.player_Turn))
+                9 -> it.copy(boxes = it.boxes.copy(Box9 = _uiState.value.player_Turn))
                 else -> it.copy()
             }
         }
@@ -89,83 +89,83 @@ class TicTacToeViewModel: ViewModel() {
         //if bot can win
         when (WillWin(uiState = uiState, player = uiState.player_Turn)) {
             1 -> {
-                _uiState.value.Box1 = uiState.player_Turn
+                _uiState.value.boxes = _uiState.value.boxes.copy(Box1 = uiState.player_Turn)
             }
             2 -> {
-                _uiState.value.Box2 = uiState.player_Turn
+                _uiState.value.boxes = _uiState.value.boxes.copy(Box2 = uiState.player_Turn)
             }
             3 -> {
-                _uiState.value.Box3 = uiState.player_Turn
+                _uiState.value.boxes = _uiState.value.boxes.copy(Box3 = uiState.player_Turn)
             }
             4 -> {
-                _uiState.value.Box4 = uiState.player_Turn
+                _uiState.value.boxes = _uiState.value.boxes.copy(Box4 = uiState.player_Turn)
             }
             5 -> {
-                _uiState.value.Box5 = uiState.player_Turn
+                _uiState.value.boxes = _uiState.value.boxes.copy(Box5 = uiState.player_Turn)
             }
             6 -> {
-                _uiState.value.Box6 = uiState.player_Turn
+                _uiState.value.boxes = _uiState.value.boxes.copy(Box6 = uiState.player_Turn)
             }
             7 -> {
-                _uiState.value.Box7 = uiState.player_Turn
+                _uiState.value.boxes = _uiState.value.boxes.copy(Box7 = uiState.player_Turn)
             }
             8 -> {
-                _uiState.value.Box8 = uiState.player_Turn
+                _uiState.value.boxes = _uiState.value.boxes.copy(Box8 = uiState.player_Turn)
             }
             9 -> {
-                _uiState.value.Box9 = uiState.player_Turn
+                _uiState.value.boxes = _uiState.value.boxes.copy(Box9 = uiState.player_Turn)
             }
             else -> {
 
                 //if bot need to defend
                 when (WillWin(uiState = uiState, player = negativePlayer)) {
                     1 -> {
-                        _uiState.value.Box1 = uiState.player_Turn
+                        _uiState.value.boxes = _uiState.value.boxes.copy(Box1 = uiState.player_Turn)
                     }
                     2 -> {
-                        _uiState.value.Box2 = uiState.player_Turn
+                        _uiState.value.boxes = _uiState.value.boxes.copy(Box2 = uiState.player_Turn)
                     }
                     3 -> {
-                        _uiState.value.Box3 = uiState.player_Turn
+                        _uiState.value.boxes = _uiState.value.boxes.copy(Box3 = uiState.player_Turn)
                     }
                     4 -> {
-                        _uiState.value.Box4 = uiState.player_Turn
+                        _uiState.value.boxes = _uiState.value.boxes.copy(Box4 = uiState.player_Turn)
                     }
                     5 -> {
-                        _uiState.value.Box5 = uiState.player_Turn
+                        _uiState.value.boxes = _uiState.value.boxes.copy(Box5 = uiState.player_Turn)
                     }
                     6 -> {
-                        _uiState.value.Box6 = uiState.player_Turn
+                        _uiState.value.boxes = _uiState.value.boxes.copy(Box6 = uiState.player_Turn)
                     }
                     7 -> {
-                        _uiState.value.Box7 = uiState.player_Turn
+                        _uiState.value.boxes = _uiState.value.boxes.copy(Box7 = uiState.player_Turn)
                     }
                     8 -> {
-                        _uiState.value.Box8 = uiState.player_Turn
+                        _uiState.value.boxes = _uiState.value.boxes.copy(Box8 = uiState.player_Turn)
                     }
                     9 -> {
-                        _uiState.value.Box9 = uiState.player_Turn
+                        _uiState.value.boxes = _uiState.value.boxes.copy(Box9 = uiState.player_Turn)
                     }
                     //random box
                     else -> {
-                        if (_uiState.value.Box1 == "") {
-                            _uiState.value.Box1 = uiState.player_Turn
-                        } else if (_uiState.value.Box2 == "") {
-                            _uiState.value.Box2 = uiState.player_Turn
-                        } else if (_uiState.value.Box3 == "") {
-                            _uiState.value.Box3 = uiState.player_Turn
-                        } else if (_uiState.value.Box4 == "") {
-                            _uiState.value.Box4 = uiState.player_Turn
-                        } else if (_uiState.value.Box5 == "") {
-                            _uiState.value.Box5 = uiState.player_Turn
-                        } else if (_uiState.value.Box6 == "") {
-                            _uiState.value.Box6 = uiState.player_Turn
-                        } else if (_uiState.value.Box7 == "") {
-                            _uiState.value.Box7 = uiState.player_Turn
-                        } else if (_uiState.value.Box8 == "") {
-                            _uiState.value.Box8 = uiState.player_Turn
-                        } else if (_uiState.value.Box9 == "") {
-                            _uiState.value.Box9 = uiState.player_Turn
+                        if (_uiState.value.boxes.Box1 == "") {
+                            _uiState.value.boxes = _uiState.value.boxes.copy(Box1 = uiState.player_Turn)
+                        } else if (_uiState.value.boxes.Box2 == "") {
+                            _uiState.value.boxes = _uiState.value.boxes.copy(Box2 = uiState.player_Turn)
+                        } else if (_uiState.value.boxes.Box3 == "") {
+                            _uiState.value.boxes = _uiState.value.boxes.copy(Box3 = uiState.player_Turn)
+                        } else if (_uiState.value.boxes.Box4 == "") {
+                            _uiState.value.boxes = _uiState.value.boxes.copy(Box4 = uiState.player_Turn)
+                        } else if (_uiState.value.boxes.Box5 == "") {
+                            _uiState.value.boxes = _uiState.value.boxes.copy(Box5 = uiState.player_Turn)
+                        } else if (_uiState.value.boxes.Box6 == "") {
+                            _uiState.value.boxes = _uiState.value.boxes.copy(Box6 = uiState.player_Turn)
+                        } else if (_uiState.value.boxes.Box7 == "") {
+                            _uiState.value.boxes = _uiState.value.boxes.copy(Box7 = uiState.player_Turn)
+                        } else if (_uiState.value.boxes.Box8 == "") {
+                            _uiState.value.boxes = _uiState.value.boxes.copy(Box8 = uiState.player_Turn)
+                        } else if (_uiState.value.boxes.Box9 == "") {
+                            _uiState.value.boxes = _uiState.value.boxes.copy(Box9 = uiState.player_Turn)
                         }
                     }
                 }

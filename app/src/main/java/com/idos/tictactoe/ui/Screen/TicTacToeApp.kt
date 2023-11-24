@@ -32,10 +32,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import com.google.firebase.firestore.FirebaseFirestore
+import com.idos.tictactoe.SplashScreen
 import com.idos.tictactoe.data.dataStore.SharedPreferencesDataStore
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.ChooseName
-import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleEmail
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInScreen
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInViewModel
 import com.idos.tictactoe.ui.theme.BackGround
@@ -63,7 +65,8 @@ enum class GameScreen(val title: String) {
     EnterGameWithCode("EnterGameWithCode"),
     ShowGameFinalScore("ShowGameFinalScore"),
     GoogleSignIn("GoogleSignIn"),
-    NewName("NewName")
+    NewName("NewName"),
+    SplashScreen("SplashScreen")
 }
 
 data class sharedPreferences(
@@ -104,7 +107,7 @@ fun CheckLogOut(
 }
 
 @Composable
-fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChangeScreen: () -> Unit = {}, sharedPreferences: GoogleEmail, onLogOutClick: () -> Unit) {
+fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChangeScreen: () -> Unit = {}, email: String, onLogOutClick: () -> Unit) {
 
     Box(modifier = Modifier
         .background(Secondery)
@@ -120,7 +123,7 @@ fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChang
         TopHomeScreenMenu(
             modifier = Modifier.weight(1f),
             context = LocalContext.current,
-            sharedPreferences = sharedPreferences,
+            email = email,
             navController = navController,
             onChangeScreen = onChangeScreen
         )
@@ -135,7 +138,7 @@ fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChang
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: GoogleEmail, navController: NavHostController, onChangeScreen: () -> Unit) {
+fun TopHomeScreenMenu(modifier: Modifier, context: Context, email: String, navController: NavHostController, onChangeScreen: () -> Unit) {
 
     var player by remember {
         mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
@@ -153,8 +156,8 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, sharedPreferences: G
                 for (d in list) {
                     val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(com.idos.tictactoe.data.MainPlayerUiState::class.java)
                     //find player using database
-                    if (p?.email == sharedPreferences.email){
-                        player = p!!
+                    if (p?.email == email){
+                        player = p
                     }
 
                 }
@@ -338,8 +341,8 @@ fun TicTacToeApp(
     var timesPlayed by remember {
         mutableIntStateOf(0)
     }
-    var startedScreen by remember {
-        mutableStateOf(GameScreen.GoogleSignIn.title)
+    val startedScreen by remember {
+        mutableStateOf<String?>(null)
     }
     var open by remember {
         mutableStateOf(false)
@@ -347,6 +350,26 @@ fun TicTacToeApp(
     var updateSharedPreferences by remember {
         mutableStateOf(false)
     }
+
+    //encrypted shared preferences
+
+    val email = remember {
+        mutableStateOf("")
+    }
+    val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+
+    val encryptedSharedPreferences = EncryptedSharedPreferences.create(
+        // passing a file name to share a preferences
+        "preferences",
+        masterKeyAlias,
+        context,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+
+    val emailStr = encryptedSharedPreferences.getString("email", "")
+    email.value = emailStr!!
+
 
     //share preferences
     val sharedPreferences = SharedPreferencesDataStore(context)
@@ -359,16 +382,6 @@ fun TicTacToeApp(
         sharedPreferences.setLastTimeSeen(sharedPreferencesUiState.lastTimeSeen)
 
         coroutineScope.launch {
-            sharedPreferences.getEmail().collect {
-                withContext(Dispatchers.IO) {
-                    emailState.email = it.email
-                    startedScreen = if (emailState.email != "") {
-                        GameScreen.Start.title
-                    } else {
-                        GameScreen.GoogleSignIn.title
-                    }
-                }
-            }
             sharedPreferences.getDetails().collect {
                 withContext(Dispatchers.IO) {
                     sharedPreferencesUiState = it
@@ -382,6 +395,12 @@ fun TicTacToeApp(
         scaffoldState = scaffoldState,
         topBar = {
         when(currentScreen) {
+            GameScreen.SplashScreen ->
+                TopAppBar(
+                    icon = null,
+                    onClick = {},
+                    isBar = false
+                )
             GameScreen.Start ->
                 TopAppBar(
                     onClick = {
@@ -473,26 +492,37 @@ fun TicTacToeApp(
                         scaffoldState.drawerState.close()
                     }
                 },
-                sharedPreferences = emailState,
+                email = email.value,
                 onLogOutClick = {
-                    emailState.email = ""
-                    sharedPreferences.setEmail(emailState.email!!)
-                    coroutineScope.launch {
-                        sharedPreferences.getEmail().collect {
-                            withContext(Dispatchers.Main) {
-                                emailState.email = it.email
-                                navController.navigate(GameScreen.GoogleSignIn.title)
-                            }
-                        }
-                    }
+                    email.value = ""
+
+                    val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+
+                    // Initialize/open an instance of EncryptedSharedPreferences on below line.
+                    val encryptedSharedPreferences = EncryptedSharedPreferences.create(
+                        // passing a file name to share a preferences
+                        "preferences",
+                        masterKeyAlias,
+                        context,
+                        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                    )
+
+                    encryptedSharedPreferences.edit().putString("email", email.value).apply()
                 }
             )
         }
     ) {
 
+        val startDestination = if (email.value == "") {
+            GameScreen.GoogleSignIn.title
+        } else {
+            GameScreen.Start.title
+        }
+
         NavHost(
             navController = navController,
-            startDestination = startedScreen,
+            startDestination = startDestination,
         ){
             //home screen
             composable(route = GameScreen.Start.title) {
@@ -521,7 +551,7 @@ fun TicTacToeApp(
                             timesPlayed
                         )
                     },
-                    playerName = emailState.email!!
+                    playerName = email.value
                 )
             }
 
@@ -546,23 +576,23 @@ fun TicTacToeApp(
                             }
                         }
                     },
-                    playerName = emailState.email!!
+                    playerName = email.value
                 )
             }
 
             //online game screen
             composable(route = GameScreen.Online.title) {
-                OnlineTicTacToe(player = emailState.email!!, context = LocalContext.current, viewModel = codeGameViewModel, navController = navController)
+                OnlineTicTacToe(player = email.value, context = LocalContext.current, viewModel = codeGameViewModel, navController = navController)
             }
 
             //leaderboard screen
             composable(route = GameScreen.LeaderBoard.title) {
-                LeaderBoardScreen(context = LocalContext.current, yourPlayer = emailState.email!!)
+                LeaderBoardScreen(context = LocalContext.current, yourPlayer = email.value)
             }
 
             //profile screen
             composable(route = GameScreen.ProfileScreen.title) {
-                ProfileScreen(player = emailState.email!!, context = LocalContext.current)
+                ProfileScreen(player = email.value, context = LocalContext.current)
             }
 
             //codeGame
@@ -572,12 +602,12 @@ fun TicTacToeApp(
 
             //open game with code
             composable(route = GameScreen.OpenGameWithCode.title) {
-                OpenOnlineGameWithCode(context = LocalContext.current, player = emailState.email!!, viewModel = codeGameViewModel, navController = navController)
+                OpenOnlineGameWithCode(context = LocalContext.current, player = email.value, viewModel = codeGameViewModel, navController = navController)
             }
 
             //enter game with code
             composable(route = GameScreen.EnterGameWithCode.title) {
-                EnterOnlineGameWithCode(context = LocalContext.current, player = emailState.email!!, gameId = onlineGameValuesUiState.gameCode, viewModel = codeGameViewModel, navController = navController)
+                EnterOnlineGameWithCode(context = LocalContext.current, player = email.value, gameId = onlineGameValuesUiState.gameCode, viewModel = codeGameViewModel, navController = navController)
             }
 
             //show game final score
@@ -597,18 +627,23 @@ fun TicTacToeApp(
             composable(GameScreen.GoogleSignIn.title) {
                 GoogleSignInScreen(
                     viewModel = googleSignInViewModel,
+                    changeEmail = {email.value = it},
+                    navController = navController,
                     onClick = {
-                        sharedPreferences.setEmail(emailState.email!!)
-                        coroutineScope.launch {
-                            sharedPreferences.getEmail().collect {
-                                withContext(Dispatchers.Main) {
-                                    emailState.email = it.email
-                                }
-                            }
-                        }
-                        navController.navigate(GameScreen.Start.title)
-                    },
-                    navController = navController
+                        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+
+                        // Initialize/open an instance of EncryptedSharedPreferences on below line.
+                        val encryptedSharedPreferences = EncryptedSharedPreferences.create(
+                            // passing a file name to share a preferences
+                            "preferences",
+                            masterKeyAlias,
+                            context,
+                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                        )
+
+                        encryptedSharedPreferences.edit().putString("email", email.value).apply()
+                    }
                 )
             }
 
@@ -617,22 +652,31 @@ fun TicTacToeApp(
                 route = GameScreen.NewName.title
             ) {
                 ChooseName(
-                    onClick = {
-                        sharedPreferences.setEmail(emailState.email!!)
-                        coroutineScope.launch {
-                            sharedPreferences.getEmail().collect {
-                                withContext(Dispatchers.Main) {
-                                    emailState.email = it.email
-                                }
-                            }
-                        }
-                        navController.navigate(GameScreen.Start.title)
-                    },
+                    changeEmail = {email.value = it},
                     viewModel = googleSignInViewModel,
                     context = LocalContext.current,
-                    emailState = emailState
+                    emailState = emailState,
+                    onClick = {
+                        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
 
+                        // Initialize/open an instance of EncryptedSharedPreferences on below line.
+                        val encryptedSharedPreferences = EncryptedSharedPreferences.create(
+                            // passing a file name to share a preferences
+                            "preferences",
+                            masterKeyAlias,
+                            context,
+                            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                        )
+
+                        encryptedSharedPreferences.edit().putString("email", email.value).apply()
+                    }
                 )
+            }
+
+            //splash screen
+            composable(GameScreen.SplashScreen.title) {
+                SplashScreen(onFinished = {navController.navigate(startedScreen!!)}, isCheckedNextScreen = startedScreen != null)
             }
 
         }

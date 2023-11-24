@@ -92,18 +92,31 @@ class FireBaseMessagingService: FirebaseMessagingService() {
         message.data.let {
             Log.v("CloudMessage", "Message Data Body ${it["body"]}")
             Log.v("CloudMessage", "Message Data Title  ${it["title"]}")
+
+            //if already sent message and user did not open app
             if (!sharedPreferencesUiState.messageSent){
-                if (sharedPreferencesUiState.lastTimeSeen <= (System.currentTimeMillis()/1000) - NotificationData.days*3600) {
+                //if last time connected to app is before 5 days
+                if (sharedPreferencesUiState.lastTimeSeen <= (System.currentTimeMillis()/1000) - NotificationData.days*86400) {
+                    //sending message
                     showNotificationOnStatusBar(message.data["title"], message.data["body"])
+                    //message sent
                     sharedPreferencesUiState.messageSent = true
+                    //sending time is now
                     sharedPreferencesUiState.messagingSendingTime = (System.currentTimeMillis()/1000)
+
+                    //set data
                     sharedPreferences.setMessageSent(sharedPreferencesUiState.messageSent)
                     sharedPreferences.setMessagingSendingTime(sharedPreferencesUiState.messagingSendingTime)
                 }
             } else {
-                if (sharedPreferencesUiState.messagingSendingTime <= (System.currentTimeMillis()/1000) - NotificationData.DaysAfterNotification*3600) {
+                //if last time message sent was before 2 days
+                if (sharedPreferencesUiState.messagingSendingTime <= (System.currentTimeMillis()/1000) - NotificationData.DaysAfterNotification*86400) {
+                    //sending message
                     showNotificationOnStatusBar(message.data["title"], message.data["body"])
+                    //sending time is now
                     sharedPreferencesUiState.messagingSendingTime = (System.currentTimeMillis()/1000)
+
+                    //set data
                     sharedPreferences.setMessagingSendingTime(sharedPreferencesUiState.messagingSendingTime)
                 }
             }

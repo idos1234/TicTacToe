@@ -29,7 +29,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.idos.tictactoe.ui.Screen.GameScreen
 
 @Composable
-fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit, navController: NavController) {
+fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavController, changeEmail: (String) -> Unit, onClick: () -> Unit) {
     var text by remember {
         mutableStateOf<String?>(null)
     }
@@ -48,17 +48,20 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit, na
     val authResultLauncher = rememberLauncherForActivityResult(contract = GoogleApiContract()) {
         try {
             val account = it?.getResult(ApiException::class.java)
+            //if sign in failed
             if (account == null) {
                 text = "Google sign in failed"
                 isError = true
             } else {
+                //getting user data
                 viewModel.fetchSignInUser(email = account.email!!, name = account.displayName!!)
             }
         } catch (e: ApiException) {
             text = e.localizedMessage
         }
     }
-    
+
+    //sign in button
     ScreenView(
         onClick = { authResultLauncher.launch(signInRequestCode) },
         isError = isError,
@@ -92,10 +95,13 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit, na
 
             }
 
+        //if user is existed
         if (isPlayerExisted) {
-            viewModel.emailState.email = user?.email!!
+            //log in
+            changeEmail(user?.email!!)
             onClick()
         } else if (!isPlayerExisted && checkedPlayer){
+            //sign up
             viewModel.updateEmail(viewModel.emailState.copy(email2 = user!!.email))
             navController.navigate(GameScreen.NewName.name)
         }
@@ -105,10 +111,11 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, onClick: () -> Unit, na
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ChooseName(
-    onClick: () -> Unit,
     viewModel: GoogleSignInViewModel,
     context: Context,
-    emailState: GoogleEmail
+    emailState: GoogleEmail,
+    changeEmail: (String) -> Unit,
+    onClick: () -> Unit
 ) {
     Column(modifier = Modifier
         .fillMaxSize()
@@ -120,19 +127,23 @@ fun ChooseName(
             },
             buttons = {
                 Button(onClick = {
+                    //if label is empty
                     if (viewModel.emailState.name!! == "") {
                         Toast.makeText(
                             context,
                             "You have to fill the label",
                             Toast.LENGTH_SHORT
                         ).show()
-                    } else if (emailState.name!!.length > 8) {
+                    } else
+                        //if name is bigger than 8 chars
+                        if (emailState.name!!.length > 8) {
                         Toast.makeText(
                             context,
                             "Maximum chars: 8",
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
+                        // sign up
                         val db: FirebaseFirestore = FirebaseFirestore.getInstance()
                         val dbPlayers: CollectionReference = db.collection("Players")
 
@@ -146,7 +157,7 @@ fun ChooseName(
                         dbPlayers.add(player)
                             //on success
                             .addOnSuccessListener {
-                                emailState.email = emailState.email2
+                                changeEmail(emailState.email2!!)
                                 onClick()
                             }
                             //on failure

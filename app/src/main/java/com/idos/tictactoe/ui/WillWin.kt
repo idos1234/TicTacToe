@@ -12,23 +12,23 @@ fun WillWin (uiState: UiState, player: String): Int {
 
     // box1
 
-    if (uiState.Box2 == player) {
-        if (uiState.Box3 == player) {
-            if (uiState.Box1 == "") {
+    if (uiState.boxes.Box2 == player) {
+        if (uiState.boxes.Box3 == player) {
+            if (uiState.boxes.Box1 == "") {
                 Box = 1
             }
         }
     }
-    if (uiState.Box2 == player) {
-        if (uiState.Box3 == player) {
-            if (uiState.Box1 == "") {
+    if (uiState.boxes.Box2 == player) {
+        if (uiState.boxes.Box3 == player) {
+            if (uiState.boxes.Box1 == "") {
                 Box = 1
             }
         }
     }
-    if (uiState.Box5 == player) {
-        if (uiState.Box9 == player) {
-            if (uiState.Box1 == "") {
+    if (uiState.boxes.Box5 == player) {
+        if (uiState.boxes.Box9 == player) {
+            if (uiState.boxes.Box1 == "") {
                 Box = 1
             }
         }
@@ -36,16 +36,16 @@ fun WillWin (uiState: UiState, player: String): Int {
 
     // box2
 
-    if (uiState.Box1 == player) {
-        if (uiState.Box3 == player) {
-            if (uiState.Box2 == "") {
+    if (uiState.boxes.Box1 == player) {
+        if (uiState.boxes.Box3 == player) {
+            if (uiState.boxes.Box2 == "") {
                 Box = 2
             }
         }
     }
-    if (uiState.Box5 == player) {
-        if (uiState.Box8 == "X") {
-            if (uiState.Box2 == "") {
+    if (uiState.boxes.Box5 == player) {
+        if (uiState.boxes.Box8 == "X") {
+            if (uiState.boxes.Box2 == "") {
                 Box = 2
             }
         }
@@ -53,23 +53,23 @@ fun WillWin (uiState: UiState, player: String): Int {
 
     // box3
 
-    if (uiState.Box2 == player) {
-        if (uiState.Box1 == player) {
-            if (uiState.Box3 == "") {
+    if (uiState.boxes.Box2 == player) {
+        if (uiState.boxes.Box1 == player) {
+            if (uiState.boxes.Box3 == "") {
                 Box = 3
             }
         }
     }
-    if (uiState.Box6 == player) {
-        if (uiState.Box9 == player) {
-            if (uiState.Box3 == "") {
+    if (uiState.boxes.Box6 == player) {
+        if (uiState.boxes.Box9 == player) {
+            if (uiState.boxes.Box3 == "") {
                 Box = 3
             }
         }
     }
-    if (uiState.Box5 == player) {
-        if (uiState.Box7 == player) {
-            if (uiState.Box3 == "") {
+    if (uiState.boxes.Box5 == player) {
+        if (uiState.boxes.Box7 == player) {
+            if (uiState.boxes.Box3 == "") {
                 Box = 3
             }
         }
@@ -77,16 +77,16 @@ fun WillWin (uiState: UiState, player: String): Int {
 
     // box4
 
-    if (uiState.Box5 == player) {
-        if (uiState.Box6 == player) {
-            if (uiState.Box4 == "") {
+    if (uiState.boxes.Box5 == player) {
+        if (uiState.boxes.Box6 == player) {
+            if (uiState.boxes.Box4 == "") {
                 Box = 4
             }
         }
     }
-    if (uiState.Box1 == player) {
-        if (uiState.Box7 == player) {
-            if (uiState.Box4 == "") {
+    if (uiState.boxes.Box1 == player) {
+        if (uiState.boxes.Box7 == player) {
+            if (uiState.boxes.Box4 == "") {
                 Box = 4
             }
         }
@@ -94,30 +94,30 @@ fun WillWin (uiState: UiState, player: String): Int {
 
     // box5
 
-    if (uiState.Box1 == player) {
-        if (uiState.Box9 == player) {
-            if (uiState.Box5 == "") {
+    if (uiState.boxes.Box1 == player) {
+        if (uiState.boxes.Box9 == player) {
+            if (uiState.boxes.Box5 == "") {
                 Box = 5
             }
         }
     }
-    if (uiState.Box3 == player) {
-        if (uiState.Box7 == player) {
-            if (uiState.Box5 == "") {
+    if (uiState.boxes.Box3 == player) {
+        if (uiState.boxes.Box7 == player) {
+            if (uiState.boxes.Box5 == "") {
                 Box = 5
             }
         }
     }
-    if (uiState.Box2 == player) {
-        if (uiState.Box8 == player) {
-            if (uiState.Box5 == "") {
+    if (uiState.boxes.Box2 == player) {
+        if (uiState.boxes.Box8 == player) {
+            if (uiState.boxes.Box5 == "") {
                 Box = 5
             }
         }
     }
-    if (uiState.Box4 == player) {
-        if (uiState.Box6 == player) {
-            if (uiState.Box5 == "") {
+    if (uiState.boxes.Box4 == player) {
+        if (uiState.boxes.Box6 == player) {
+            if (uiState.boxes.Box5 == "") {
                 Box = 5
             }
         }
@@ -125,16 +125,16 @@ fun WillWin (uiState: UiState, player: String): Int {
 
     // box6
 
-    if (uiState.Box3 == player) {
-        if (uiState.Box9 == player) {
-            if (uiState.Box6 == "") {
+    if (uiState.boxes.Box3 == player) {
+        if (uiState.boxes.Box9 == player) {
+            if (uiState.boxes.Box6 == "") {
                 Box = 6
             }
         }
     }
-    if (uiState.Box4 == player) {
-        if (uiState.Box5 == player) {
-            if (uiState.Box6 == "") {
+    if (uiState.boxes.Box4 == player) {
+        if (uiState.boxes.Box5 == player) {
+            if (uiState.boxes.Box6 == "") {
                 Box = 6
             }
         }
@@ -142,23 +142,23 @@ fun WillWin (uiState: UiState, player: String): Int {
 
     // box7
 
-    if (uiState.Box3 == player) {
-        if (uiState.Box5 == player) {
-            if (uiState.Box7 == "") {
+    if (uiState.boxes.Box3 == player) {
+        if (uiState.boxes.Box5 == player) {
+            if (uiState.boxes.Box7 == "") {
                 Box = 7
             }
         }
     }
-    if (uiState.Box1 == player) {
-        if (uiState.Box4 == player) {
-            if (uiState.Box7 == "") {
+    if (uiState.boxes.Box1 == player) {
+        if (uiState.boxes.Box4 == player) {
+            if (uiState.boxes.Box7 == "") {
                 Box = 7
             }
         }
     }
-    if (uiState.Box9 == player) {
-        if (uiState.Box8 == player) {
-            if (uiState.Box7 == "") {
+    if (uiState.boxes.Box9 == player) {
+        if (uiState.boxes.Box8 == player) {
+            if (uiState.boxes.Box7 == "") {
                 Box = 7
             }
         }
@@ -166,16 +166,16 @@ fun WillWin (uiState: UiState, player: String): Int {
 
     // box8
 
-    if (uiState.Box2 == player) {
-        if (uiState.Box5 == player) {
-            if (uiState.Box8 == "") {
+    if (uiState.boxes.Box2 == player) {
+        if (uiState.boxes.Box5 == player) {
+            if (uiState.boxes.Box8 == "") {
                 Box = 8
             }
         }
     }
-    if (uiState.Box7 == player) {
-        if (uiState.Box9 == player) {
-            if (uiState.Box8 == "") {
+    if (uiState.boxes.Box7 == player) {
+        if (uiState.boxes.Box9 == player) {
+            if (uiState.boxes.Box8 == "") {
                 Box = 8
             }
         }
@@ -183,23 +183,23 @@ fun WillWin (uiState: UiState, player: String): Int {
 
     // box9
 
-    if (uiState.Box3 == player) {
-        if (uiState.Box6 == player) {
-            if (uiState.Box9 == "") {
+    if (uiState.boxes.Box3 == player) {
+        if (uiState.boxes.Box6 == player) {
+            if (uiState.boxes.Box9 == "") {
                 Box = 9
             }
         }
     }
-    if (uiState.Box7 == player) {
-        if (uiState.Box8 == player) {
-            if (uiState.Box9 == "") {
+    if (uiState.boxes.Box7 == player) {
+        if (uiState.boxes.Box8 == player) {
+            if (uiState.boxes.Box9 == "") {
                 Box = 9
             }
         }
     }
-    if (uiState.Box1 == player) {
-        if (uiState.Box5 == player) {
-            if (uiState.Box9 == "") {
+    if (uiState.boxes.Box1 == player) {
+        if (uiState.boxes.Box5 == player) {
+            if (uiState.boxes.Box9 == "") {
                 Box = 9
             }
         }

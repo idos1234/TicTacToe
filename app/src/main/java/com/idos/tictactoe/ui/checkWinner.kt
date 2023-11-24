@@ -16,17 +16,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // first row
 
-    if(uiState.Box1 == "X") {
-        if(uiState.Box2 == "X") {
-            if(uiState.Box3 == "X"){
+    if(uiState.boxes.Box1 == "X") {
+        if(uiState.boxes.Box2 == "X") {
+            if(uiState.boxes.Box3 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.Box1 == "O") {
-        if(uiState.Box2 == "O") {
-            if(uiState.Box3 == "O"){
+    if(uiState.boxes.Box1 == "O") {
+        if(uiState.boxes.Box2 == "O") {
+            if(uiState.boxes.Box3 == "O"){
                 winner = "O"
             }
         }
@@ -34,17 +34,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // second row
 
-    if(uiState.Box4 == "X") {
-        if(uiState.Box5 == "X") {
-            if(uiState.Box6 == "X"){
+    if(uiState.boxes.Box4 == "X") {
+        if(uiState.boxes.Box5 == "X") {
+            if(uiState.boxes.Box6 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.Box4 == "O") {
-        if(uiState.Box5 == "O") {
-            if(uiState.Box6 == "O"){
+    if(uiState.boxes.Box4 == "O") {
+        if(uiState.boxes.Box5 == "O") {
+            if(uiState.boxes.Box6 == "O"){
                 winner = "O"
             }
         }
@@ -52,17 +52,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // third row
 
-    if(uiState.Box7 == "X") {
-        if(uiState.Box8 == "X") {
-            if(uiState.Box9 == "X"){
+    if(uiState.boxes.Box7 == "X") {
+        if(uiState.boxes.Box8 == "X") {
+            if(uiState.boxes.Box9 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.Box7 == "O") {
-        if(uiState.Box8 == "O") {
-            if(uiState.Box9 == "O"){
+    if(uiState.boxes.Box7 == "O") {
+        if(uiState.boxes.Box8 == "O") {
+            if(uiState.boxes.Box9 == "O"){
                 winner = "O"
             }
         }
@@ -70,17 +70,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // first column
 
-    if(uiState.Box1 == "X") {
-        if(uiState.Box4 == "X") {
-            if(uiState.Box7 == "X"){
+    if(uiState.boxes.Box1 == "X") {
+        if(uiState.boxes.Box4 == "X") {
+            if(uiState.boxes.Box7 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.Box1 == "O") {
-        if(uiState.Box4 == "O") {
-            if(uiState.Box7 == "O"){
+    if(uiState.boxes.Box1 == "O") {
+        if(uiState.boxes.Box4 == "O") {
+            if(uiState.boxes.Box7 == "O"){
                 winner = "O"
             }
         }
@@ -88,17 +88,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // second column
 
-    if(uiState.Box2 == "X") {
-        if(uiState.Box5 == "X") {
-            if(uiState.Box8 == "X"){
+    if(uiState.boxes.Box2 == "X") {
+        if(uiState.boxes.Box5 == "X") {
+            if(uiState.boxes.Box8 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.Box2 == "O") {
-        if(uiState.Box5 == "O") {
-            if(uiState.Box8 == "O"){
+    if(uiState.boxes.Box2 == "O") {
+        if(uiState.boxes.Box5 == "O") {
+            if(uiState.boxes.Box8 == "O"){
                 winner = "O"
             }
         }
@@ -106,17 +106,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // third column
 
-    if(uiState.Box3 == "X") {
-        if(uiState.Box6 == "X") {
-            if(uiState.Box9 == "X"){
+    if(uiState.boxes.Box3 == "X") {
+        if(uiState.boxes.Box6 == "X") {
+            if(uiState.boxes.Box9 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.Box3 == "O") {
-        if(uiState.Box6 == "O") {
-            if(uiState.Box9 == "O"){
+    if(uiState.boxes.Box3 == "O") {
+        if(uiState.boxes.Box6 == "O") {
+            if(uiState.boxes.Box9 == "O"){
                 winner = "O"
             }
         }
@@ -124,17 +124,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // first diagonal line
 
-    if(uiState.Box1 == "X") {
-        if(uiState.Box5 == "X") {
-            if(uiState.Box9 == "X"){
+    if(uiState.boxes.Box1 == "X") {
+        if(uiState.boxes.Box5 == "X") {
+            if(uiState.boxes.Box9 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.Box1 == "O") {
-        if(uiState.Box5 == "O") {
-            if(uiState.Box9 == "O"){
+    if(uiState.boxes.Box1 == "O") {
+        if(uiState.boxes.Box5 == "O") {
+            if(uiState.boxes.Box9 == "O"){
                 winner = "O"
             }
         }
@@ -142,17 +142,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // second diagonal line
 
-    if(uiState.Box3 == "X") {
-        if(uiState.Box5 == "X") {
-            if(uiState.Box7 == "X"){
+    if(uiState.boxes.Box3 == "X") {
+        if(uiState.boxes.Box5 == "X") {
+            if(uiState.boxes.Box7 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.Box3 == "O") {
-        if(uiState.Box5 == "O") {
-            if(uiState.Box7 == "O"){
+    if(uiState.boxes.Box3 == "O") {
+        if(uiState.boxes.Box5 == "O") {
+            if(uiState.boxes.Box7 == "O"){
                 winner = "O"
             }
         }
