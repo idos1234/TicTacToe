@@ -35,7 +35,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.google.firebase.firestore.FirebaseFirestore
-import com.idos.tictactoe.SplashScreen
 import com.idos.tictactoe.data.dataStore.SharedPreferencesDataStore
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.ChooseName
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInScreen
@@ -66,7 +65,6 @@ enum class GameScreen(val title: String) {
     ShowGameFinalScore("ShowGameFinalScore"),
     GoogleSignIn("GoogleSignIn"),
     NewName("NewName"),
-    SplashScreen("SplashScreen")
 }
 
 data class sharedPreferences(
@@ -395,12 +393,6 @@ fun TicTacToeApp(
         scaffoldState = scaffoldState,
         topBar = {
         when(currentScreen) {
-            GameScreen.SplashScreen ->
-                TopAppBar(
-                    icon = null,
-                    onClick = {},
-                    isBar = false
-                )
             GameScreen.Start ->
                 TopAppBar(
                     onClick = {
@@ -672,11 +664,6 @@ fun TicTacToeApp(
                         encryptedSharedPreferences.edit().putString("email", email.value).apply()
                     }
                 )
-            }
-
-            //splash screen
-            composable(GameScreen.SplashScreen.title) {
-                SplashScreen(onFinished = {navController.navigate(startedScreen!!)}, isCheckedNextScreen = startedScreen != null)
             }
 
         }
