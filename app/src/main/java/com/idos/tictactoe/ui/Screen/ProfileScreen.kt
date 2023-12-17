@@ -1,19 +1,41 @@
 package com.idos.tictactoe.ui.Screen
 
 import android.content.Context
-import android.widget.Toast
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,13 +49,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
 import com.idos.tictactoe.ui.theme.Shapes
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
-import com.idos.tictactoe.data.MainPlayerUiState
 
 @Composable
 fun ProfileScreen(player: String, context: Context) {
@@ -49,35 +71,8 @@ fun ProfileScreen(player: String, context: Context) {
     var showPlayerO by remember {
         mutableStateOf(false)
     }
-
-    //get database
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-
     //get Players collection from database
-    db.collection("Players").get()
-        //on success
-        .addOnSuccessListener { queryDocumentSnapshots ->
-            //check if collection is empty
-            if (!queryDocumentSnapshots.isEmpty) {
-                val list = queryDocumentSnapshots.documents
-                for (d in list) {
-                    val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
-                    //find player using database
-                    if (p?.email == player){
-                        profile = p
-                    }
-
-                }
-            }
-        }
-        //on failure
-        .addOnFailureListener {
-            Toast.makeText(
-                context,
-                "Fail to get the data.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+    profile = getPlayer(player, context)
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxSize()

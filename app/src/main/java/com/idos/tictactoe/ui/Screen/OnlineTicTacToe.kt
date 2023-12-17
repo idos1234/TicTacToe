@@ -39,7 +39,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun SetBoxOnline(game: OnlineGameUiState, boxNumber: Int, playerTurn: String, databaseReference: DatabaseReference) {
+fun SetBoxOnline(
+    game: OnlineGameUiState,
+    boxNumber: Int,
+    playerTurn: String,
+    databaseReference: DatabaseReference
+) {
 
     val boxes: com.idos.tictactoe.data.Boxes? = when(boxNumber) {
         1 -> game.boxes.copy(Box1 = playerTurn)
@@ -56,7 +61,6 @@ fun SetBoxOnline(game: OnlineGameUiState, boxNumber: Int, playerTurn: String, da
 
     databaseReference.child(game.id).child("boxes").setValue(boxes)
     databaseReference.child(game.id).child("times").setValue(game.times.plus(1))
-
 }
 
 @Composable
@@ -68,48 +72,30 @@ fun changePlayerTurn(game: OnlineGameUiState, databaseReference: DatabaseReferen
     }
 
     databaseReference.child(game.id).child("playerTurn").setValue(PlayerTurn)
-
 }
 
 @Composable
-fun OnlineGameButton(game: OnlineGameUiState, boxNumber: Int, box: String, enabled: Boolean, context: Context = LocalContext.current, databaseReference: DatabaseReference) {
+fun OnlineGameButton(
+    game: OnlineGameUiState,
+    boxNumber: Int,
+    box: String,
+    enabled: Boolean,
+    context: Context = LocalContext.current,
+    databaseReference: DatabaseReference,
+    FindGame: (OnlineGameUiState) -> Unit,
+    enableClick: (Boolean) -> Unit
+) {
     var player1 by remember {
         mutableStateOf(MainPlayerUiState())
     }
     var player2 by remember {
         mutableStateOf(MainPlayerUiState())
     }
-    //get database
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     //get Players collection from database
-    db.collection("Players").get()
-        //on success
-        .addOnSuccessListener { queryDocumentSnapshots ->
-            //check if collection is empty
-            if (!queryDocumentSnapshots.isEmpty) {
-                val list = queryDocumentSnapshots.documents
-                for (d in list) {
-                    val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
-                    //find player using database
-                    if (p?.name == game.player1){
-                        player1 = p
-                    }
-                    if (p?.name == game.player2){
-                        player2 = p
-                    }
+    player1 = getPlayer(email = player1.email, context = context)
+    player2 = getPlayer(email = player2.email, context = context)
 
-                }
-            }
-        }
-        //on failure
-        .addOnFailureListener {
-            Toast.makeText(
-                context,
-                "Fail to get the data.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
 
     var setBox by remember {
         mutableStateOf(false)
@@ -130,15 +116,25 @@ fun OnlineGameButton(game: OnlineGameUiState, boxNumber: Int, box: String, enabl
                 .background(Color.Gray)
                 .size(100.dp)
                 .clickable(
-                    onClick = { setBox = true },
+                    onClick = {
+                        enableClick(false)
+                        setBox = true
+                    },
                     enabled = (box == "") && enabled,
                 )
         )
     }
 
     if (setBox) {
-        SetBoxOnline(game = game, boxNumber = boxNumber, playerTurn = game.playerTurn, databaseReference = databaseReference)
         changePlayerTurn(game, databaseReference = databaseReference)
+        SetBoxOnline(
+            game = game,
+            boxNumber = boxNumber,
+            playerTurn = game.playerTurn,
+            databaseReference = databaseReference
+        )
+        FindGame(findGame(gameId = game.id, databaseReference = databaseReference))
+        enableClick(true)
         setBox = false
     }
 }
@@ -147,18 +143,11 @@ fun OnlineGameButton(game: OnlineGameUiState, boxNumber: Int, box: String, enabl
     "SuspiciousIndentation"
 )
 @Composable
-fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, player: String, player1: MainPlayerUiState, player2: MainPlayerUiState, databaseReference: DatabaseReference, viewModel: CodeGameViewModel, navController: NavController) {
+fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, player: String, player1: MainPlayerUiState, player2: MainPlayerUiState, databaseReference: DatabaseReference, viewModel: CodeGameViewModel, navController: NavController, enableState: Enable) {
     var game by remember {
         mutableStateOf(OnlineGameUiState())
     }
-    val isMyTurn = if (gameStarted) {
-        myTurn == game.playerTurn
-    } else {
-        false
-    }
-    var enabled by remember {
-        mutableStateOf(true)
-    }
+
     var foundWinner by remember {
         mutableStateOf(false)
     }
@@ -173,47 +162,72 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
 
     Column {
         Row {
-            OnlineGameButton(game = game, boxNumber = 1, box = game.boxes.Box1, enabled = isMyTurn && enabled, databaseReference = databaseReference)
-            OnlineGameButton(game = game, boxNumber = 2, box = game.boxes.Box2, enabled = isMyTurn && enabled, databaseReference = databaseReference)
-            OnlineGameButton(game = game, boxNumber = 3, box = game.boxes.Box3, enabled = isMyTurn && enabled, databaseReference = databaseReference)
+            OnlineGameButton(game = game, boxNumber = 1, box = game.boxes.Box1, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+                viewModel.changeEnable(it)
+            }
+            OnlineGameButton(game = game, boxNumber = 2, box = game.boxes.Box2, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+                viewModel.changeEnable(it)
+            }
+            OnlineGameButton(game = game, boxNumber = 3, box = game.boxes.Box3, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+                viewModel.changeEnable(it)
+            }
         }
         Row {
-            OnlineGameButton(game = game, boxNumber = 4, box = game.boxes.Box4, enabled = isMyTurn && enabled, databaseReference = databaseReference)
-            OnlineGameButton(game = game, boxNumber = 5, box = game.boxes.Box5, enabled = isMyTurn && enabled, databaseReference = databaseReference)
-            OnlineGameButton(game = game, boxNumber = 6, box = game.boxes.Box6, enabled = isMyTurn && enabled, databaseReference = databaseReference)
+            OnlineGameButton(game = game, boxNumber = 4, box = game.boxes.Box4, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+                viewModel.changeEnable(it)
+            }
+            OnlineGameButton(game = game, boxNumber = 5, box = game.boxes.Box5, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+                viewModel.changeEnable(it)
+            }
+            OnlineGameButton(game = game, boxNumber = 6, box = game.boxes.Box6, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+                viewModel.changeEnable(it)
+            }
         }
         Row {
-            OnlineGameButton(game = game, boxNumber = 7, box = game.boxes.Box7, enabled = isMyTurn && enabled, databaseReference = databaseReference)
-            OnlineGameButton(game = game, boxNumber = 8, box = game.boxes.Box8, enabled = isMyTurn && enabled, databaseReference = databaseReference)
-            OnlineGameButton(game = game, boxNumber = 9, box = game.boxes.Box9, enabled = isMyTurn && enabled, databaseReference = databaseReference)
+            OnlineGameButton(game = game, boxNumber = 7, box = game.boxes.Box7, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+                viewModel.changeEnable(it)
+            }
+            OnlineGameButton(game = game, boxNumber = 8, box = game.boxes.Box8, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+                viewModel.changeEnable(it)
+            }
+            OnlineGameButton(game = game, boxNumber = 9, box = game.boxes.Box9, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+                viewModel.changeEnable(it)
+            }
         }
     }
 
     game = findGame(gameId = gameId, databaseReference = databaseReference)
+    //if can be a winner
     if(game.times >= 5) {
         databaseReference.child(game.id).child("winner").setValue(CheckOnlineWinner(game.boxes))
+        //if has winner
         if(game.winner.isNotEmpty()) {
+            //if no one found the winner
             if (!game.foundWinner) {
+                databaseReference.child(game.id).child("foundWinner").setValue(true)
+                //update game score
                 if (game.winner == "X") {
-                    databaseReference.child(game.id).child("foundWinner").setValue(true)
+                    viewModel.changeEnable(false)
                     databaseReference.child(game.id).child("player1Score").setValue(game.player1Score.plus(1))
                     databaseReference.child(game.id).child("rounds").setValue(game.rounds.plus(1))
-                    enabled = false
                 }
                 if ((game.winner == "O")) {
-                    databaseReference.child(game.id).child("foundWinner").setValue(true)
+                    viewModel.changeEnable(false)
                     databaseReference.child(game.id).child("player2Score").setValue(game.player2Score.plus(1))
                     databaseReference.child(game.id).child("rounds").setValue(game.rounds.plus(1))
-                    enabled = false
                 }
             }
+
+            // if has final winner
             if (game.player1Score == 2) {
                 if (myTurn == "X") {
                     //show winner
+                    //won
                     updateScore(playerName = player, addedScore = 1, context = LocalContext.current)
                     viewModel.updateFinalScoreScreenData("You won!", game, player1,  player2)
                 } else if (myTurn == "O") {
                     //show winner
+                    //lose
                     updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
                     viewModel.updateFinalScoreScreenData("You lose", game, player1,  player2)
                 }
@@ -221,44 +235,53 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
             } else if (game.player2Score == 2) {
                 if (myTurn == "O") {
                     //show winner
+                    //won
                     updateScore(playerName = player, addedScore = 1, context = LocalContext.current)
                     viewModel.updateFinalScoreScreenData("You won!", game, player1,  player2)
                 } else if (myTurn == "X") {
                     //show winner
+                    //lose
                     updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
                     viewModel.updateFinalScoreScreenData("You lose", game, player1,  player2)
                 }
+                // show score screen
                 navController.navigate(GameScreen.ShowGameFinalScore.title)
             } else
+                //new round
                 game = findGame(gameId = gameId, databaseReference = databaseReference)
                 if (game.foundWinner && game.player1Score != 2 && game.player2Score != 2) {
                     scope.launch {
                         delay(3000)
                         ResetGame(game = game, databaseReference = databaseReference)
-                        enabled = true
+                        viewModel.changeEnable(true)
                     }
             }
         }
         //tie
         else if (game.times == 9){
+            //if didn't update round
             if (!game.editedRounds) {
+                //update round
                 databaseReference.child(gameId).child("editedRounds").setValue(true)
                 databaseReference.child(gameId).child("rounds").setValue(game.rounds.plus(1))
             }
             game = findGame(gameId = gameId, databaseReference = databaseReference)
+            //reset round
             if (game.player1Score != 2 && game.player2Score != 2) {
                 scope.launch {
                     delay(3000)
                     ResetGame(game = game, databaseReference = databaseReference)
-                    enabled = true
+                    viewModel.changeEnable(true)
                 }
             }
         }
     }
 
+
     if (!startedCountDown) {
         foundWinner = game.foundWinner
     }
+    //show countDown dialog for winning
     if (foundWinner && (game.player1Score != 2) && (game.player2Score != 2)) {
         startedCountDown = true
         NextRoundDialog(
@@ -274,6 +297,7 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
     if (!startedCountDown) {
         times = game.times
     }
+    //show countDown dialog for tie
     if ((times == 9) && (game.player1Score != 2) && (game.player2Score != 2)) {
         startedCountDown = true
         NextRoundDialog(
@@ -415,7 +439,13 @@ fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
 }
 
 @Composable
-fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewModel, navController: NavController) {
+fun OnlineTicTacToe(
+    player: String,
+    context: Context,
+    viewModel: CodeGameViewModel,
+    navController: NavController,
+    enableState: Enable
+) {
     var currentGame by remember {
         mutableStateOf(OnlineGameUiState())
     }
@@ -668,7 +698,7 @@ fun OnlineTicTacToe(player: String, context: Context, viewModel: CodeGameViewMod
             }
         }
         Spacer(modifier = Modifier.weight(2f))
-        OnlineButtonGrid(gameId = currentGame.id, myTurn = myTurn, gameStarted = foundPlayer, player = player, player1 = player1, player2 = player2, databaseReference = databaseReference, viewModel = viewModel, navController = navController)
+        OnlineButtonGrid(gameId = currentGame.id, myTurn = myTurn, gameStarted = foundPlayer, player = player, player1 = player1, player2 = player2, databaseReference = databaseReference, viewModel = viewModel, navController = navController, enableState = enableState)
         Spacer(modifier = Modifier.weight(4f))
     }
 }
@@ -722,7 +752,7 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
                 Loop@ for (d in list) {
                     val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
                     //find player using database
-                    if (p?.name == playerName){
+                    if (p?.email == playerName){
                         player = p
                         score = if (player.score + addedScore < 0) 0 else player.score + addedScore
 
@@ -893,12 +923,12 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
                                 updatedPlayer = player.copy(score = score, wins = player.wins + 1)
                             }
                         } else if (addedScore == -1) {
-                            updatedPlayer = player.copy(score = score, wins = player.loses + 1)
+                            updatedPlayer = player.copy(score = score, loses = player.loses + 1)
 
                         }
 
                         db.collection("Players")
-                            .whereEqualTo("name", playerName)
+                            .whereEqualTo("email", playerName)
                             .get()
                             .addOnSuccessListener {
                                 for (document in it) {

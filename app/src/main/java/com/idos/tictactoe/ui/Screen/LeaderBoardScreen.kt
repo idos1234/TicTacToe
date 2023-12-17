@@ -36,6 +36,9 @@ fun LeaderBoardScreen(
     context: Context,
     yourPlayer: String
 ) {
+    var i by remember {
+        mutableIntStateOf(0)
+    }
     //players list in database
     var playerlist = mutableStateListOf<MainPlayerUiState?>()
     //database
@@ -52,6 +55,10 @@ fun LeaderBoardScreen(
                     //add every player to player list
                     val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
                     playerlist.add(p)
+                    i++
+                    if(i == 10) {
+                        break
+                    }
 
                 }
                 //sort players list by players' score
@@ -92,7 +99,7 @@ fun ShowTopPlayers(
     }
     //table header
     Card(modifier = Modifier.fillMaxWidth(.9f), border = BorderStroke(1.dp, Color.Black), shape = RoundedCornerShape(10)) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally,) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -241,7 +248,7 @@ fun showPlayer(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                     profile = player,
                     winsColor = Color.Red,
                     losesColor = Color.Yellow,
-                    modifier =Modifier
+                    modifier = Modifier
                         .fillMaxWidth(0.9f)
                         .height(10.dp)
                         .clip(RoundedCornerShape(50)),
@@ -251,3 +258,35 @@ fun showPlayer(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
     }
 }
 
+@Composable
+fun getPlayer(email: String, context: Context): MainPlayerUiState {
+    var player by remember {
+        mutableStateOf(MainPlayerUiState())
+    }
+
+    //database
+    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    //get Players collection from database
+    db.collection("Players").get()
+        //on success
+        .addOnSuccessListener { queryDocumentSnapshots ->
+            //check if collection is empty
+            if (!queryDocumentSnapshots.isEmpty) {
+                val list = queryDocumentSnapshots.documents
+                player = list.find {
+                    it.toObject(MainPlayerUiState::class.java)!!.email == email
+                }?.toObject(MainPlayerUiState::class.java)!!
+            }
+        }
+        //on failure
+        .addOnFailureListener {
+            Toast.makeText(
+                context,
+                "Fail to get the data.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+    return player
+}

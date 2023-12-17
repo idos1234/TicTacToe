@@ -31,7 +31,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGameViewModel, navController: NavController) {
+fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGameViewModel, navController: NavController, enableState: Enable) {
     var currentGame by remember {
         mutableStateOf(com.idos.tictactoe.data.OnlineGameUiState())
     }
@@ -245,7 +245,8 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
             player2 = player2,
             databaseReference = databaseReference,
             viewModel = viewModel,
-            navController = navController
+            navController = navController,
+            enableState = enableState
         )
         Spacer(modifier = Modifier.weight(4f))
     }
@@ -271,7 +272,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
 }
 
 @Composable
-fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, viewModel: CodeGameViewModel, navController: NavController) {
+fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, viewModel: CodeGameViewModel, navController: NavController, enableState: Enable) {
     var currentGame by remember {
         mutableStateOf(com.idos.tictactoe.data.OnlineGameUiState())
     }
@@ -463,7 +464,8 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
             player2 = player2,
             databaseReference = databaseReference,
             viewModel = viewModel,
-            navController = navController
+            navController = navController,
+            enableState = enableState
         )
         Spacer(modifier = Modifier.weight(4f))
     }

@@ -15,6 +15,7 @@ import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,6 +70,9 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
     )
 
     user?.let {
+        var times by remember {
+            mutableIntStateOf(0)
+        }
         var isPlayerExisted by remember {
             mutableStateOf(false)
         }
@@ -95,15 +99,19 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
 
             }
 
-        //if user is existed
+            //if user is existed
         if (isPlayerExisted) {
-            //log in
-            changeEmail(user?.email!!)
-            onClick()
-        } else if (!isPlayerExisted && checkedPlayer){
-            //sign up
-            viewModel.updateEmail(viewModel.emailState.copy(email2 = user!!.email))
-            navController.navigate(GameScreen.NewName.name)
+            if (times == 0) {
+                //log in
+                changeEmail(user?.email!!)
+                onClick()
+            }
+        } else if (!isPlayerExisted && checkedPlayer) {
+            if (times == 0) {
+                //sign up
+                viewModel.updateEmail(viewModel.emailState.copy(email2 = user!!.email))
+                navController.navigate(GameScreen.NewName.name)
+            }
         }
     }
 }

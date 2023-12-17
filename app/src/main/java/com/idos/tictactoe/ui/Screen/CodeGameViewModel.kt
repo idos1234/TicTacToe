@@ -12,6 +12,15 @@ class CodeGameViewModel: ViewModel() {
     private val _onlineGameValuesUiState = MutableStateFlow(OnlineGameRememberedValues())
     val onlineGameValuesUiState: StateFlow<OnlineGameRememberedValues> = _onlineGameValuesUiState.asStateFlow()
 
+    private val _enableState = MutableStateFlow(Enable())
+    val enableState: StateFlow<Enable> = _enableState.asStateFlow()
+
+    fun changeEnable(isEnable: Boolean) {
+        _enableState.update {
+            it.copy(enable = isEnable)
+        }
+    }
+
     fun updateGameCode(newGameCode: String) {
         _onlineGameValuesUiState.update {
             it.copy(gameCode = newGameCode)
@@ -36,4 +45,8 @@ data class OnlineGameRememberedValues(
     var game: OnlineGameUiState = OnlineGameUiState(),
     var player1: MainPlayerUiState = MainPlayerUiState(),
     var player2: MainPlayerUiState = MainPlayerUiState()
+)
+
+data class  Enable(
+    var enable: Boolean = true
 )

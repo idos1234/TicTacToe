@@ -1,9 +1,7 @@
 package com.idos.tictactoe.ui.Screen
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,13 +20,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.idos.tictactoe.R
 import com.idos.tictactoe.data.UiState
 import com.idos.tictactoe.ui.CheckWinner
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
-import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
 
 /**
@@ -41,34 +39,8 @@ fun GameButton(box: String, onClick: () -> Unit = {}, context: Context = LocalCo
         mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
     }
 
-    //get database
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-
     //get Players collection from database
-    db.collection("Players").get()
-        //on success
-        .addOnSuccessListener { queryDocumentSnapshots ->
-            //check if collection is empty
-            if (!queryDocumentSnapshots.isEmpty) {
-                val list = queryDocumentSnapshots.documents
-                for (d in list) {
-                    val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(com.idos.tictactoe.data.MainPlayerUiState::class.java)
-                    //find player using database
-                    if (p?.email == playerName){
-                        player = p
-                    }
-
-                }
-            }
-        }
-        //on failure
-        .addOnFailureListener {
-            Toast.makeText(
-                context,
-                "Fail to get the data.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+    player = getPlayer(playerName, context)
 
     Card(modifier = Modifier.padding(8.dp),shape = RoundedCornerShape(100.dp), border = BorderStroke(3.dp, color = Secondery)) {
         Image(
@@ -103,7 +75,8 @@ fun ButtonGrid(
     viewModel: TicTacToeViewModel,
     onPlayAgain: () -> Unit,
     uiState: UiState,
-    playerName: String
+    playerName: String,
+    navController: NavController
 ) {
 
     //if need to check winner
@@ -115,14 +88,17 @@ fun ButtonGrid(
              showWinner(
                  winner = "Winner is: ${uiState.winner}",
                  text = "Congratulations for winning",
-                 onPlayAgain = {
-                     onPlayAgain()
-                 }
+                 onPlayAgain = { onPlayAgain() },
+                 navController = navController
              )
         }
         //show tie
         else if (uiState.times == 9){
-            showWinner(winner = "Draw", text = "Try to win next time", onPlayAgain = onPlayAgain)
+            showWinner(
+                winner = "Draw",
+                text = "Try to win next time",
+                onPlayAgain = { onPlayAgain() },
+                navController)
         }
 
     } else {
@@ -249,9 +225,7 @@ fun ButtonGrid(
  */
 
 @Composable
-fun showWinner(winner: String, text: String, onPlayAgain: () -> Unit) {
-
-    val activity = (LocalContext.current as Activity)
+fun showWinner(winner: String, text: String, onPlayAgain: () -> Unit, navController: NavController) {
 
     AlertDialog(
         backgroundColor = Secondery,
@@ -261,7 +235,7 @@ fun showWinner(winner: String, text: String, onPlayAgain: () -> Unit) {
         dismissButton = {
             TextButton(
                 onClick = {
-                    activity.finish()
+                    navController.navigate(GameScreen.Start.title)
                 }
             ) {
                 Text("Exit")
@@ -284,7 +258,8 @@ fun TicTacToeScreen(
     viewModel: TicTacToeViewModel,
     uiState: UiState,
     onPlayAgain: () -> Unit,
-    playerName: String
+    playerName: String,
+    navController: NavController
 ) {
 
 
@@ -293,12 +268,16 @@ fun TicTacToeScreen(
         .fillMaxSize()) {
         Spacer(modifier = Modifier.weight(1f))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Card(modifier = Modifier.size(150.dp).padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "X") Primery else { Secondery})) {
+            Card(modifier = Modifier
+                .size(150.dp)
+                .padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "X") Primery else { Secondery})) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("X", fontWeight = FontWeight.Bold, fontSize = 50.sp)
                 }
             }
-            Card(modifier = Modifier.size(150.dp).padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "O") Primery else { Secondery})) {
+            Card(modifier = Modifier
+                .size(150.dp)
+                .padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "O") Primery else { Secondery})) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("O", fontWeight = FontWeight.Bold, fontSize = 50.sp)
                 }
@@ -311,7 +290,8 @@ fun TicTacToeScreen(
                 onPlayAgain()
             },
             uiState = uiState,
-            playerName = playerName
+            playerName = playerName,
+            navController
         )
         Spacer(modifier = Modifier.weight(4f))
     }

@@ -2,7 +2,6 @@ package com.idos.tictactoe.ui.Screen
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -34,7 +33,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
-import com.google.firebase.firestore.FirebaseFirestore
 import com.idos.tictactoe.data.dataStore.SharedPreferencesDataStore
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.ChooseName
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInScreen
@@ -141,34 +139,9 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, email: String, navCo
     var player by remember {
         mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
     }
-    //get database
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     //get Players collection from database
-    db.collection("Players").get()
-        //on success
-        .addOnSuccessListener { queryDocumentSnapshots ->
-            //check if collection is empty
-            if (!queryDocumentSnapshots.isEmpty) {
-                val list = queryDocumentSnapshots.documents
-                for (d in list) {
-                    val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(com.idos.tictactoe.data.MainPlayerUiState::class.java)
-                    //find player using database
-                    if (p?.email == email){
-                        player = p
-                    }
-
-                }
-            }
-        }
-        //on failure
-        .addOnFailureListener {
-            Toast.makeText(
-                context,
-                "Fail to get the data.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+    player = getPlayer(email, context)
 
     Box(modifier = modifier
         .clickable(
@@ -333,14 +306,12 @@ fun TicTacToeApp(
     val onlineGameValuesUiState by codeGameViewModel.onlineGameValuesUiState.collectAsState()
     var sharedPreferencesUiState by mutableStateOf(sharedPreferences())
     val emailState = googleSignInViewModel.emailState
+    val enableState by codeGameViewModel.enableState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
 
     var timesPlayed by remember {
         mutableIntStateOf(0)
-    }
-    val startedScreen by remember {
-        mutableStateOf<String?>(null)
     }
     var open by remember {
         mutableStateOf(false)
@@ -543,7 +514,8 @@ fun TicTacToeApp(
                             timesPlayed
                         )
                     },
-                    playerName = email.value
+                    playerName = email.value,
+                    navController = navController
                 )
             }
 
@@ -568,13 +540,20 @@ fun TicTacToeApp(
                             }
                         }
                     },
-                    playerName = email.value
+                    playerName = email.value,
+                    navController = navController
                 )
             }
 
             //online game screen
             composable(route = GameScreen.Online.title) {
-                OnlineTicTacToe(player = email.value, context = LocalContext.current, viewModel = codeGameViewModel, navController = navController)
+                OnlineTicTacToe(
+                    player = email.value,
+                    context = LocalContext.current,
+                    viewModel = codeGameViewModel,
+                    navController = navController,
+                    enableState = enableState
+                )
             }
 
             //leaderboard screen
@@ -594,12 +573,12 @@ fun TicTacToeApp(
 
             //open game with code
             composable(route = GameScreen.OpenGameWithCode.title) {
-                OpenOnlineGameWithCode(context = LocalContext.current, player = email.value, viewModel = codeGameViewModel, navController = navController)
+                OpenOnlineGameWithCode(context = LocalContext.current, player = email.value, viewModel = codeGameViewModel, navController = navController, enableState = enableState)
             }
 
             //enter game with code
             composable(route = GameScreen.EnterGameWithCode.title) {
-                EnterOnlineGameWithCode(context = LocalContext.current, player = email.value, gameId = onlineGameValuesUiState.gameCode, viewModel = codeGameViewModel, navController = navController)
+                EnterOnlineGameWithCode(context = LocalContext.current, player = email.value, gameId = onlineGameValuesUiState.gameCode, viewModel = codeGameViewModel, navController = navController, enableState = enableState)
             }
 
             //show game final score
