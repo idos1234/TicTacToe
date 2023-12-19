@@ -43,7 +43,8 @@ fun SetBoxOnline(
     game: OnlineGameUiState,
     boxNumber: Int,
     playerTurn: String,
-    databaseReference: DatabaseReference
+    databaseReference: DatabaseReference,
+    gameId: String
 ) {
 
     val boxes: com.idos.tictactoe.data.Boxes? = when(boxNumber) {
@@ -59,19 +60,19 @@ fun SetBoxOnline(
         else -> null
     }
 
-    databaseReference.child(game.id).child("boxes").setValue(boxes)
-    databaseReference.child(game.id).child("times").setValue(game.times.plus(1))
+    databaseReference.child(gameId).child("boxes").setValue(boxes)
+    databaseReference.child(gameId).child("times").setValue(game.times.plus(1))
 }
 
 @Composable
-fun changePlayerTurn(game: OnlineGameUiState, databaseReference: DatabaseReference) {
+fun changePlayerTurn(game: OnlineGameUiState, databaseReference: DatabaseReference, gameId: String) {
     val PlayerTurn = if(game.playerTurn == "X") {
         "O"
     } else {
         "X"
     }
 
-    databaseReference.child(game.id).child("playerTurn").setValue(PlayerTurn)
+    databaseReference.child(gameId).child("playerTurn").setValue(PlayerTurn)
 }
 
 @Composable
@@ -83,7 +84,9 @@ fun OnlineGameButton(
     context: Context = LocalContext.current,
     databaseReference: DatabaseReference,
     FindGame: (OnlineGameUiState) -> Unit,
+    gameId: String,
     enableClick: (Boolean) -> Unit
+
 ) {
     var player1 by remember {
         mutableStateOf(MainPlayerUiState())
@@ -126,14 +129,15 @@ fun OnlineGameButton(
     }
 
     if (setBox) {
-        changePlayerTurn(game, databaseReference = databaseReference)
+        changePlayerTurn(game, databaseReference = databaseReference, gameId)
         SetBoxOnline(
             game = game,
             boxNumber = boxNumber,
             playerTurn = game.playerTurn,
-            databaseReference = databaseReference
+            databaseReference = databaseReference,
+            gameId
         )
-        FindGame(findGame(gameId = game.id, databaseReference = databaseReference))
+        FindGame(findGame(gameId = gameId, databaseReference = databaseReference))
         enableClick(true)
         setBox = false
     }
@@ -162,35 +166,35 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
 
     Column {
         Row {
-            OnlineGameButton(game = game, boxNumber = 1, box = game.boxes.Box1, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+            OnlineGameButton(game = game, boxNumber = 1, box = game.boxes.Box1, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 2, box = game.boxes.Box2, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+            OnlineGameButton(game = game, boxNumber = 2, box = game.boxes.Box2, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 3, box = game.boxes.Box3, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
-                viewModel.changeEnable(it)
-            }
-        }
-        Row {
-            OnlineGameButton(game = game, boxNumber = 4, box = game.boxes.Box4, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
-                viewModel.changeEnable(it)
-            }
-            OnlineGameButton(game = game, boxNumber = 5, box = game.boxes.Box5, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
-                viewModel.changeEnable(it)
-            }
-            OnlineGameButton(game = game, boxNumber = 6, box = game.boxes.Box6, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+            OnlineGameButton(game = game, boxNumber = 3, box = game.boxes.Box3, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
                 viewModel.changeEnable(it)
             }
         }
         Row {
-            OnlineGameButton(game = game, boxNumber = 7, box = game.boxes.Box7, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+            OnlineGameButton(game = game, boxNumber = 4, box = game.boxes.Box4, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 8, box = game.boxes.Box8, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+            OnlineGameButton(game = game, boxNumber = 5, box = game.boxes.Box5, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 9, box = game.boxes.Box9, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}) {
+            OnlineGameButton(game = game, boxNumber = 6, box = game.boxes.Box6, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+                viewModel.changeEnable(it)
+            }
+        }
+        Row {
+            OnlineGameButton(game = game, boxNumber = 7, box = game.boxes.Box7, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+                viewModel.changeEnable(it)
+            }
+            OnlineGameButton(game = game, boxNumber = 8, box = game.boxes.Box8, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+                viewModel.changeEnable(it)
+            }
+            OnlineGameButton(game = game, boxNumber = 9, box = game.boxes.Box9, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
                 viewModel.changeEnable(it)
             }
         }
@@ -199,22 +203,22 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
     game = findGame(gameId = gameId, databaseReference = databaseReference)
     //if can be a winner
     if(game.times >= 5) {
-        databaseReference.child(game.id).child("winner").setValue(CheckOnlineWinner(game.boxes))
+        databaseReference.child(gameId).child("winner").setValue(CheckOnlineWinner(game.boxes))
         //if has winner
         if(game.winner.isNotEmpty()) {
             //if no one found the winner
             if (!game.foundWinner) {
-                databaseReference.child(game.id).child("foundWinner").setValue(true)
+                databaseReference.child(gameId).child("foundWinner").setValue(true)
                 //update game score
                 if (game.winner == "X") {
                     viewModel.changeEnable(false)
-                    databaseReference.child(game.id).child("player1Score").setValue(game.player1Score.plus(1))
-                    databaseReference.child(game.id).child("rounds").setValue(game.rounds.plus(1))
+                    databaseReference.child(gameId).child("player1Score").setValue(game.player1Score.plus(1))
+                    databaseReference.child(gameId).child("rounds").setValue(game.rounds.plus(1))
                 }
                 if ((game.winner == "O")) {
                     viewModel.changeEnable(false)
-                    databaseReference.child(game.id).child("player2Score").setValue(game.player2Score.plus(1))
-                    databaseReference.child(game.id).child("rounds").setValue(game.rounds.plus(1))
+                    databaseReference.child(gameId).child("player2Score").setValue(game.player2Score.plus(1))
+                    databaseReference.child(gameId).child("rounds").setValue(game.rounds.plus(1))
                 }
             }
 
@@ -252,7 +256,7 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
                 if (game.foundWinner && game.player1Score != 2 && game.player2Score != 2) {
                     scope.launch {
                         delay(3000)
-                        ResetGame(game = game, databaseReference = databaseReference)
+                        ResetGame(game = game, databaseReference = databaseReference, gameId)
                         viewModel.changeEnable(true)
                     }
             }
@@ -270,7 +274,7 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
             if (game.player1Score != 2 && game.player2Score != 2) {
                 scope.launch {
                     delay(3000)
-                    ResetGame(game = game, databaseReference = databaseReference)
+                    ResetGame(game = game, databaseReference = databaseReference, gameId)
                     viewModel.changeEnable(true)
                 }
             }
@@ -397,20 +401,18 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
 
 @Composable
 fun findGame(gameId: String, databaseReference: DatabaseReference, context: Context = LocalContext.current): OnlineGameUiState {
-    var foundGame by remember {
+    var game by remember {
         mutableStateOf(OnlineGameUiState())
     }
     //get Players collection from database
     databaseReference.addValueEventListener(object : ValueEventListener {
         //on success
         override fun onDataChange(snapshot: DataSnapshot) {
-            for (Game in snapshot.children) {
-                val game = Game.getValue(OnlineGameUiState::class.java)
-                if (game!!.id == gameId) {
-                    foundGame = game
-                    break
-                }
-            }
+            val list = snapshot.children
+            game = list.find {
+                it.getValue(OnlineGameUiState::class.java)!!.id == gameId
+            }?.getValue(OnlineGameUiState::class.java)!!
+
         }
 
         override fun onCancelled(error: DatabaseError) {
@@ -421,21 +423,21 @@ fun findGame(gameId: String, databaseReference: DatabaseReference, context: Cont
             ).show()
         }
     })
-    return foundGame
+    return game
 }
 
-fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
-    databaseReference.child(game.id).child("winner").setValue("")
-    databaseReference.child(game.id).child("boxes").setValue(com.idos.tictactoe.data.Boxes())
-    databaseReference.child(game.id).child("times").setValue(0)
-    databaseReference.child(game.id).child("foundWinner").setValue(false)
-    databaseReference.child(game.id).child("editedRounds").setValue(false)
+fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference, gameId: String) {
+    databaseReference.child(gameId).child("winner").setValue("")
+    databaseReference.child(gameId).child("boxes").setValue(com.idos.tictactoe.data.Boxes())
+    databaseReference.child(gameId).child("times").setValue(0)
+    databaseReference.child(gameId).child("foundWinner").setValue(false)
+    databaseReference.child(gameId).child("editedRounds").setValue(false)
     val playerTurn = if ((game.rounds % 2) == 0) {
         "O"
     } else if ((game.rounds % 2) == 1) {
         "X"
     } else null
-    databaseReference.child(game.id).child("playerTurn").setValue(playerTurn)
+    databaseReference.child(gameId).child("playerTurn").setValue(playerTurn)
 }
 
 @Composable
