@@ -399,14 +399,6 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
     }
 }
 
-@Preview()
-@Composable
-fun previewDialog() {
-    NextRoundDialog(game = OnlineGameUiState(), player1 = MainPlayerUiState(), player2 = MainPlayerUiState()) {
-        
-    }
-}
-
 @Composable
 fun findGame(gameId: String, databaseReference: DatabaseReference, context: Context = LocalContext.current): OnlineGameUiState {
     var game by remember {
