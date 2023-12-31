@@ -21,20 +21,21 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.tictactoe.ui.Screen.CheckOnlineWinner
-import com.idos.tictactoe.ui.theme.BackGround
-import com.idos.tictactoe.ui.theme.Primery
-import com.idos.tictactoe.ui.theme.Secondery
 import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.idos.tictactoe.R
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
+import com.idos.tictactoe.ui.theme.BackGround
+import com.idos.tictactoe.ui.theme.Primery
+import com.idos.tictactoe.ui.theme.Secondery
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -336,9 +337,9 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
             .fillMaxWidth(0.98f)
             .background(Color.White)) {
             Text(text = "Next round in: $secondsToNextRound", fontWeight = FontWeight.Bold, fontSize = 30.sp, color = Color.Black)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier.weight(2f)) {
-                    Column() {
+            Row() {
+                Box(modifier = Modifier.weight(2f), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Card(
                             shape = RoundedCornerShape(125.dp),
                             elevation = 10.dp,
@@ -365,9 +366,8 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
                         )
                     }
                 }
-                Spacer(modifier = Modifier.weight(1f))
-                Box(modifier = Modifier.weight(2f)) {
-                    Column() {
+                Box(modifier = Modifier.weight(2f), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Card(
                             shape = RoundedCornerShape(125.dp),
                             elevation = 10.dp,
@@ -381,13 +381,13 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
                             )
                         }
                         Text(
-                            text = player2.name,
+                            text = player1.name,
                             fontSize = 25.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black
                         )
                         Text(
-                            text = game.player2Score.toString(),
+                            text = game.player1Score.toString(),
                             fontSize = 25.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black
@@ -396,6 +396,14 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
                 }
             }
         }
+    }
+}
+
+@Preview()
+@Composable
+fun previewDialog() {
+    NextRoundDialog(game = OnlineGameUiState(), player1 = MainPlayerUiState(), player2 = MainPlayerUiState()) {
+        
     }
 }
 
@@ -741,6 +749,10 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
         mutableStateOf<List<Int>>(listOf())
     }
 
+    var failed by remember {
+        mutableStateOf(false)
+    }
+
     //get database
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -938,6 +950,9 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
                                         SetOptions.merge())
                                 }
                             }
+                            .addOnFailureListener {
+                                failed = true
+                            }
                         break@Loop
                     }
 
@@ -946,10 +961,11 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
         }
         //on failure
         .addOnFailureListener {
-            Toast.makeText(
-                context,
-                "Fail to get the data.",
-                Toast.LENGTH_SHORT
-            ).show()
+            failed = true
         }
+
+    if (failed) {
+        updateScore(playerName = playerName, context = context, addedScore = addedScore)
+        failed = false
+    }
 }
