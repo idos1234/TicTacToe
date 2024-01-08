@@ -30,6 +30,7 @@ import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.idos.tictactoe.R
+import com.idos.tictactoe.data.Boxes
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.theme.BackGround
@@ -47,7 +48,7 @@ fun SetBoxOnline(
     gameId: String
 ) {
 
-    val boxes: com.idos.tictactoe.data.Boxes? = when(boxNumber) {
+    val boxes: Boxes? = when(boxNumber) {
         1 -> game.boxes.copy(Box1 = playerTurn)
         2 -> game.boxes.copy(Box2 = playerTurn)
         3 -> game.boxes.copy(Box3 = playerTurn)
@@ -79,6 +80,7 @@ fun changePlayerTurn(game: OnlineGameUiState, databaseReference: DatabaseReferen
 fun OnlineGameButton(
     game: OnlineGameUiState,
     boxNumber: Int,
+    setBox:(String) -> Unit,
     box: String,
     enabled: Boolean,
     context: Context = LocalContext.current,
@@ -130,6 +132,7 @@ fun OnlineGameButton(
 
     if (setBox) {
         changePlayerTurn(game, databaseReference = databaseReference, gameId)
+        setBox(game.playerTurn)
         SetBoxOnline(
             game = game,
             boxNumber = boxNumber,
@@ -162,48 +165,53 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
         mutableStateOf(false)
     }
 
+    var boxes by remember {
+        mutableStateOf(game.boxes)
+    }
+
     val scope = rememberCoroutineScope()
 
     Column {
         Row {
-            OnlineGameButton(game = game, boxNumber = 1, box = game.boxes.Box1, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+            OnlineGameButton(game = game, boxNumber = 1, setBox = {boxes.Box1 = it}, box = boxes.Box1, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 2, box = game.boxes.Box2, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+            OnlineGameButton(game = game, boxNumber = 2, setBox = {boxes.Box2 = it}, box = boxes.Box2, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 3, box = game.boxes.Box3, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
-                viewModel.changeEnable(it)
-            }
-        }
-        Row {
-            OnlineGameButton(game = game, boxNumber = 4, box = game.boxes.Box4, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
-                viewModel.changeEnable(it)
-            }
-            OnlineGameButton(game = game, boxNumber = 5, box = game.boxes.Box5, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
-                viewModel.changeEnable(it)
-            }
-            OnlineGameButton(game = game, boxNumber = 6, box = game.boxes.Box6, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+            OnlineGameButton(game = game, boxNumber = 3, setBox = {boxes.Box3 = it}, box = boxes.Box3, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
                 viewModel.changeEnable(it)
             }
         }
         Row {
-            OnlineGameButton(game = game, boxNumber = 7, box = game.boxes.Box7, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+            OnlineGameButton(game = game, boxNumber = 4, setBox = {boxes.Box4 = it}, box = boxes.Box4, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 8, box = game.boxes.Box8, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+            OnlineGameButton(game = game, boxNumber = 5, setBox = {boxes.Box5 = it}, box = boxes.Box5, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 9, box = game.boxes.Box9, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+            OnlineGameButton(game = game, boxNumber = 6, setBox = {boxes.Box6 = it}, box = boxes.Box6, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+                viewModel.changeEnable(it)
+            }
+        }
+        Row {
+            OnlineGameButton(game = game, boxNumber = 7, setBox = {boxes.Box7 = it}, box = boxes.Box7, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+                viewModel.changeEnable(it)
+            }
+            OnlineGameButton(game = game, boxNumber = 8, setBox = {boxes.Box8 = it}, box = boxes.Box8, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+                viewModel.changeEnable(it)
+            }
+            OnlineGameButton(game = game, boxNumber = 9, setBox = {boxes.Box9 = it}, box = boxes.Box9, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
                 viewModel.changeEnable(it)
             }
         }
     }
 
     game = findGame(gameId = gameId, databaseReference = databaseReference)
+    boxes = game.boxes
     //if can be a winner
     if(game.times >= 5) {
-        databaseReference.child(gameId).child("winner").setValue(CheckOnlineWinner(game.boxes))
+        databaseReference.child(gameId).child("winner").setValue(CheckOnlineWinner(boxes))
         //if has winner
         if(game.winner.isNotEmpty()) {
             //if no one found the winner
@@ -253,6 +261,7 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
             } else
                 //new round
                 game = findGame(gameId = gameId, databaseReference = databaseReference)
+                boxes = game.boxes
                 if (game.foundWinner && game.player1Score != 2 && game.player2Score != 2) {
                     scope.launch {
                         delay(3000)
@@ -270,6 +279,7 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
                 databaseReference.child(gameId).child("rounds").setValue(game.rounds.plus(1))
             }
             game = findGame(gameId = gameId, databaseReference = databaseReference)
+            boxes = game.boxes
             //reset round
             if (game.player1Score != 2 && game.player2Score != 2) {
                 scope.launch {
@@ -431,7 +441,7 @@ fun findGame(gameId: String, databaseReference: DatabaseReference, context: Cont
 
 fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference, gameId: String) {
     databaseReference.child(gameId).child("winner").setValue("")
-    databaseReference.child(gameId).child("boxes").setValue(com.idos.tictactoe.data.Boxes())
+    databaseReference.child(gameId).child("boxes").setValue(Boxes())
     databaseReference.child(gameId).child("times").setValue(0)
     databaseReference.child(gameId).child("foundWinner").setValue(false)
     databaseReference.child(gameId).child("editedRounds").setValue(false)
@@ -533,7 +543,7 @@ fun OnlineTicTacToe(
                         player1 = player,
                         player2 = "",
                         winner = "",
-                        boxes = com.idos.tictactoe.data.Boxes()
+                        boxes = Boxes()
                     )
                     //get Players collection from database
                     db.collection("Players").get()
