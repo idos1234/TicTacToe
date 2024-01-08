@@ -10,16 +10,18 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultAlpha
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.idos.tictactoe.R
 import com.idos.tictactoe.data.UiState
@@ -94,18 +96,34 @@ fun SinglePlayerButtonGrid(
     if(uiState.ToCheck) {
         uiState.winner = CheckWinner(uiState)
         if(uiState.winner != "") {
-            //show winner
-            showWinner(
-                winner = "Winner is: ${uiState.winner}",
-                text = "Congratulations for winning",
-                onPlayAgain = { onPlayAgain() },
-                navController = navController
-            )
+            if(uiState.winner == "X") {
+                //Won
+                if (!uiState.isScoreUpdated) {
+                    viewModel.updateScore(1)
+                }
+                showWinner(
+                    winner = "You won!",
+                    text = "Congratulations for winning",
+                    onPlayAgain = { onPlayAgain() },
+                    navController = navController
+                )
+            } else if(uiState.winner == "O") {
+                //Lost
+                if (!uiState.isScoreUpdated) {
+                    viewModel.updateScore(2)
+                }
+                showWinner(
+                    winner = "You lost!",
+                    text = "Try to win next time",
+                    onPlayAgain = { onPlayAgain() },
+                    navController = navController
+                )
+            }
         }
         //show tie
         else if (uiState.times >= 9){
             showWinner(
-                winner = "Draw",
+                winner = "Draw!",
                 text = "Try to win next time",
                 onPlayAgain = { onPlayAgain() },
                 navController = navController)
@@ -255,7 +273,7 @@ fun TicTacToeSinglePlayerScreen(
     playerName: String,
     navController: NavController
 ) {
-
+    val player = getPlayer(email = playerName, context = LocalContext.current)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -268,16 +286,22 @@ fun TicTacToeSinglePlayerScreen(
             Card(modifier = Modifier
                 .size(150.dp)
                 .padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "X") Primery else { Secondery})) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("X", fontWeight = FontWeight.Bold, fontSize = 50.sp)
-                }
+                Image(
+                    painterResource(id = player.currentImage),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
             }
+            Text("${uiState.player1Score} : ${uiState.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
+
             Card(modifier = Modifier
                 .size(150.dp)
                 .padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "O") Primery else { Secondery})) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("O", fontWeight = FontWeight.Bold, fontSize = 50.sp)
-                }
+                Image(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
             }
         }
         Spacer(modifier = Modifier.weight(2f))

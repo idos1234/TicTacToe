@@ -21,7 +21,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -409,9 +408,13 @@ fun findGame(gameId: String, databaseReference: DatabaseReference, context: Cont
         //on success
         override fun onDataChange(snapshot: DataSnapshot) {
             val list = snapshot.children
-            game = list.find {
-                it.getValue(OnlineGameUiState::class.java)!!.id == gameId
-            }?.getValue(OnlineGameUiState::class.java)!!
+            try {
+                game = list.find {
+                    it.getValue(OnlineGameUiState::class.java)!!.id == gameId
+                }?.getValue(OnlineGameUiState::class.java)!!
+            } catch (e: Exception) {
+                game = OnlineGameUiState()
+            }
 
         }
 

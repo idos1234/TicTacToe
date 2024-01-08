@@ -14,12 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultAlpha
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.idos.tictactoe.R
 import com.idos.tictactoe.data.UiState
@@ -83,10 +83,18 @@ fun ButtonGrid(
     if(uiState.ToCheck) {
         uiState.winner = CheckWinner(uiState)
         if(uiState.winner != "") {
-
             //show winner
+
+            if(!uiState.isScoreUpdated) {
+                if(uiState.winner == "X") {
+                    viewModel.updateScore(1)
+                } else if(uiState.winner == "O") {
+                    viewModel.updateScore(2)
+                }
+            }
+
              showWinner(
-                 winner = "Winner is: ${uiState.winner}",
+                 winner = "Winner is: ${uiState.winner}!",
                  text = "Congratulations for winning",
                  onPlayAgain = { onPlayAgain() },
                  navController = navController
@@ -95,7 +103,7 @@ fun ButtonGrid(
         //show tie
         else if (uiState.times == 9){
             showWinner(
-                winner = "Draw",
+                winner = "Draw!",
                 text = "Try to win next time",
                 onPlayAgain = { onPlayAgain() },
                 navController)
@@ -261,7 +269,7 @@ fun TicTacToeScreen(
     playerName: String,
     navController: NavController
 ) {
-
+    val player = getPlayer(email = playerName, context = LocalContext.current)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
@@ -271,16 +279,23 @@ fun TicTacToeScreen(
             Card(modifier = Modifier
                 .size(150.dp)
                 .padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "X") Primery else { Secondery})) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("X", fontWeight = FontWeight.Bold, fontSize = 50.sp)
-                }
+                Image(
+                    painterResource(id = player.currentImage),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
             }
+
+            Text("${uiState.player1Score} : ${uiState.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
+
             Card(modifier = Modifier
                 .size(150.dp)
                 .padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "O") Primery else { Secondery})) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("O", fontWeight = FontWeight.Bold, fontSize = 50.sp)
-                }
+                Image(
+                    painterResource(id = player.currentImage),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
             }
         }
         Spacer(modifier = Modifier.weight(2f))

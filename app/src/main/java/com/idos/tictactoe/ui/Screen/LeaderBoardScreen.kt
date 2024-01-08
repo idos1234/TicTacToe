@@ -274,9 +274,13 @@ fun getPlayer(email: String, context: Context): MainPlayerUiState {
             //check if collection is empty
             if (!queryDocumentSnapshots.isEmpty) {
                 val list = queryDocumentSnapshots.documents
-                player = list.find {
-                    it.toObject(MainPlayerUiState::class.java)!!.email == email
-                }?.toObject(MainPlayerUiState::class.java)!!
+                try {
+                    player = list.find {
+                        it.toObject(MainPlayerUiState::class.java)!!.email == email
+                    }?.toObject(MainPlayerUiState::class.java)!!
+                } catch (e: Exception) {
+                    player = MainPlayerUiState()
+                }
             }
         }
         //on failure

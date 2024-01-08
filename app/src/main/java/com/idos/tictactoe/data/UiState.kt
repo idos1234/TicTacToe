@@ -18,6 +18,12 @@ data class UiState (
     var times: Int = 0,
     //check if box is enabled(if it already clicked)
     var isenabled: Boolean = true,
+    //player1 score
+    var player1Score: Int = 0,
+    //player2 score
+    var player2Score: Int = 0,
+    //update score
+    var isScoreUpdated: Boolean = false,
     //target boxes for bot
     var targets: MutableList<Int> = mutableListOf(1,2,3,4,5,6,7,8,9)
 )

@@ -32,8 +32,20 @@ class TicTacToeViewModel: ViewModel() {
     fun resetGame(times: Int) {
         _uiState.value = UiState(
             player_Turn = if (times % 2 == 1) { "O" } else { "X" },
-            isenabled = times % 2 == 0
+            isenabled = times % 2 == 0,
+            player1Score = uiState.value.player1Score,
+            player2Score = uiState.value.player2Score
         )
+    }
+
+    fun updateScore(player: Int) {
+        when(player) {
+            1 -> _uiState.update { it.copy(player1Score = it.player1Score+1) }
+            2 -> _uiState.update { it.copy(player2Score = it.player2Score+1) }
+        }
+        _uiState.update {
+            it.copy(isScoreUpdated = true)
+        }
     }
 
     fun onClick() {
