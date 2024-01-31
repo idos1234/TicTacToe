@@ -197,7 +197,7 @@ fun ScreenView(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = { onClick() }) {
-            Text(text = "SignIn with Google")
+            Text(text = "Sign in with Google")
         }
 
         when {

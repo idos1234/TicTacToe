@@ -1,5 +1,6 @@
 package com.idos.tictactoe.ui.Screen
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -17,18 +18,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
-import com.idos.tictactoe.ui.theme.BackGround
-import com.idos.tictactoe.ui.theme.Primery
-import com.idos.tictactoe.ui.theme.Secondery
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
+import com.idos.tictactoe.ui.theme.BackGround
+import com.idos.tictactoe.ui.theme.Primery
+import com.idos.tictactoe.ui.theme.Secondery
 
 @Composable
 fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGameViewModel, navController: NavController, enableState: Enable) {
@@ -49,6 +52,9 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
     }
     var player2 by remember {
         mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+    }
+    var removeGame by remember() {
+        mutableStateOf(false)
     }
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
@@ -255,17 +261,100 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
         Dialog(
             onDismissRequest = {}
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.background(Color.White)) {
-                Text(
-                    text = "Game code:",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Normal
-                )
-                Text(
-                    text = currentGame.id,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .background(Color.White)
+                    .fillMaxWidth(0.8f)
+                    .fillMaxHeight(0.3f)
+            ) {
+                Box(modifier = Modifier.weight(2f)) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .background(Color.White)
+                    ) {
+                        Text(
+                            text = "Game code:",
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                        Text(
+                            text = "hfk3h",
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                Button(onClick = {removeGame = true}, modifier = Modifier.weight(1f).padding(bottom = 16.dp, top = 16.dp). height(20.dp).fillMaxWidth(0.9f)) {
+                    Text(
+                        text = "Quit",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
+            }
+        }
+    }
+
+    if(removeGame) {
+        removeGame(currentGame.id, databaseReference) { navController.navigate(GameScreen.CodeGame.title) }
+    }
+}
+
+@Composable
+fun removeGame (id: String, db: DatabaseReference, onSuccessListener: () -> Unit) {
+    db.child(id).removeValue().addOnCompleteListener {
+        onSuccessListener()
+    }
+}
+
+@SuppressLint("ComposableNaming")
+@Composable
+@Preview
+fun preview() {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(Color.Gray)) {
+        Dialog(
+            onDismissRequest = {}
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .background(Color.White)
+                    .fillMaxWidth(0.8f)
+                    .fillMaxHeight(0.3f)
+            ) {
+                Box(modifier = Modifier.weight(2f)) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .background(Color.White)
+                    ) {
+                        Text(
+                            text = "Game code:",
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                        Text(
+                            text = "hfk3h",
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                Button(onClick = {}, modifier = Modifier.weight(1f).padding(bottom = 16.dp, top = 16.dp). height(20.dp).fillMaxWidth(0.9f)) {
+                    Text(
+                        text = "Quit",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
             }
         }
     }
