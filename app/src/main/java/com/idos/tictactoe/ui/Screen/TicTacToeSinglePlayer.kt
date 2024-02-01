@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,7 +38,7 @@ import kotlin.concurrent.schedule
  */
 
 @Composable
-fun SinglePlayerGameButton(box: String, onClick: () -> Unit = {}, viewModel: TicTacToeViewModel, context: Context = LocalContext.current, playerName: String) {
+fun SinglePlayerGameButton(box: String, onClick: () -> Unit = {}, viewModel: TicTacToeViewModel, context: Context = LocalContext.current, playerName: String, modifier: Modifier) {
     val uiState by viewModel.uiState.collectAsState()
     var player by remember {
         mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
@@ -46,7 +47,7 @@ fun SinglePlayerGameButton(box: String, onClick: () -> Unit = {}, viewModel: Tic
     //get Players collection from database
     player = getPlayer(playerName, context)
 
-    Card(modifier = Modifier.padding(8.dp),shape = RoundedCornerShape(100.dp), border = BorderStroke(3.dp, color = Secondery)) {
+    Card(modifier = modifier,shape = RoundedCornerShape(100.dp), border = BorderStroke(3.dp, color = Secondery)) {
         Image(
             painter = painterResource(
                 id = when (box) {
@@ -89,8 +90,12 @@ fun SinglePlayerButtonGrid(
     onPlayAgain: () -> Unit,
     uiState: UiState,
     playerName: String,
-    navController: NavController
+    navController: NavController,
+    modifier: Modifier
 ) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val size = (screenWidth/19)*5
 
     //if need to check winner
     if(uiState.ToCheck) {
@@ -143,8 +148,10 @@ fun SinglePlayerButtonGrid(
 
 
 
-    Column {
-        Row {
+    Column(modifier = modifier) {
+        Spacer(modifier = Modifier.weight(0.5f))
+        Row(modifier = Modifier.weight(5f)) {
+            Spacer(modifier = Modifier.weight(1f))
             //box1
             SinglePlayerGameButton(
                 box = uiState.boxes.Box1,
@@ -155,8 +162,10 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel,
-                playerName = playerName
+                playerName = playerName,
+                modifier = Modifier.weight(5f).size(size)
             )
+            Spacer(modifier = Modifier.weight(1f))
             //box2
             SinglePlayerGameButton(
                 box = uiState.boxes.Box2,
@@ -167,8 +176,10 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel,
-                playerName = playerName
+                playerName = playerName,
+                modifier = Modifier.weight(5f).size(size)
             )
+            Spacer(modifier = Modifier.weight(1f))
             //box3
             SinglePlayerGameButton(
                 box = uiState.boxes.Box3,
@@ -179,10 +190,14 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel,
-                playerName = playerName
+                playerName = playerName,
+                modifier = Modifier.weight(5f).size(size)
             )
+            Spacer(modifier = Modifier.weight(1f))
         }
-        Row() {
+        Spacer(modifier = Modifier.weight(0.5f))
+        Row(modifier = Modifier.weight(5f)) {
+            Spacer(modifier = Modifier.weight(1f))
             //box4
             SinglePlayerGameButton(
                 box = uiState.boxes.Box4,
@@ -193,8 +208,10 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel,
-                playerName = playerName
+                playerName = playerName,
+                modifier = Modifier.weight(5f).size(size)
             )
+            Spacer(modifier = Modifier.weight(1f))
             //box5
             SinglePlayerGameButton(
                 box = uiState.boxes.Box5,
@@ -205,8 +222,10 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel,
-                playerName = playerName
+                playerName = playerName,
+                modifier = Modifier.weight(5f).size(size)
             )
+            Spacer(modifier = Modifier.weight(1f))
             //box6
             SinglePlayerGameButton(
                 box = uiState.boxes.Box6,
@@ -217,10 +236,14 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel,
-                playerName = playerName
+                playerName = playerName,
+                modifier = Modifier.weight(5f).size(size)
             )
+            Spacer(modifier = Modifier.weight(1f))
         }
-        Row() {
+        Spacer(modifier = Modifier.weight(0.5f))
+        Row(modifier = Modifier.weight(5f)) {
+            Spacer(modifier = Modifier.weight(1f))
             //box7
             SinglePlayerGameButton(
                 box = uiState.boxes.Box7,
@@ -231,8 +254,10 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel,
-                playerName = playerName
+                playerName = playerName,
+                modifier = Modifier.weight(5f).size(size)
             )
+            Spacer(modifier = Modifier.weight(1f))
             //box8
             SinglePlayerGameButton(
                 box = uiState.boxes.Box8,
@@ -243,8 +268,10 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel,
-                playerName = playerName
+                playerName = playerName,
+                modifier = Modifier.weight(5f).size(size)
             )
+            Spacer(modifier = Modifier.weight(1f))
             //box9
             SinglePlayerGameButton(
                 box = uiState.boxes.Box9,
@@ -255,8 +282,10 @@ fun SinglePlayerButtonGrid(
                     }
                 },
                 viewModel = viewModel,
-                playerName = playerName
+                playerName = playerName,
+                modifier = Modifier.weight(5f).size(size)
             )
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
@@ -274,6 +303,9 @@ fun TicTacToeSinglePlayerScreen(
     navController: NavController
 ) {
     val player = getPlayer(email = playerName, context = LocalContext.current)
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val size = (screenWidth/10)*3
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -281,30 +313,32 @@ fun TicTacToeSinglePlayerScreen(
             .background(BackGround)
             .fillMaxSize()
     ) {
-        Spacer(modifier = Modifier.weight(1f))
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(2f)) {
+            Spacer(modifier = Modifier.weight(1f))
             Card(modifier = Modifier
-                .size(150.dp)
-                .padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "X") Primery else { Secondery})) {
+                .size(size)
+                .weight(3f), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "X") Primery else { Secondery})) {
                 Image(
                     painterResource(id = player.currentImage),
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )
             }
+            Spacer(modifier = Modifier.weight(1f))
             Text("${uiState.player1Score} : ${uiState.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
-
+            Spacer(modifier = Modifier.weight(1f))
             Card(modifier = Modifier
-                .size(150.dp)
-                .padding(20.dp), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "O") Primery else { Secondery})) {
+                .size(size)
+                .weight(3f), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "O") Primery else { Secondery})) {
                 Image(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )
             }
+            Spacer(modifier = Modifier.weight(1f))
         }
-        Spacer(modifier = Modifier.weight(2f))
+        Spacer(modifier = Modifier.weight(1f))
         SinglePlayerButtonGrid(
             viewModel = viewModel,
             onPlayAgain = {
@@ -312,8 +346,9 @@ fun TicTacToeSinglePlayerScreen(
             },
             uiState = uiState,
             playerName = playerName,
-            navController = navController
+            navController = navController,
+            modifier = Modifier.weight(6f)
         )
-        Spacer(modifier = Modifier.weight(4f))
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
