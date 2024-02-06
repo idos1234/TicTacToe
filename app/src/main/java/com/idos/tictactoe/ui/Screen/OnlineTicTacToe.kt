@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -87,8 +88,8 @@ fun OnlineGameButton(
     databaseReference: DatabaseReference,
     FindGame: (OnlineGameUiState) -> Unit,
     gameId: String,
+    modifier: Modifier,
     enableClick: (Boolean) -> Unit
-
 ) {
     var player1 by remember {
         mutableStateOf(MainPlayerUiState())
@@ -102,11 +103,11 @@ fun OnlineGameButton(
     player2 = getPlayer(email = player2.email, context = context)
 
 
-    var setBox by remember {
+    var SetBox by remember {
         mutableStateOf(false)
     }
 
-    Card(modifier = Modifier.padding(8.dp),shape = RoundedCornerShape(100.dp), border = BorderStroke(3.dp, color = Secondery)) {
+    Card(modifier = modifier,shape = RoundedCornerShape(100.dp), border = BorderStroke(3.dp, color = Secondery)) {
         Image(
             painter = painterResource(
                 id = when (box) {
@@ -123,14 +124,14 @@ fun OnlineGameButton(
                 .clickable(
                     onClick = {
                         enableClick(false)
-                        setBox = true
+                        SetBox = true
                     },
                     enabled = (box == "") && enabled,
                 )
         )
     }
 
-    if (setBox) {
+    if (SetBox) {
         changePlayerTurn(game, databaseReference = databaseReference, gameId)
         setBox(game.playerTurn)
         SetBoxOnline(
@@ -142,7 +143,7 @@ fun OnlineGameButton(
         )
         FindGame(findGame(gameId = gameId, databaseReference = databaseReference))
         enableClick(true)
-        setBox = false
+        SetBox = false
     }
 }
 
@@ -150,7 +151,7 @@ fun OnlineGameButton(
     "SuspiciousIndentation"
 )
 @Composable
-fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, player: String, player1: MainPlayerUiState, player2: MainPlayerUiState, databaseReference: DatabaseReference, viewModel: CodeGameViewModel, navController: NavController, enableState: Enable) {
+fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, player: String, player1: MainPlayerUiState, player2: MainPlayerUiState, databaseReference: DatabaseReference, viewModel: CodeGameViewModel, navController: NavController, enableState: Enable, modifier: Modifier) {
     var game by remember {
         mutableStateOf(OnlineGameUiState())
     }
@@ -169,41 +170,78 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
         mutableStateOf(game.boxes)
     }
 
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val size = (screenWidth/19)*5
+
     val scope = rememberCoroutineScope()
 
-    Column {
-        Row {
-            OnlineGameButton(game = game, boxNumber = 1, setBox = {boxes.Box1 = it}, box = boxes.Box1, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+    Column(modifier = modifier) {
+        Spacer(modifier = Modifier.weight(0.5f))
+        Row(modifier = Modifier.weight(5f)) {
+            Spacer(modifier = Modifier.weight(1f))
+            OnlineGameButton(game = game, boxNumber = 1, setBox = {boxes.Box1 = it}, box = boxes.Box1, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
+                .weight(5f)
+                .size(size)) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 2, setBox = {boxes.Box2 = it}, box = boxes.Box2, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+            Spacer(modifier = Modifier.weight(1f))
+            OnlineGameButton(game = game, boxNumber = 2, setBox = {boxes.Box2 = it}, box = boxes.Box2, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
+                .weight(5f)
+                .size(size)) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 3, setBox = {boxes.Box3 = it}, box = boxes.Box3, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+            Spacer(modifier = Modifier.weight(1f))
+            OnlineGameButton(game = game, boxNumber = 3, setBox = {boxes.Box3 = it}, box = boxes.Box3, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
+                .weight(5f)
+                .size(size)) {
                 viewModel.changeEnable(it)
             }
+            Spacer(modifier = Modifier.weight(1f))
         }
-        Row {
-            OnlineGameButton(game = game, boxNumber = 4, setBox = {boxes.Box4 = it}, box = boxes.Box4, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+        Spacer(modifier = Modifier.weight(0.5f))
+        Row(modifier = Modifier.weight(5f)) {
+            Spacer(modifier = Modifier.weight(1f))
+            OnlineGameButton(game = game, boxNumber = 4, setBox = {boxes.Box4 = it}, box = boxes.Box4, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
+                .weight(5f)
+                .size(size)) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 5, setBox = {boxes.Box5 = it}, box = boxes.Box5, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+            Spacer(modifier = Modifier.weight(1f))
+            OnlineGameButton(game = game, boxNumber = 5, setBox = {boxes.Box5 = it}, box = boxes.Box5, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
+                .weight(5f)
+                .size(size)) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 6, setBox = {boxes.Box6 = it}, box = boxes.Box6, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+            Spacer(modifier = Modifier.weight(1f))
+            OnlineGameButton(game = game, boxNumber = 6, setBox = {boxes.Box6 = it}, box = boxes.Box6, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
+                .weight(5f)
+                .size(size)) {
                 viewModel.changeEnable(it)
             }
+            Spacer(modifier = Modifier.weight(1f))
         }
-        Row {
-            OnlineGameButton(game = game, boxNumber = 7, setBox = {boxes.Box7 = it}, box = boxes.Box7, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+        Spacer(modifier = Modifier.weight(0.5f))
+        Row(modifier = Modifier.weight(5f)) {
+            Spacer(modifier = Modifier.weight(1f))
+            OnlineGameButton(game = game, boxNumber = 7, setBox = {boxes.Box7 = it}, box = boxes.Box7, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
+                .weight(5f)
+                .size(size)) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 8, setBox = {boxes.Box8 = it}, box = boxes.Box8, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+            Spacer(modifier = Modifier.weight(1f))
+            OnlineGameButton(game = game, boxNumber = 8, setBox = {boxes.Box8 = it}, box = boxes.Box8, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
+                .weight(5f)
+                .size(size)) {
                 viewModel.changeEnable(it)
             }
-            OnlineGameButton(game = game, boxNumber = 9, setBox = {boxes.Box9 = it}, box = boxes.Box9, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId) {
+            Spacer(modifier = Modifier.weight(1f))
+            OnlineGameButton(game = game, boxNumber = 9, setBox = {boxes.Box9 = it}, box = boxes.Box9, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
+                .weight(5f)
+                .size(size)) {
                 viewModel.changeEnable(it)
             }
+            Spacer(modifier = Modifier.weight(1f))
         }
     }
 
@@ -480,6 +518,10 @@ fun OnlineTicTacToe(
         mutableStateOf(MainPlayerUiState())
     }
 
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val size = (screenWidth/10)*3
+
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("Games")
@@ -626,14 +668,12 @@ fun OnlineTicTacToe(
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
-        Spacer(modifier = Modifier.weight(1f))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(2f)) {
+            Spacer(modifier = Modifier.weight(1f))
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
                 if (player1 != MainPlayerUiState()) {
                     Card(
-                        modifier = Modifier
-                            .size(150.dp)
-                            .padding(20.dp),
+                        modifier = Modifier.size(size),
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
@@ -652,9 +692,7 @@ fun OnlineTicTacToe(
                     Text(player1.name, fontSize = 10.sp, color = Color.White)
                 } else {
                     Card(
-                        modifier = Modifier
-                            .size(150.dp)
-                            .padding(20.dp),
+                        modifier = Modifier.size(size),
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
@@ -668,15 +706,13 @@ fun OnlineTicTacToe(
                     }
                 }
             }
-
+            Spacer(modifier = Modifier.weight(1f))
             Text("${currentGame.player1Score} : ${currentGame.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(modifier = Modifier.weight(1f))
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
                 if (foundPlayer) {
                     Card(
-                        modifier = Modifier
-                            .size(150.dp)
-                            .padding(20.dp),
+                        modifier = Modifier.size(size),
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
@@ -695,9 +731,7 @@ fun OnlineTicTacToe(
                     Text(player2.name, fontSize = 10.sp, color = Color.White)
                 } else {
                     Card(
-                        modifier = Modifier
-                            .size(150.dp)
-                            .padding(20.dp),
+                        modifier = Modifier.size(size),
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
@@ -711,10 +745,11 @@ fun OnlineTicTacToe(
                     }
                 }
             }
+            Spacer(modifier = Modifier.weight(1f))
         }
-        Spacer(modifier = Modifier.weight(2f))
-        OnlineButtonGrid(gameId = currentGame.id, myTurn = myTurn, gameStarted = foundPlayer, player = player, player1 = player1, player2 = player2, databaseReference = databaseReference, viewModel = viewModel, navController = navController, enableState = enableState)
-        Spacer(modifier = Modifier.weight(4f))
+        Spacer(modifier = Modifier.weight(1f))
+        OnlineButtonGrid(gameId = currentGame.id, myTurn = myTurn, gameStarted = foundPlayer, player = player, player1 = player1, player2 = player2, databaseReference = databaseReference, viewModel = viewModel, navController = navController, enableState = enableState, modifier = Modifier.weight(6f))
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 

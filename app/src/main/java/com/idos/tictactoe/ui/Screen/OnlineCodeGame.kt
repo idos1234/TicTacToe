@@ -26,6 +26,7 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +49,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
+import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
@@ -66,14 +69,19 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
         mutableStateOf<String?>(null)
     }
     var player1 by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
     var player2 by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
     var removeGame by remember() {
         mutableStateOf(false)
     }
+
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val size = (screenWidth/10)*3
+
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("GamesWithCode")
@@ -104,8 +112,8 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
                             if (!queryDocumentSnapshots.isEmpty) {
                                 val list = queryDocumentSnapshots.documents
                                 for (d in list) {
-                                    val p: com.idos.tictactoe.data.MainPlayerUiState? =
-                                        d.toObject(com.idos.tictactoe.data.MainPlayerUiState::class.java)
+                                    val p: MainPlayerUiState? =
+                                        d.toObject(MainPlayerUiState::class.java)
                                     if (p?.email == player) {
                                         player1 = p
                                     }
@@ -138,8 +146,8 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
                                 if (!queryDocumentSnapshots.isEmpty) {
                                     val list = queryDocumentSnapshots.documents
                                     for (d in list) {
-                                        val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(
-                                            com.idos.tictactoe.data.MainPlayerUiState::class.java)
+                                        val p: MainPlayerUiState? = d.toObject(
+                                            MainPlayerUiState::class.java)
                                         if (p?.name == currentGame.player2){
                                             player2 = p
                                         }
@@ -173,14 +181,12 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
-        Spacer(modifier = Modifier.weight(1f))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                if (player1 != com.idos.tictactoe.data.MainPlayerUiState()) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(2f)) {
+            Spacer(modifier = Modifier.weight(1f))
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
+                if (player1 != MainPlayerUiState()) {
                     Card(
-                        modifier = Modifier
-                            .size(150.dp)
-                            .padding(20.dp),
+                        modifier = Modifier.size(size),
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
@@ -199,9 +205,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
                     Text(player1.name, fontSize = 10.sp, color = Color.White)
                 } else {
                     Card(
-                        modifier = Modifier
-                            .size(150.dp)
-                            .padding(20.dp),
+                        modifier = Modifier.size(size),
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
@@ -215,15 +219,13 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
                     }
                 }
             }
-
+            Spacer(modifier = Modifier.weight(1f))
             Text("${currentGame.player1Score} : ${currentGame.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(modifier = Modifier.weight(1f))
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
                 if (foundPlayer) {
                     Card(
-                        modifier = Modifier
-                            .size(150.dp)
-                            .padding(20.dp),
+                        modifier = Modifier.size(size),
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
@@ -242,9 +244,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
                     Text(player2.name, fontSize = 10.sp, color = Color.White)
                 } else {
                     Card(
-                        modifier = Modifier
-                            .size(150.dp)
-                            .padding(20.dp),
+                        modifier = Modifier.size(size),
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
@@ -259,7 +259,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
                 }
             }
         }
-        Spacer(modifier = Modifier.weight(2f))
+        Spacer(modifier = Modifier.weight(1f))
         OnlineButtonGrid(
             gameId = currentGame.id,
             myTurn = myTurn,
@@ -270,9 +270,10 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
             databaseReference = databaseReference,
             viewModel = viewModel,
             navController = navController,
-            enableState = enableState
+            enableState = enableState,
+            modifier = Modifier.weight(6f)
         )
-        Spacer(modifier = Modifier.weight(4f))
+        Spacer(modifier = Modifier.weight(1f))
     }
     
     if(!foundPlayer) {
@@ -300,13 +301,17 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
                             fontWeight = FontWeight.Normal
                         )
                         Text(
-                            text = "hfk3h",
+                            text = currentGame.id,
                             fontSize = 25.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
-                Button(onClick = {removeGame = true}, modifier = Modifier.weight(1f).padding(bottom = 16.dp, top = 16.dp). height(20.dp).fillMaxWidth(0.9f)) {
+                Button(onClick = {removeGame = true}, modifier = Modifier
+                    .weight(1f)
+                    .padding(bottom = 16.dp, top = 16.dp)
+                    .height(20.dp)
+                    .fillMaxWidth(0.9f)) {
                     Text(
                         text = "Quit",
                         fontSize = 20.sp,
@@ -335,20 +340,25 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
         mutableStateOf(com.idos.tictactoe.data.OnlineGameUiState())
     }
     var times by remember {
-        mutableStateOf(1)
+        mutableIntStateOf(1)
     }
     var myTurn by remember {
         mutableStateOf<String?>(null)
     }
     var player1 by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
     var player2 by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
     var foundPlayer by remember {
         mutableStateOf(false)
     }
+
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val size = (screenWidth/10)*3
+
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("GamesWithCode")
@@ -376,8 +386,8 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
                                 if (!queryDocumentSnapshots.isEmpty) {
                                     val list = queryDocumentSnapshots.documents
                                     for (d in list) {
-                                        val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(
-                                            com.idos.tictactoe.data.MainPlayerUiState::class.java)
+                                        val p: MainPlayerUiState? = d.toObject(
+                                            MainPlayerUiState::class.java)
                                         //find player using database
                                         if (p?.email == game.player1){
                                             player1 = p
@@ -426,14 +436,12 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
-        Spacer(modifier = Modifier.weight(1f))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                if (player1 != com.idos.tictactoe.data.MainPlayerUiState()) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(2f)) {
+            Spacer(modifier = Modifier.weight(1f))
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
+                if (player1 != MainPlayerUiState()) {
                     Card(
-                        modifier = Modifier
-                            .size(150.dp)
-                            .padding(20.dp),
+                        modifier = Modifier.size(size),
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
@@ -452,9 +460,7 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
                     Text(player1.name, fontSize = 10.sp, color = Color.White)
                 } else {
                     Card(
-                        modifier = Modifier
-                            .size(150.dp)
-                            .padding(20.dp),
+                        modifier = Modifier.size(size),
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
@@ -468,15 +474,13 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
                     }
                 }
             }
-
+            Spacer(modifier = Modifier.weight(1f))
             Text("${currentGame.player1Score} : ${currentGame.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(modifier = Modifier.weight(1f))
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
                 if (foundPlayer) {
                     Card(
-                        modifier = Modifier
-                            .size(150.dp)
-                            .padding(20.dp),
+                        modifier = Modifier.size(size),
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
@@ -495,9 +499,7 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
                     Text(player2.name, fontSize = 10.sp, color = Color.White)
                 } else {
                     Card(
-                        modifier = Modifier
-                            .size(150.dp)
-                            .padding(20.dp),
+                        modifier = Modifier.size(size),
                         elevation = 5.dp,
                         backgroundColor = Secondery,
                         border = BorderStroke(
@@ -511,8 +513,9 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
                     }
                 }
             }
+            Spacer(modifier = Modifier.weight(1f))
         }
-        Spacer(modifier = Modifier.weight(2f))
+        Spacer(modifier = Modifier.weight(1f))
         OnlineButtonGrid(
             gameId = currentGame.id,
             myTurn = myTurn,
@@ -523,9 +526,10 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
             databaseReference = databaseReference,
             viewModel = viewModel,
             navController = navController,
-            enableState = enableState
+            enableState = enableState,
+            modifier = Modifier.weight(6f)
         )
-        Spacer(modifier = Modifier.weight(4f))
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
