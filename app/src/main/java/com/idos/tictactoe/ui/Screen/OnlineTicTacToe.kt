@@ -456,12 +456,12 @@ fun findGame(gameId: String, databaseReference: DatabaseReference, context: Cont
         //on success
         override fun onDataChange(snapshot: DataSnapshot) {
             val list = snapshot.children
-            try {
-                game = list.find {
+            game = try {
+                list.find {
                     it.getValue(OnlineGameUiState::class.java)!!.id == gameId
                 }?.getValue(OnlineGameUiState::class.java)!!
             } catch (e: Exception) {
-                game = OnlineGameUiState()
+                OnlineGameUiState()
             }
 
         }

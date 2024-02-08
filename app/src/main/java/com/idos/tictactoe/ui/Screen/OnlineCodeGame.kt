@@ -50,14 +50,17 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.idos.tictactoe.data.MainPlayerUiState
+import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
 
+var gameStarted = false
+
 @Composable
 fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGameViewModel, navController: NavController, enableState: Enable) {
     var currentGame by remember {
-        mutableStateOf(com.idos.tictactoe.data.OnlineGameUiState())
+        mutableStateOf(OnlineGameUiState())
     }
     var times by remember {
         mutableStateOf(1)
@@ -91,9 +94,9 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
         //on success
         override fun onDataChange(snapshot: DataSnapshot) {
             while (times == 1) {
-                if (currentGame == com.idos.tictactoe.data.OnlineGameUiState()) {
+                if (currentGame == OnlineGameUiState()) {
                     val key: String = databaseReference.push().key!!.takeLast(5)
-                    val newGame = com.idos.tictactoe.data.OnlineGameUiState(
+                    val newGame = OnlineGameUiState(
                         id = key,
                         player1 = player,
                         player2 = "",
@@ -133,7 +136,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
                 times++
             }
             for (Game in snapshot.children) {
-                val game = Game.getValue(com.idos.tictactoe.data.OnlineGameUiState::class.java)
+                val game = Game.getValue(OnlineGameUiState::class.java)
                 if (game!!.id == currentGame.id) {
                     currentGame = game
                     if (currentGame.player2 != "") {
@@ -337,7 +340,7 @@ fun removeGame (id: String, db: DatabaseReference, onSuccessListener: () -> Unit
 @Composable
 fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, viewModel: CodeGameViewModel, navController: NavController, enableState: Enable) {
     var currentGame by remember {
-        mutableStateOf(com.idos.tictactoe.data.OnlineGameUiState())
+        mutableStateOf(OnlineGameUiState())
     }
     var times by remember {
         mutableIntStateOf(1)
@@ -369,9 +372,9 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
         override fun onDataChange(snapshot: DataSnapshot) {
             while (times == 1) {
                 for (Game in snapshot.children) {
-                    val game = Game.getValue(com.idos.tictactoe.data.OnlineGameUiState::class.java)
+                    val game = Game.getValue(OnlineGameUiState::class.java)
                     if ((game!!.id == gameId)) {
-                        val updatedGame = com.idos.tictactoe.data.OnlineGameUiState(
+                        val updatedGame = OnlineGameUiState(
                             id = game.id,
                             player1 = game.player1,
                             player2 = player,
@@ -417,7 +420,7 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
                 times++
             }
             for (Game in snapshot.children) {
-                val game = Game.getValue(com.idos.tictactoe.data.OnlineGameUiState::class.java)
+                val game = Game.getValue(OnlineGameUiState::class.java)
                 if (game!!.id == currentGame.id) {
                     currentGame = game
                     }
@@ -550,13 +553,14 @@ fun openNewGameButton(modifier: Modifier, navController: NavController) {
     }
     if (openGame) {
         openGame = false
+        gameStarted = true
         navController.navigate(GameScreen.OpenGameWithCode.title)
     }
 }
 
 @Composable
 fun enterGameWithCodeButton(modifier: Modifier, codeGameViewModel: CodeGameViewModel, codeGameUiState: OnlineGameRememberedValues, navController: NavController) {
-    var enterGame by remember {
+    var checkGame by remember {
         mutableStateOf(false)
     }
     val context = LocalContext.current
@@ -573,58 +577,70 @@ fun enterGameWithCodeButton(modifier: Modifier, codeGameViewModel: CodeGameViewM
             colors = TextFieldDefaults.textFieldColors(backgroundColor = Secondery),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password))
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = {
-            if (codeGameUiState.gameCode != "") {
-                enterGame = true
-            } else {
-                Toast.makeText(context,"You did not put game code", Toast.LENGTH_SHORT).show()
-            }},
+        Button(
+            onClick = {
+                gameStarted = false
+                checkGame = true
+                      },
             colors = ButtonDefaults.buttonColors(backgroundColor = Primery)) {
             Text(text = "Enter game", fontSize = 30.sp)
         }
     }
-    if (enterGame) {
+
+    if(checkGame) {
         CheckForGame(
             gameId = codeGameUiState.gameCode,
             context = context,
             onFindGame = {
-                enterGame = false
+                checkGame = false
                 navController.navigate(GameScreen.EnterGameWithCode.title)
-            }
+            },
+            notFindGame = { checkGame = false }
         )
     }
 }
 
 @Composable
-fun CheckForGame(gameId: String, context: Context, onFindGame: () -> Unit) {
-    var foundGame by remember {
-        mutableStateOf(false)
+fun CheckForGame(gameId: String, context: Context, onFindGame: () -> Unit, notFindGame: () -> Unit) {
+    var game by remember {
+        mutableStateOf(OnlineGameUiState())
     }
 
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("GamesWithCode")
-    //get Players collection from database
+
     databaseReference.addValueEventListener(object : ValueEventListener {
         //on success
         override fun onDataChange(snapshot: DataSnapshot) {
-            for (Game in snapshot.children) {
-                val game = Game.getValue(com.idos.tictactoe.data.OnlineGameUiState::class.java)
-                if (game!!.id == gameId) {
-                    foundGame = true
-                    if (game.player2 == "") {
-                        onFindGame()
-                    } else {
-
+            val list = snapshot.children
+            game = try {
+                list.find {
+                    it.getValue(OnlineGameUiState::class.java)!!.id == gameId
+                }?.getValue(OnlineGameUiState::class.java)!!
+            } catch (e: Exception) {
+                OnlineGameUiState()
+            }
+            if (game == OnlineGameUiState()) {
+                if(!gameStarted) {
+                    Toast.makeText(context, "Game was not found", Toast.LENGTH_SHORT).show()
+                    notFindGame()
+                }
+            } else {
+                if (game.player2 != "") {
+                    if(!gameStarted) {
+                        Toast.makeText(context, "Game has already started", Toast.LENGTH_SHORT)
+                            .show()
+                        notFindGame()
                     }
-                    break
+                } else {
+                    if(!gameStarted) {
+                        gameStarted = true
+                        onFindGame()
+                    }
                 }
             }
-            if (!foundGame) {
-
-            }
         }
-
         override fun onCancelled(error: DatabaseError) {
             Toast.makeText(
                 context,
