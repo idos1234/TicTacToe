@@ -42,7 +42,7 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
     var isError by remember {
         mutableStateOf(false)
     }
-    var checkedPlayer by remember {
+    var searchedPlayer by remember {
         mutableStateOf(false)
     }
 
@@ -95,7 +95,7 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
                         }
                     }
                 }
-                checkedPlayer = true
+                searchedPlayer = true
 
             }
 
@@ -106,7 +106,7 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
                 changeEmail(user?.email!!)
                 onClick()
             }
-        } else if (!isPlayerExisted && checkedPlayer) {
+        } else if (!isPlayerExisted && searchedPlayer) {
             if (times == 0) {
                 //sign up
                 viewModel.updateEmail(viewModel.emailState.copy(email2 = user!!.email))

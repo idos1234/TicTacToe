@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id 'org.jetbrains.kotlin.android'
+    //google sign in
     id 'com.google.devtools.ksp' version "1.8.0-1.0.9"
     id("com.google.gms.google-services")
 }
@@ -12,7 +13,7 @@ android {
     defaultConfig {
         applicationId "com.idos.tictactoe"
         minSdk 26
-        targetSdk 33
+        targetSdk 34
         versionCode 7
         versionName "1.0.6"
 
@@ -58,44 +59,31 @@ apply plugin: 'com.android.application'
 dependencies {
 
     // FireBase Dependency
-    implementation 'com.google.firebase:firebase-database-ktx:20.3.0'
-    implementation 'com.google.firebase:firebase-firestore-ktx:24.9.1'
-    implementation 'com.google.firebase:firebase-messaging-ktx:23.3.1'
+    implementation 'com.google.firebase:firebase-database-ktx:20.3.1'
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.10.3'
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.4.1'
     implementation(platform("com.google.firebase:firebase-bom:32.5.0"))
     // preferences DataStore
     implementation "androidx.datastore:datastore-preferences:1.0.0"
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
     implementation "androidx.security:security-crypto-ktx:1.1.0-alpha06"
-    def nav_version = "2.7.4"
+    def nav_version = "2.7.7"
 
-    //noinspection GradleDependency
+    //Compose Dependency
     implementation "androidx.navigation:navigation-compose:$nav_version"
-    implementation platform('androidx.compose:compose-bom:2023.01.00')
-    implementation 'androidx.activity:activity-compose:1.8.1'
+    implementation 'androidx.activity:activity-compose:1.8.2'
     implementation "androidx.compose.material:material"
     implementation "androidx.compose.ui:ui"
     implementation "androidx.compose.ui:ui-tooling"
     implementation "androidx.compose.ui:ui-tooling-preview"
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2'
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2"
-    //noinspection GradleDependency
-    implementation "androidx.room:room-runtime:$room_version"
-    implementation 'androidx.test:monitor:1.6.1'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'junit:junit:4.13.2'
-    ksp "androidx.room:room-compiler:$room_version"
-    //noinspection GradleDependency
-    implementation "androidx.room:room-ktx:$room_version"
-    //noinspection GradleDependency
-    implementation "androidx.compose.material:material-icons-extended:$compose_ui_version"
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0"
 
+    //Icons
+    implementation "androidx.compose.material:material-icons-extended:$compose_ui_version"
     implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation 'com.google.code.gson:gson:2.10.1'
 
     //google sign in
-    implementation 'com.google.android.gms:play-services-auth:20.7.0'
-    implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
-    implementation("com.google.firebase:firebase-analytics")
+    implementation 'com.google.android.gms:play-services-auth:21.0.0'
 
 }

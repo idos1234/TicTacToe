@@ -101,7 +101,7 @@ class FireBaseMessagingService: FirebaseMessagingService() {
                     showNotificationOnStatusBar(message.data["title"], message.data["body"])
                     //message sent
                     sharedPreferencesUiState.messageSent = true
-                    //sending time is now
+                    //sending time is current time
                     sharedPreferencesUiState.messagingSendingTime = (System.currentTimeMillis()/1000)
 
                     //set data
@@ -113,7 +113,7 @@ class FireBaseMessagingService: FirebaseMessagingService() {
                 if (sharedPreferencesUiState.messagingSendingTime <= (System.currentTimeMillis()/1000) - NotificationData.DaysAfterNotification*86400) {
                     //sending message
                     showNotificationOnStatusBar(message.data["title"], message.data["body"])
-                    //sending time is now
+                    //sending time is current time
                     sharedPreferencesUiState.messagingSendingTime = (System.currentTimeMillis()/1000)
 
                     //set data

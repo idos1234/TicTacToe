@@ -54,6 +54,7 @@ fun LeaderBoardScreen(
                 for (d in list) {
                     //add every player to player list
                     val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
+                    //first 10 players
                     playerlist.add(p)
                     i++
                     if(i == 10) {

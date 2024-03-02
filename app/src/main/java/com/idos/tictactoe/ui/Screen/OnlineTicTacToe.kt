@@ -10,7 +10,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,7 +34,6 @@ import com.idos.tictactoe.data.Boxes
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.theme.BackGround
-import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -668,85 +666,14 @@ fun OnlineTicTacToe(
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(2f)) {
-            Spacer(modifier = Modifier.weight(1f))
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
-                if (player1 != MainPlayerUiState()) {
-                    Card(
-                        modifier = Modifier.size(size),
-                        elevation = 5.dp,
-                        backgroundColor = Secondery,
-                        border = BorderStroke(
-                            5.dp,
-                            if (currentGame.playerTurn == "X") Primery else {
-                                Secondery
-                            }
-                        )
-                    ) {
-                        Image(
-                            painter = painterResource(id = player1.currentImage),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                    Text(player1.name, fontSize = 10.sp, color = Color.White)
-                } else {
-                    Card(
-                        modifier = Modifier.size(size),
-                        elevation = 5.dp,
-                        backgroundColor = Secondery,
-                        border = BorderStroke(
-                            2.dp,
-                            if (currentGame.playerTurn == "O") Primery else {
-                                Secondery
-                            }
-                        )
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Text("${currentGame.player1Score} : ${currentGame.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
-            Spacer(modifier = Modifier.weight(1f))
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
-                if (foundPlayer) {
-                    Card(
-                        modifier = Modifier.size(size),
-                        elevation = 5.dp,
-                        backgroundColor = Secondery,
-                        border = BorderStroke(
-                            5.dp,
-                            if (currentGame.playerTurn == "O") Primery else {
-                                Secondery
-                            }
-                        )
-                    ) {
-                        Image(
-                            painter = painterResource(id = player2.currentImage),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                    Text(player2.name, fontSize = 10.sp, color = Color.White)
-                } else {
-                    Card(
-                        modifier = Modifier.size(size),
-                        elevation = 5.dp,
-                        backgroundColor = Secondery,
-                        border = BorderStroke(
-                            2.dp,
-                            if (currentGame.playerTurn == "O") Primery else {
-                                Secondery
-                            }
-                        )
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.weight(1f))
-        }
+        playersBar(
+            player1 = player1,
+            player2 = player2,
+            size = size,
+            modifier = Modifier.weight(2f),
+            currentGame = currentGame,
+            foundPlayer = foundPlayer
+        )
         Spacer(modifier = Modifier.weight(1f))
         OnlineButtonGrid(gameId = currentGame.id, myTurn = myTurn, gameStarted = foundPlayer, player = player, player1 = player1, player2 = player2, databaseReference = databaseReference, viewModel = viewModel, navController = navController, enableState = enableState, modifier = Modifier.weight(6f))
         Spacer(modifier = Modifier.weight(1f))

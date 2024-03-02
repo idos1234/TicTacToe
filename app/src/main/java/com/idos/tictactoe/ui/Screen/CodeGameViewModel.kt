@@ -1,6 +1,7 @@
 package com.idos.tictactoe.ui.Screen
 
 import androidx.lifecycle.ViewModel
+import com.google.firebase.database.DatabaseReference
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +36,12 @@ class CodeGameViewModel: ViewModel() {
                 player1 = player1,
                 player2 = player2
             )
+        }
+    }
+
+    fun removeGame (id: String, db: DatabaseReference, onSuccessListener: () -> Unit) {
+        db.child(id).removeValue().addOnCompleteListener {
+            onSuccessListener()
         }
     }
 }

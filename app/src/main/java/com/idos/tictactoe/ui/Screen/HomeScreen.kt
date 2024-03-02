@@ -56,7 +56,7 @@ fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Un
         )
         Spacer(modifier = Modifier.weight(1f))
 
-        //button shows training game(offline)
+        //training game button(offline)
         Button(
             onClick = { showTrainingGames = true },
             colors = ButtonDefaults.buttonColors(Primery),
@@ -71,6 +71,7 @@ fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Un
             )
         }
 
+        //online game button(offline)
         Button(
             onClick = onOnlineClick,
             colors = ButtonDefaults.buttonColors(Primery),
@@ -93,7 +94,7 @@ fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Un
     }
 }
 
-//show training games(offline)
+//training games dialog(offline)
 @Composable
 fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Unit = {}, onCloseClicked: () -> Unit) {
     Dialog(

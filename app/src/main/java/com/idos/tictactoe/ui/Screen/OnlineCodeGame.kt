@@ -39,13 +39,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
@@ -56,6 +56,89 @@ import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
 
 var gameStarted = false
+
+@Composable
+fun playersBar(player1: MainPlayerUiState, player2: MainPlayerUiState, size: Dp, modifier: Modifier, currentGame: OnlineGameUiState, foundPlayer: Boolean) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
+        Spacer(modifier = Modifier.weight(1f))
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
+            if (player1 != MainPlayerUiState()) {
+                Card(
+                    modifier = Modifier.size(size),
+                    elevation = 5.dp,
+                    backgroundColor = Secondery,
+                    border = BorderStroke(
+                        5.dp,
+                        if (currentGame.playerTurn == "X") Primery else {
+                            Secondery
+                        }
+                    )
+                ) {
+                    Image(
+                        painter = painterResource(id = player1.currentImage),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                Text(player1.name, fontSize = 10.sp, color = Color.White)
+            } else {
+                Card(
+                    modifier = Modifier.size(size),
+                    elevation = 5.dp,
+                    backgroundColor = Secondery,
+                    border = BorderStroke(
+                        2.dp,
+                        if (currentGame.playerTurn == "O") Primery else {
+                            Secondery
+                        }
+                    )
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        Text("${currentGame.player1Score} : ${currentGame.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
+        Spacer(modifier = Modifier.weight(1f))
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
+            if (foundPlayer) {
+                Card(
+                    modifier = Modifier.size(size),
+                    elevation = 5.dp,
+                    backgroundColor = Secondery,
+                    border = BorderStroke(
+                        5.dp,
+                        if (currentGame.playerTurn == "O") Primery else {
+                            Secondery
+                        }
+                    )
+                ) {
+                    Image(
+                        painter = painterResource(id = player2.currentImage),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                Text(player2.name, fontSize = 10.sp, color = Color.White)
+            } else {
+                Card(
+                    modifier = Modifier.size(size),
+                    elevation = 5.dp,
+                    backgroundColor = Secondery,
+                    border = BorderStroke(
+                        2.dp,
+                        if (currentGame.playerTurn == "O") Primery else {
+                            Secondery
+                        }
+                    )
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
 
 @Composable
 fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGameViewModel, navController: NavController, enableState: Enable) {
@@ -184,84 +267,14 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(2f)) {
-            Spacer(modifier = Modifier.weight(1f))
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
-                if (player1 != MainPlayerUiState()) {
-                    Card(
-                        modifier = Modifier.size(size),
-                        elevation = 5.dp,
-                        backgroundColor = Secondery,
-                        border = BorderStroke(
-                            5.dp,
-                            if (currentGame.playerTurn == "X") Primery else {
-                                Secondery
-                            }
-                        )
-                    ) {
-                        Image(
-                            painter = painterResource(id = player1.currentImage),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                    Text(player1.name, fontSize = 10.sp, color = Color.White)
-                } else {
-                    Card(
-                        modifier = Modifier.size(size),
-                        elevation = 5.dp,
-                        backgroundColor = Secondery,
-                        border = BorderStroke(
-                            2.dp,
-                            if (currentGame.playerTurn == "O") Primery else {
-                                Secondery
-                            }
-                        )
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Text("${currentGame.player1Score} : ${currentGame.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
-            Spacer(modifier = Modifier.weight(1f))
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
-                if (foundPlayer) {
-                    Card(
-                        modifier = Modifier.size(size),
-                        elevation = 5.dp,
-                        backgroundColor = Secondery,
-                        border = BorderStroke(
-                            5.dp,
-                            if (currentGame.playerTurn == "O") Primery else {
-                                Secondery
-                            }
-                        )
-                    ) {
-                        Image(
-                            painter = painterResource(id = player2.currentImage),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                    Text(player2.name, fontSize = 10.sp, color = Color.White)
-                } else {
-                    Card(
-                        modifier = Modifier.size(size),
-                        elevation = 5.dp,
-                        backgroundColor = Secondery,
-                        border = BorderStroke(
-                            2.dp,
-                            if (currentGame.playerTurn == "O") Primery else {
-                                Secondery
-                            }
-                        )
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            }
-        }
+        playersBar(
+            player1 = player1,
+            player2 = player2,
+            size = size,
+            modifier = Modifier.weight(2f),
+            currentGame = currentGame,
+            foundPlayer = foundPlayer
+        )
         Spacer(modifier = Modifier.weight(1f))
         OnlineButtonGrid(
             gameId = currentGame.id,
@@ -326,14 +339,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
     }
 
     if(removeGame) {
-        removeGame(currentGame.id, databaseReference) { navController.navigate(GameScreen.CodeGame.title) }
-    }
-}
-
-@Composable
-fun removeGame (id: String, db: DatabaseReference, onSuccessListener: () -> Unit) {
-    db.child(id).removeValue().addOnCompleteListener {
-        onSuccessListener()
+        viewModel.removeGame(currentGame.id, databaseReference) { navController.navigate(GameScreen.CodeGame.title) }
     }
 }
 
@@ -439,85 +445,14 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(2f)) {
-            Spacer(modifier = Modifier.weight(1f))
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
-                if (player1 != MainPlayerUiState()) {
-                    Card(
-                        modifier = Modifier.size(size),
-                        elevation = 5.dp,
-                        backgroundColor = Secondery,
-                        border = BorderStroke(
-                            5.dp,
-                            if (currentGame.playerTurn == "X") Primery else {
-                                Secondery
-                            }
-                        )
-                    ) {
-                        Image(
-                            painter = painterResource(id = player1.currentImage),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                    Text(player1.name, fontSize = 10.sp, color = Color.White)
-                } else {
-                    Card(
-                        modifier = Modifier.size(size),
-                        elevation = 5.dp,
-                        backgroundColor = Secondery,
-                        border = BorderStroke(
-                            2.dp,
-                            if (currentGame.playerTurn == "O") Primery else {
-                                Secondery
-                            }
-                        )
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Text("${currentGame.player1Score} : ${currentGame.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
-            Spacer(modifier = Modifier.weight(1f))
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
-                if (foundPlayer) {
-                    Card(
-                        modifier = Modifier.size(size),
-                        elevation = 5.dp,
-                        backgroundColor = Secondery,
-                        border = BorderStroke(
-                            5.dp,
-                            if (currentGame.playerTurn == "O") Primery else {
-                                Secondery
-                            }
-                        )
-                    ) {
-                        Image(
-                            painter = painterResource(id = player2.currentImage),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                    Text(player2.name, fontSize = 10.sp, color = Color.White)
-                } else {
-                    Card(
-                        modifier = Modifier.size(size),
-                        elevation = 5.dp,
-                        backgroundColor = Secondery,
-                        border = BorderStroke(
-                            2.dp,
-                            if (currentGame.playerTurn == "O") Primery else {
-                                Secondery
-                            }
-                        )
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.weight(1f))
-        }
+        playersBar(
+            player1 = player1,
+            player2 = player2,
+            size = size,
+            modifier = Modifier.weight(2f),
+            currentGame = currentGame,
+            foundPlayer = foundPlayer
+        )
         Spacer(modifier = Modifier.weight(1f))
         OnlineButtonGrid(
             gameId = currentGame.id,
