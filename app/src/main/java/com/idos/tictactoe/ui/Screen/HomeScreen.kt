@@ -1,5 +1,7 @@
 package com.idos.tictactoe.ui.Screen
 
+import android.content.Context
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -30,7 +32,7 @@ import kotlin.system.exitProcess
  */
 
 @Composable
-fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Unit = {}, onOnlineClick: () -> Unit = {}, onBackClick: () -> Unit) {
+fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Unit = {}, onOnlineClick: () -> Unit = {}, onBackClick: () -> Unit, context: Context) {
     BackHandler(
         onBack = {
             onBackClick()
@@ -71,9 +73,12 @@ fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Un
             )
         }
 
-        //online game button(offline)
+        //online game button
         Button(
-            onClick = onOnlineClick,
+            onClick = {
+                context.startService(Intent(context, OnlineGameService::class.java))
+                onOnlineClick()
+                      },
             colors = ButtonDefaults.buttonColors(Primery),
             shape = Shapes.large,
         ) {

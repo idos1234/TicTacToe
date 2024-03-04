@@ -1,7 +1,11 @@
 package com.idos.tictactoe.ui.Screen
 
 import android.annotation.SuppressLint
+import android.app.Service
 import android.content.Context
+import android.content.Intent
+import android.os.IBinder
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -37,6 +41,32 @@ import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+private var wasGameStarted = false
+private var onlineGameId: String = ""
+
+class OnlineGameService : Service() {
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        return START_NOT_STICKY
+    }
+
+    override fun onDestroy() {}
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        //get database
+        val firebaseDatabase = FirebaseDatabase.getInstance()
+        val databaseReference = firebaseDatabase.getReference("Games")
+
+        Log.e("Service", "Online game end")
+        if(!wasGameStarted) {
+            CodeGameViewModel().removeGame(onlineGameId, databaseReference, { Log.e("Service", "Online game removed") })
+        }
+    }
+}
 
 @Composable
 fun SetBoxOnline(
@@ -150,6 +180,9 @@ fun OnlineGameButton(
 )
 @Composable
 fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, player: String, player1: MainPlayerUiState, player2: MainPlayerUiState, databaseReference: DatabaseReference, viewModel: CodeGameViewModel, navController: NavController, enableState: Enable, modifier: Modifier) {
+
+    wasGameStarted = gameStarted
+
     var game by remember {
         mutableStateOf(OnlineGameUiState())
     }
@@ -532,6 +565,7 @@ fun OnlineTicTacToe(
             while (times == 1) {
                 Loop@ for (Game in snapshot.children) {
                     val game = Game.getValue(OnlineGameUiState::class.java)
+                    //open room
                     if ((game!!.player2 == "")) {
                         val updatedGame = OnlineGameUiState(
                             id = game.id,
@@ -540,6 +574,7 @@ fun OnlineTicTacToe(
                             winner = game.winner,
                             boxes = game.boxes
                         )
+                        onlineGameId = game.id
                         //get Players collection from database
                         db.collection("Players").get()
                             //on success
@@ -576,6 +611,7 @@ fun OnlineTicTacToe(
                         break@Loop
                     }
                 }
+                //open room
                 if (currentGame == OnlineGameUiState()) {
                     val key: String = databaseReference.push().key!!.takeLast(5)
                     val newGame = OnlineGameUiState(
@@ -585,6 +621,7 @@ fun OnlineTicTacToe(
                         winner = "",
                         boxes = Boxes()
                     )
+                    onlineGameId = key
                     //get Players collection from database
                     db.collection("Players").get()
                         //on success

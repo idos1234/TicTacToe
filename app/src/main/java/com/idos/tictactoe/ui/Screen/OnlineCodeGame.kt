@@ -1,6 +1,10 @@
 package com.idos.tictactoe.ui.Screen
 
+import android.app.Service
 import android.content.Context
+import android.content.Intent
+import android.os.IBinder
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -55,7 +59,25 @@ import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
 
-var gameStarted = false
+private var gameStarted = false
+private var codeGameId: String = ""
+
+
+class CodeGameService : Service() {
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        return START_NOT_STICKY
+    }
+
+    override fun onDestroy() {}
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        Log.e("Service", "Code game end")
+    }
+}
 
 @Composable
 fun playersBar(player1: MainPlayerUiState, player2: MainPlayerUiState, size: Dp, modifier: Modifier, currentGame: OnlineGameUiState, foundPlayer: Boolean) {
@@ -472,7 +494,7 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
 }
 
 @Composable
-fun openNewGameButton(modifier: Modifier, navController: NavController) {
+fun openNewGameButton(modifier: Modifier, navController: NavController, context: Context) {
     var openGame by remember {
         mutableStateOf(false)
     }
@@ -487,6 +509,9 @@ fun openNewGameButton(modifier: Modifier, navController: NavController) {
         }
     }
     if (openGame) {
+        //start service
+        context.startService(Intent(context, CodeGameService::class.java))
+
         openGame = false
         gameStarted = true
         navController.navigate(GameScreen.OpenGameWithCode.title)
@@ -527,6 +552,9 @@ fun enterGameWithCodeButton(modifier: Modifier, codeGameViewModel: CodeGameViewM
             gameId = codeGameUiState.gameCode,
             context = context,
             onFindGame = {
+                //start service
+                context.startService(Intent(context, CodeGameService::class.java))
+
                 checkGame = false
                 navController.navigate(GameScreen.EnterGameWithCode.title)
             },
@@ -587,7 +615,7 @@ fun CheckForGame(gameId: String, context: Context, onFindGame: () -> Unit, notFi
 }
 
 @Composable
-fun codeGameScreen(codeGameViewModel: CodeGameViewModel, codeGameUiState: OnlineGameRememberedValues, navController: NavController) {
+fun codeGameScreen(codeGameViewModel: CodeGameViewModel, codeGameUiState: OnlineGameRememberedValues, navController: NavController, context: Context) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -595,6 +623,6 @@ fun codeGameScreen(codeGameViewModel: CodeGameViewModel, codeGameUiState: Online
             .background(BackGround)
     ) {
         enterGameWithCodeButton(modifier = Modifier.weight(1f), codeGameUiState = codeGameUiState, codeGameViewModel = codeGameViewModel, navController = navController)
-        openNewGameButton(modifier = Modifier.weight(1f), navController = navController)
+        openNewGameButton(modifier = Modifier.weight(1f), navController = navController, context = context)
     }
 }

@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,7 +34,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import androidx.security.crypto.MasterKey
 import com.idos.tictactoe.data.dataStore.SharedPreferencesDataStore
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.ChooseName
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInScreen
@@ -219,7 +221,7 @@ fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, o
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "Log out")
                 Spacer(modifier = Modifier.width(10.dp))
-                Icon(imageVector = Icons.Default.Logout, contentDescription = "Log out icon")
+                Icon(imageVector = Icons.AutoMirrored.Filled.Logout, contentDescription = "Log out icon")
             }
 
         }
@@ -289,7 +291,7 @@ fun CheckExit(onQuitClick: () -> Unit, onCancelClick: () -> Unit) {
 fun TicTacToeApp(
     viewModel: TicTacToeViewModel = TicTacToeViewModel(),
     codeGameViewModel: CodeGameViewModel = viewModel(),
-    googleSignInViewModel: GoogleSignInViewModel = viewModel(),
+    googleSignInViewModel: GoogleSignInViewModel = viewModel()
 ) {
     //nav controller
     val context = LocalContext.current
@@ -325,13 +327,14 @@ fun TicTacToeApp(
     val email = remember {
         mutableStateOf("")
     }
-    val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+    val masterKey = MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
 
     val encryptedSharedPreferences = EncryptedSharedPreferences.create(
-        // passing a file name to share a preferences
-        "preferences",
-        masterKeyAlias,
         context,
+        "preferences",
+        masterKey,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
@@ -345,7 +348,7 @@ fun TicTacToeApp(
 
     if (!updateSharedPreferences) {
         sharedPreferencesUiState.messageSent = false
-        sharedPreferencesUiState.lastTimeSeen = (System.currentTimeMillis()/1000)
+        sharedPreferencesUiState.lastTimeSeen = (System.currentTimeMillis() / 1000)
 
         sharedPreferences.setMessageSent(sharedPreferencesUiState.messageSent)
         sharedPreferences.setLastTimeSeen(sharedPreferencesUiState.lastTimeSeen)
@@ -363,86 +366,95 @@ fun TicTacToeApp(
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-        when(currentScreen) {
-            GameScreen.Start ->
-                TopAppBar(
-                    onClick = {
-                        scope.launch {
-                            scaffoldState.drawerState.open()
-                        }
-                    },
-                    icon = Icons.Default.Menu
-                )
-            GameScreen.LeaderBoard ->
-                TopAppBar(
-                    onClick = {
-                        scope.launch {
-                            scaffoldState.drawerState.open()
-                        }
-                    },
-                    icon = Icons.Default.Menu
-                )
-            GameScreen.CodeGame ->
-                TopAppBar(
-                    onClick = {
-                        scope.launch {
-                            scaffoldState.drawerState.open()
-                        }
-                    },
-                    icon = Icons.Default.Menu
-                )
-            GameScreen.SignUp ->
-                TopAppBar(
-                    icon = null,
-                    onClick = {},
-                    isBar = false
-                )
-            GameScreen.LogIn ->
-                TopAppBar(
-                    icon = null,
-                    onClick = {},
-                    isBar = false
-                )
-            GameScreen.Online ->
-                TopAppBar(
-                    onClick = {
-                        open = true
-                    },
-                    icon = Icons.Default.ArrowBack
-                )
-            GameScreen.ShowGameFinalScore ->
-                TopAppBar(
-                    icon = null,
-                    onClick = {},
-                    isBar = false
-                )
-            GameScreen.GoogleSignIn ->
-                TopAppBar(
-                    icon = null,
-                    onClick = {},
-                    isBar = false
-                )
-            else ->{
-                TopAppBar(
-                onClick = {navController.navigateUp()},
-                icon = Icons.Default.ArrowBack
-            )}
+            when (currentScreen) {
+                GameScreen.Start ->
+                    TopAppBar(
+                        onClick = {
+                            scope.launch {
+                                scaffoldState.drawerState.open()
+                            }
+                        },
+                        icon = Icons.Default.Menu
+                    )
+
+                GameScreen.LeaderBoard ->
+                    TopAppBar(
+                        onClick = {
+                            scope.launch {
+                                scaffoldState.drawerState.open()
+                            }
+                        },
+                        icon = Icons.Default.Menu
+                    )
+
+                GameScreen.CodeGame ->
+                    TopAppBar(
+                        onClick = {
+                            scope.launch {
+                                scaffoldState.drawerState.open()
+                            }
+                        },
+                        icon = Icons.Default.Menu
+                    )
+
+                GameScreen.SignUp ->
+                    TopAppBar(
+                        icon = null,
+                        onClick = {},
+                        isBar = false
+                    )
+
+                GameScreen.LogIn ->
+                    TopAppBar(
+                        icon = null,
+                        onClick = {},
+                        isBar = false
+                    )
+
+                GameScreen.Online ->
+                    TopAppBar(
+                        onClick = {
+                            open = true
+                        },
+                        icon = Icons.AutoMirrored.Filled.ArrowBack
+                    )
+
+                GameScreen.ShowGameFinalScore ->
+                    TopAppBar(
+                        icon = null,
+                        onClick = {},
+                        isBar = false
+                    )
+
+                GameScreen.GoogleSignIn ->
+                    TopAppBar(
+                        icon = null,
+                        onClick = {},
+                        isBar = false
+                    )
+
+                else -> {
+                    TopAppBar(
+                        onClick = { navController.navigateUp() },
+                        icon = Icons.AutoMirrored.Filled.ArrowBack
+                    )
+                }
             }
             if (open) {
                 CheckExit(
-                    onCancelClick = {open = false},
+                    onCancelClick = { open = false },
                     onQuitClick = {
                         navController.navigateUp()
                         open = false
                     }
                 )
             }
-    },
+        },
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
         drawerContent = {
             HomeScreenMenu(
                 modifier = Modifier
-                    .clickable (
+                    .clickable(
                         onClick = {
                             scope.launch {
                                 scaffoldState.drawerState.close()
@@ -459,14 +471,14 @@ fun TicTacToeApp(
                 onLogOutClick = {
                     email.value = ""
 
-                    val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+                    val masterKey = MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+                        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                        .build()
 
-                    // Initialize/open an instance of EncryptedSharedPreferences on below line.
                     val encryptedSharedPreferences = EncryptedSharedPreferences.create(
-                        // passing a file name to share a preferences
-                        "preferences",
-                        masterKeyAlias,
                         context,
+                        "preferences",
+                        masterKey,
                         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
                     )
@@ -486,18 +498,19 @@ fun TicTacToeApp(
         NavHost(
             navController = navController,
             startDestination = startDestination,
-        ){
+        ) {
             //home screen
             composable(route = GameScreen.Start.title) {
                 HomeScreen(
-                    onTwoPlayersClick = {navController.navigate(GameScreen.TwoPlayers.title)},
-                    onSinglePlayerClick = {navController.navigate(GameScreen.SinglePlayer.title)},
-                    onOnlineClick = {navController.navigate(GameScreen.Online.title)},
+                    onTwoPlayersClick = { navController.navigate(GameScreen.TwoPlayers.title) },
+                    onSinglePlayerClick = { navController.navigate(GameScreen.SinglePlayer.title) },
+                    onOnlineClick = { navController.navigate(GameScreen.Online.title) },
                     onBackClick = {
-                        sharedPreferencesUiState.lastTimeSeen = (System.currentTimeMillis()/1000)
+                        sharedPreferencesUiState.lastTimeSeen = (System.currentTimeMillis() / 1000)
 
                         sharedPreferences.setLastTimeSeen(sharedPreferencesUiState.lastTimeSeen)
-                    }
+                    },
+                    context = LocalContext.current
                 )
             }
 
@@ -507,10 +520,13 @@ fun TicTacToeApp(
                     viewModel = viewModel,
                     uiState = uiState,
                     onPlayAgain = {
-                        timesPlayed ++
+                        timesPlayed++
                         resetGame(
                             viewModel,
-                            navController.popBackStack(GameScreen.TwoPlayers.title, inclusive = false),
+                            navController.popBackStack(
+                                GameScreen.TwoPlayers.title,
+                                inclusive = false
+                            ),
                             timesPlayed
                         )
                     },
@@ -535,7 +551,7 @@ fun TicTacToeApp(
                             timesPlayed
                         )
                         Timer().schedule(1000) {
-                            if ((timesPlayed % 2 == 1) && uiState.player_Turn == "O"){
+                            if ((timesPlayed % 2 == 1) && uiState.player_Turn == "O") {
                                 viewModel.botTurn(uiState)
                             }
                         }
@@ -568,24 +584,46 @@ fun TicTacToeApp(
 
             //codeGame
             composable(route = GameScreen.CodeGame.title) {
-                codeGameScreen(codeGameViewModel = codeGameViewModel, codeGameUiState = onlineGameValuesUiState, navController = navController)
+                codeGameScreen(
+                    codeGameViewModel = codeGameViewModel,
+                    codeGameUiState = onlineGameValuesUiState,
+                    navController = navController,
+                    context = LocalContext.current
+                )
             }
 
             //open game with code
             composable(route = GameScreen.OpenGameWithCode.title) {
-                OpenOnlineGameWithCode(context = LocalContext.current, player = email.value, viewModel = codeGameViewModel, navController = navController, enableState = enableState)
+                OpenOnlineGameWithCode(
+                    context = LocalContext.current,
+                    player = email.value,
+                    viewModel = codeGameViewModel,
+                    navController = navController,
+                    enableState = enableState
+                )
             }
 
             //enter game with code
             composable(route = GameScreen.EnterGameWithCode.title) {
-                EnterOnlineGameWithCode(context = LocalContext.current, player = email.value, gameId = onlineGameValuesUiState.gameCode, viewModel = codeGameViewModel, navController = navController, enableState = enableState)
+                EnterOnlineGameWithCode(
+                    context = LocalContext.current,
+                    player = email.value,
+                    gameId = onlineGameValuesUiState.gameCode,
+                    viewModel = codeGameViewModel,
+                    navController = navController,
+                    enableState = enableState
+                )
             }
 
             //show game final score
             composable(
                 route = GameScreen.ShowGameFinalScore.title,
                 exitTransition = {
-                    slideOutVertically(animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+                    slideOutVertically(animationSpec = tween(300)) + fadeOut(
+                        animationSpec = tween(
+                            300
+                        )
+                    )
                 },
                 enterTransition = {
                     slideInVertically(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
@@ -598,17 +636,18 @@ fun TicTacToeApp(
             composable(GameScreen.GoogleSignIn.title) {
                 GoogleSignInScreen(
                     viewModel = googleSignInViewModel,
-                    changeEmail = {email.value = it},
+                    changeEmail = { email.value = it },
                     navController = navController,
                     onClick = {
-                        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+                        val masterKey =
+                            MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+                                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                                .build()
 
-                        // Initialize/open an instance of EncryptedSharedPreferences on below line.
                         val encryptedSharedPreferences = EncryptedSharedPreferences.create(
-                            // passing a file name to share a preferences
-                            "preferences",
-                            masterKeyAlias,
                             context,
+                            "preferences",
+                            masterKey,
                             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
                         )
@@ -623,19 +662,20 @@ fun TicTacToeApp(
                 route = GameScreen.NewName.title
             ) {
                 ChooseName(
-                    changeEmail = {email.value = it},
+                    changeEmail = { email.value = it },
                     viewModel = googleSignInViewModel,
                     context = LocalContext.current,
                     emailState = emailState,
                     onClick = {
-                        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+                        val masterKey =
+                            MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+                                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                                .build()
 
-                        // Initialize/open an instance of EncryptedSharedPreferences on below line.
                         val encryptedSharedPreferences = EncryptedSharedPreferences.create(
-                            // passing a file name to share a preferences
-                            "preferences",
-                            masterKeyAlias,
                             context,
+                            "preferences",
+                            masterKey,
                             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
                         )
