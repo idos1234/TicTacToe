@@ -39,8 +39,12 @@ class CodeGameViewModel: ViewModel() {
         }
     }
 
-    fun removeGame (id: String, db: DatabaseReference, onSuccessListener: () -> Unit) {
-        db.child(id).removeValue().addOnCompleteListener {
+    fun removeGame (id: String, db: DatabaseReference, times: Int,  onSuccessListener: () -> Unit) {
+        if(times < 50) {
+            if (!db.child(id).removeValue().isSuccessful) {
+                removeGame(id, db, times + 1,  onSuccessListener)
+            }
+        } else {
             onSuccessListener()
         }
     }

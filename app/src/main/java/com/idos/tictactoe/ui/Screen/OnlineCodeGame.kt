@@ -4,7 +4,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -59,6 +58,7 @@ import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
 
+private var enteredGame = false
 private var gameStarted = false
 private var codeGameId: String = ""
 
@@ -75,7 +75,20 @@ class CodeGameService : Service() {
     override fun onDestroy() {}
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        Log.e("Service", "Code game end")
+        //get database
+        val firebaseDatabase = FirebaseDatabase.getInstance()
+        val databaseReference = firebaseDatabase.getReference("GamesWithCode")
+
+        if(!gameStarted) {
+            CodeGameViewModel().removeGame(codeGameId, databaseReference, 0) {
+                stopService(
+                    Intent(
+                        baseContext,
+                        CodeGameService::class.java
+                    )
+                )
+            }
+        }
     }
 }
 
@@ -208,6 +221,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
                         winner = "",
                         boxes = com.idos.tictactoe.data.Boxes()
                     )
+                    codeGameId = key
                     databaseReference.child(key)
                         .setValue(newGame)
                     currentGame = newGame
@@ -246,6 +260,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
                     currentGame = game
                     if (currentGame.player2 != "") {
                         foundPlayer = true
+                        gameStarted = true
                         //get Players collection from database
                         db.collection("Players").get()
                             //on success
@@ -361,7 +376,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
     }
 
     if(removeGame) {
-        viewModel.removeGame(currentGame.id, databaseReference) { navController.navigate(GameScreen.CodeGame.title) }
+        viewModel.removeGame(currentGame.id, databaseReference, 0) { navController.navigate(GameScreen.CodeGame.title) }
     }
 }
 
@@ -513,7 +528,7 @@ fun openNewGameButton(modifier: Modifier, navController: NavController, context:
         context.startService(Intent(context, CodeGameService::class.java))
 
         openGame = false
-        gameStarted = true
+        enteredGame = true
         navController.navigate(GameScreen.OpenGameWithCode.title)
     }
 }
@@ -539,7 +554,7 @@ fun enterGameWithCodeButton(modifier: Modifier, codeGameViewModel: CodeGameViewM
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
-                gameStarted = false
+                enteredGame = false
                 checkGame = true
                       },
             colors = ButtonDefaults.buttonColors(backgroundColor = Primery)) {
@@ -585,20 +600,22 @@ fun CheckForGame(gameId: String, context: Context, onFindGame: () -> Unit, notFi
                 OnlineGameUiState()
             }
             if (game == OnlineGameUiState()) {
-                if(!gameStarted) {
+                if(!enteredGame) {
                     Toast.makeText(context, "Game was not found", Toast.LENGTH_SHORT).show()
                     notFindGame()
                 }
             } else {
                 if (game.player2 != "") {
-                    if(!gameStarted) {
+                    if(!enteredGame) {
                         Toast.makeText(context, "Game has already started", Toast.LENGTH_SHORT)
                             .show()
                         notFindGame()
                     }
                 } else {
-                    if(!gameStarted) {
+                    if(!enteredGame) {
                         gameStarted = true
+                        enteredGame = true
+                        codeGameId = gameId
                         onFindGame()
                     }
                 }

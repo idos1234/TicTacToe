@@ -5,7 +5,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -61,9 +60,15 @@ class OnlineGameService : Service() {
         val firebaseDatabase = FirebaseDatabase.getInstance()
         val databaseReference = firebaseDatabase.getReference("Games")
 
-        Log.e("Service", "Online game end")
         if(!wasGameStarted) {
-            CodeGameViewModel().removeGame(onlineGameId, databaseReference, { Log.e("Service", "Online game removed") })
+            CodeGameViewModel().removeGame(onlineGameId, databaseReference, 0) {
+                stopService(
+                    Intent(
+                        baseContext,
+                        OnlineGameService::class.java
+                    )
+                )
+            }
         }
     }
 }
