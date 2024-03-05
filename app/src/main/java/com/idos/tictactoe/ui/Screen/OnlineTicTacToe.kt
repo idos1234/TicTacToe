@@ -12,6 +12,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -40,6 +42,8 @@ import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Timer
+import kotlin.concurrent.schedule
 
 private var wasGameStarted = false
 private var onlineGameId: String = ""
@@ -553,6 +557,9 @@ fun OnlineTicTacToe(
     var player2 by remember {
         mutableStateOf(MainPlayerUiState())
     }
+    var waitingTimeFlag by remember {
+        mutableStateOf(true)
+    }
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
@@ -562,6 +569,18 @@ fun OnlineTicTacToe(
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("Games")
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    if(waitingTimeFlag) {
+        waitingTimeFlag = false
+
+        Timer().schedule(60000) {
+            if(currentGame.player2 == "" && navController.currentDestination?.route == GameScreen.Online.title) {
+                viewModel.removeGame(currentGame.id, databaseReference, 0){
+                    navController.navigate(GameScreen.TimeUp.title)
+                }
+            }
+        }
+    }
 
     //get Players collection from database
     databaseReference.addValueEventListener(object : ValueEventListener {
@@ -977,4 +996,36 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
         updateScore(playerName = playerName, context = context, addedScore = addedScore)
         failed = false
     }
+}
+
+@Composable
+fun CheckExitOnlineGame(onQuitClick: () -> Unit, onCancelClick: () -> Unit, navController: NavController) {
+
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("Games")
+
+    AlertDialog(
+        onDismissRequest = {},
+        title = {},
+        text = { Text(text = "Are you sure you want to quit the game") },
+        dismissButton = {
+            Button(onClick = {
+                onQuitClick()
+                if(!wasGameStarted) {
+                    CodeGameViewModel().removeGame(onlineGameId, databaseReference, 0) {
+                        navController.navigateUp()
+                    }
+                } else {
+                    navController.navigateUp()
+                }
+            }) {
+                Text(text = "Quit")
+            }
+        },
+        confirmButton = {
+            Button(onClick = onCancelClick) {
+                Text(text = "Cancel")
+            }
+        }
+    )
 }

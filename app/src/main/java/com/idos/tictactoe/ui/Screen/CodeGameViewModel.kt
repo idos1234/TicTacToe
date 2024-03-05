@@ -1,13 +1,16 @@
 package com.idos.tictactoe.ui.Screen
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.DatabaseReference
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class CodeGameViewModel: ViewModel() {
     private val _onlineGameValuesUiState = MutableStateFlow(OnlineGameRememberedValues())
@@ -45,7 +48,9 @@ class CodeGameViewModel: ViewModel() {
                 removeGame(id, db, times + 1,  onSuccessListener)
             }
         } else {
-            onSuccessListener()
+            viewModelScope.launch(Dispatchers.Main) {
+                onSuccessListener()
+            }
         }
     }
 }

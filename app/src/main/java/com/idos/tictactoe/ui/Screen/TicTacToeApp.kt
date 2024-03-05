@@ -36,7 +36,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.idos.tictactoe.data.dataStore.SharedPreferencesDataStore
-import com.idos.tictactoe.ui.Screen.GoogleSignIn.ChooseName
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInScreen
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInViewModel
 import com.idos.tictactoe.ui.theme.BackGround
@@ -65,6 +64,7 @@ enum class GameScreen(val title: String) {
     ShowGameFinalScore("ShowGameFinalScore"),
     GoogleSignIn("GoogleSignIn"),
     NewName("NewName"),
+    TimeUp("TimeUp")
 }
 
 data class sharedPreferences(
@@ -263,25 +263,6 @@ fun TopAppBar(onClick: () -> Unit, icon: ImageVector?, isBar: Boolean = true) {
     }
 }
 
-@Composable
-fun CheckExit(onQuitClick: () -> Unit, onCancelClick: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = {},
-        title = {},
-        text = { Text(text = "Are you sure you want to quit the game") },
-        dismissButton = {
-            Button(onClick = onQuitClick) {
-                Text(text = "Quit")
-            }
-                        },
-        confirmButton = {
-            Button(onClick = onCancelClick) {
-                Text(text = "Cancel")
-            }
-        }
-    )
-}
-
 
 
 @SuppressLint("UnrememberedMutableState", "UnusedMaterialScaffoldPaddingParameter",
@@ -441,12 +422,10 @@ fun TicTacToeApp(
                 }
             }
             if (open) {
-                CheckExit(
+                CheckExitOnlineGame(
                     onCancelClick = { open = false },
-                    onQuitClick = {
-                        navController.navigateUp()
-                        open = false
-                    }
+                    onQuitClick = { open = false },
+                    navController = navController
                 )
             }
         },
@@ -683,6 +662,10 @@ fun TicTacToeApp(
                         encryptedSharedPreferences.edit().putString("email", email.value).apply()
                     }
                 )
+            }
+            
+            composable(GameScreen.TimeUp.title) {
+                TimeUp(navController = navController)
             }
 
         }
