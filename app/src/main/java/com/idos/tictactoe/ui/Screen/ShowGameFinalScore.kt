@@ -29,7 +29,7 @@ import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
 
 @Composable
-fun ShowGameFinalScore(uiState: OnlineGameRememberedValues, navController: NavController) {
+fun ShowGameFinalScore(uiState: OnlineGameRememberedValues, navController: NavController, codeGameViewModel: CodeGameViewModel) {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
@@ -76,7 +76,14 @@ fun ShowGameFinalScore(uiState: OnlineGameRememberedValues, navController: NavCo
             }
         }
         Spacer(modifier = Modifier.height(200.dp))
-        Button(onClick = {navController.navigate(GameScreen.Start.title)}, colors = ButtonDefaults.buttonColors(backgroundColor = Primery)) {
+        Button(
+            onClick = {
+                //clears code after quit game
+                codeGameViewModel.clearCode()
+                navController.navigate(GameScreen.Start.title)
+                      },
+            colors = ButtonDefaults.buttonColors(backgroundColor = Primery)
+        ) {
             Text(text = "Home", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.White)
         }
     }

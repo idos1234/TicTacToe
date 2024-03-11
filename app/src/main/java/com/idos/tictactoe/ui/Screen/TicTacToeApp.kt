@@ -400,6 +400,22 @@ fun TicTacToeApp(
                         icon = Icons.AutoMirrored.Filled.ArrowBack
                     )
 
+                GameScreen.EnterGameWithCode ->
+                    TopAppBar(
+                        onClick = {
+                            open = true
+                        },
+                        icon = Icons.AutoMirrored.Filled.ArrowBack
+                    )
+
+                GameScreen.OpenGameWithCode ->
+                    TopAppBar(
+                        onClick = {
+                            open = true
+                        },
+                        icon = Icons.AutoMirrored.Filled.ArrowBack
+                    )
+
                 GameScreen.ShowGameFinalScore ->
                     TopAppBar(
                         icon = null,
@@ -424,7 +440,10 @@ fun TicTacToeApp(
             if (open) {
                 CheckExitOnlineGame(
                     onCancelClick = { open = false },
-                    onQuitClick = { open = false },
+                    onQuitClick = {
+                        codeGameViewModel.clearCode()
+                        open = false
+                                  },
                     navController = navController
                 )
             }
@@ -578,7 +597,8 @@ fun TicTacToeApp(
                     player = email.value,
                     viewModel = codeGameViewModel,
                     navController = navController,
-                    enableState = enableState
+                    enableState = enableState,
+                    codeGameViewModel = codeGameViewModel
                 )
             }
 
@@ -608,7 +628,7 @@ fun TicTacToeApp(
                     slideInVertically(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
                 }
             ) {
-                ShowGameFinalScore(uiState = onlineGameValuesUiState, navController = navController)
+                ShowGameFinalScore(uiState = onlineGameValuesUiState, navController = navController, codeGameViewModel = codeGameViewModel)
             }
 
             // google sign in

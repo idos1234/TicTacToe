@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -36,11 +38,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -176,7 +181,7 @@ fun playersBar(player1: MainPlayerUiState, player2: MainPlayerUiState, size: Dp,
 }
 
 @Composable
-fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGameViewModel, navController: NavController, enableState: Enable) {
+fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGameViewModel, navController: NavController, enableState: Enable, codeGameViewModel: CodeGameViewModel) {
     var currentGame by remember {
         mutableStateOf(OnlineGameUiState())
     }
@@ -376,7 +381,11 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
     }
 
     if(removeGame) {
-        viewModel.removeGame(currentGame.id, databaseReference, 0) { navController.navigate(GameScreen.CodeGame.title) }
+        viewModel.removeGame(currentGame.id, databaseReference, 0) {
+            //clears code after quit game
+            codeGameViewModel.clearCode()
+            navController.navigate(GameScreen.CodeGame.title)
+        }
     }
 }
 
@@ -526,7 +535,6 @@ fun openNewGameButton(modifier: Modifier, navController: NavController, context:
     if (openGame) {
         //start service
         context.startService(Intent(context, CodeGameService::class.java))
-
         openGame = false
         enteredGame = true
         navController.navigate(GameScreen.OpenGameWithCode.title)
@@ -539,18 +547,24 @@ fun enterGameWithCodeButton(modifier: Modifier, codeGameViewModel: CodeGameViewM
         mutableStateOf(false)
     }
     val context = LocalContext.current
+    //controls the keyboard
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxSize()
-            .background(BackGround)) {
+            .background(BackGround)
+    ) {
         TextField(
             value = codeGameUiState.gameCode,
             onValueChange = { codeGameViewModel.updateGameCode(it) },
             placeholder = { Text(text = "Code:")},
             colors = TextFieldDefaults.textFieldColors(backgroundColor = Secondery),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password))
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
+        )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
@@ -633,11 +647,20 @@ fun CheckForGame(gameId: String, context: Context, onFindGame: () -> Unit, notFi
 
 @Composable
 fun codeGameScreen(codeGameViewModel: CodeGameViewModel, codeGameUiState: OnlineGameRememberedValues, navController: NavController, context: Context) {
+    //controls the keyboard
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
             .background(BackGround)
+            .pointerInput(key1 = null){
+                // hide keyboard on tap
+                detectTapGestures(
+                    onTap = { keyboardController?.hide() }
+                )
+            }
     ) {
         enterGameWithCodeButton(modifier = Modifier.weight(1f), codeGameUiState = codeGameUiState, codeGameViewModel = codeGameViewModel, navController = navController)
         openNewGameButton(modifier = Modifier.weight(1f), navController = navController, context = context)

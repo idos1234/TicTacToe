@@ -19,6 +19,10 @@ class CodeGameViewModel: ViewModel() {
     private val _enableState = MutableStateFlow(Enable())
     val enableState: StateFlow<Enable> = _enableState.asStateFlow()
 
+    fun clearCode() {
+        _onlineGameValuesUiState.value.gameCode = ""
+    }
+
     fun changeEnable(isEnable: Boolean) {
         _enableState.update {
             it.copy(enable = isEnable)
@@ -46,6 +50,10 @@ class CodeGameViewModel: ViewModel() {
         if(times < 50) {
             if (!db.child(id).removeValue().isSuccessful) {
                 removeGame(id, db, times + 1,  onSuccessListener)
+            } else {
+                viewModelScope.launch(Dispatchers.Main) {
+                    onSuccessListener()
+                }
             }
         } else {
             viewModelScope.launch(Dispatchers.Main) {
