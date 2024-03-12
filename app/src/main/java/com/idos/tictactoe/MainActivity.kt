@@ -11,6 +11,7 @@ import com.idos.tictactoe.ui.theme.TicTacToeTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             TicTacToeTheme {
                 TicTacToeApp()

@@ -21,17 +21,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleEmail
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInViewModel
+import java.security.MessageDigest
+
+private fun String.toSHA256(): String {
+    val HEX_CHARS = "0123456789ABCDEF"
+    val digest = MessageDigest.getInstance("SHA-256").digest(this.toByteArray())
+    return digest.joinToString(
+        separator = "",
+        transform = {
+            String(
+                charArrayOf(
+                    HEX_CHARS[it.toInt() shr 4 and 0x0f],
+                    HEX_CHARS[it.toInt() and 0x0f]
+                )
+            )
+        }
+    )
+}
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -74,7 +89,7 @@ fun ChooseName(
 
                             val player = MainPlayerUiState(
                                 name = emailState.name!!,
-                                email = emailState.email2!!,
+                                email = emailState.email2!!.toSHA256(),
                                 score = 0,
                                 password = ""
                             )
@@ -82,7 +97,7 @@ fun ChooseName(
                             dbPlayers.add(player)
                                 //on success
                                 .addOnSuccessListener {
-                                    changeEmail(emailState.email2!!)
+                                    changeEmail(emailState.email2!!.toSHA256())
                                     onClick()
                                 }
                                 //on failure
@@ -123,13 +138,5 @@ fun TimeUp(navController: NavController) {
                 }
             }
         }
-    }
-}
-
-@Composable
-@Preview
-fun timePrev() {
-    Column(modifier = Modifier.fillMaxSize()) {
-        TimeUp(navController = rememberNavController())
     }
 }

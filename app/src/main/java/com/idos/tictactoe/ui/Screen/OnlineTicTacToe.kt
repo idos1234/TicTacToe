@@ -468,13 +468,13 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
                             )
                         }
                         Text(
-                            text = player1.name,
+                            text = player2.name,
                             fontSize = 25.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black
                         )
                         Text(
-                            text = game.player1Score.toString(),
+                            text = game.player2Score.toString(),
                             fontSize = 25.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black
