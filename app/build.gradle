@@ -4,6 +4,7 @@ plugins {
     //google sign in
     id 'com.google.devtools.ksp' version "1.8.0-1.0.9"
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -59,10 +60,15 @@ apply plugin: 'com.android.application'
 dependencies {
 
     // FireBase Dependency
+    //data base
     implementation 'com.google.firebase:firebase-database-ktx:20.3.1'
-    implementation 'com.google.firebase:firebase-firestore-ktx:24.10.3'
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.11.0'
+    //messaging
     implementation 'com.google.firebase:firebase-messaging-ktx:23.4.1'
-    implementation(platform("com.google.firebase:firebase-bom:32.5.0"))
+    //crashlytics
+    implementation("com.google.firebase:firebase-crashlytics")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
     // preferences DataStore
     implementation "androidx.datastore:datastore-preferences:1.0.0"
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
