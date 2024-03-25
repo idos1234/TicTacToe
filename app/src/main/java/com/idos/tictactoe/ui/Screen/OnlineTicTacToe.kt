@@ -953,7 +953,6 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
                                     name = player.name,
                                     email = player.email,
                                     score = score,
-                                    password = player.password,
                                     currentImage = player.currentImage,
                                     unlockedImages = unlockedPhotos,
                                     lockedImages = lockedPhotos,

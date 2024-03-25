@@ -10,8 +10,6 @@ data class MainPlayerUiState(
     var email: String = "",
     //player's score
     var score: Int = 0,
-    //player's password
-    var password: String = "",
     //player's image
     var currentImage: String = "xo_1",
     //images that the player got

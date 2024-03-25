@@ -81,7 +81,7 @@ data class sharedPreferences(
 @Composable
 fun CheckLogOut(
     onCancelClick: () -> Unit,
-    onClearClick: () -> Unit
+    onLogOut: () -> Unit
 ) {
 
     AlertDialog(
@@ -97,7 +97,7 @@ fun CheckLogOut(
         },
         confirmButton = {
             TextButton(
-                onClick = onClearClick
+                onClick = onLogOut
             ) {
                 Text("Log out")
             }
@@ -232,7 +232,7 @@ fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, o
     if (checkLogOut) {
         CheckLogOut(
             onCancelClick = {checkLogOut = false},
-            onClearClick = {
+            onLogOut = {
                 onLogOutClick()
                 checkLogOut = false
                 onChangeScreen()

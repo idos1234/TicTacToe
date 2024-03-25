@@ -21,6 +21,7 @@ import androidx.navigation.NavController
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.firestore.FirebaseFirestore
 import com.idos.tictactoe.ui.Screen.GameScreen
+import com.idos.tictactoe.ui.Screen.toSHA256
 
 @Composable
 fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavController, changeEmail: (String) -> Unit, onClick: () -> Unit) {
@@ -80,7 +81,7 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
                             com.idos.tictactoe.data.MainPlayerUiState::class.java
                         )
                         //check if email already used
-                        if (p?.email == user!!.email) {
+                        if (p?.email == user!!.email?.toSHA256()) {
                             isPlayerExisted = true
                         }
                     }

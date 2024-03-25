@@ -10,16 +10,23 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,7 +39,7 @@ import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleEmail
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInViewModel
 import java.security.MessageDigest
 
-private fun String.toSHA256(): String {
+fun String.toSHA256(): String {
     val HEX_CHARS = "0123456789ABCDEF"
     val digest = MessageDigest.getInstance("SHA-256").digest(this.toByteArray())
     return digest.joinToString(
@@ -57,63 +64,76 @@ fun ChooseName(
     changeEmail: (String) -> Unit,
     onClick: () -> Unit
 ) {
+
+    var done by remember {
+        mutableStateOf(false)
+    }
+
     Column(modifier = Modifier
         .fillMaxSize()
         .background(Color.Black)) {
         AlertDialog(
             onDismissRequest = {},
             text = {
-                TextField(value = emailState.name!!, onValueChange = {viewModel.updateEmail(emailState.copy(name = it))})
+                TextField(
+                    value = emailState.name!!,
+                    onValueChange = {viewModel.updateEmail(emailState.copy(name = it))},
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = {done = true})
+                )
             },
             buttons = {
                 Button(onClick = {
-                    //if label is empty
-                    if (viewModel.emailState.name!! == "") {
-                        Toast.makeText(
-                            context,
-                            "You have to fill the label",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } else
-                    //if name is bigger than 8 chars
-                        if (emailState.name!!.length > 8) {
-                            Toast.makeText(
-                                context,
-                                "Maximum chars: 8",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else {
-                            // sign up
-                            val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-                            val dbPlayers: CollectionReference = db.collection("Players")
-
-                            val player = MainPlayerUiState(
-                                name = emailState.name!!,
-                                email = emailState.email2!!.toSHA256(),
-                                score = 0,
-                                password = ""
-                            )
-
-                            dbPlayers.add(player)
-                                //on success
-                                .addOnSuccessListener {
-                                    changeEmail(emailState.email2!!.toSHA256())
-                                    onClick()
-                                }
-                                //on failure
-                                .addOnFailureListener { e ->
-                                    Toast.makeText(
-                                        context,
-                                        "Fail! Try again \n$e",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                        }
+                    done = true
                 }) {
                     Text(text = "Next")
                 }
             }
         )
+    }
+
+    if(done) {
+        //if label is empty
+        if (viewModel.emailState.name!! == "") {
+            Toast.makeText(
+                context,
+                "You have to fill the label",
+                Toast.LENGTH_SHORT
+            ).show()
+        } else
+        //if name is bigger than 8 chars
+            if (emailState.name!!.length > 8) {
+                Toast.makeText(
+                    context,
+                    "Maximum chars: 8",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                // sign up
+                val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+                val dbPlayers: CollectionReference = db.collection("Players")
+
+                val player = MainPlayerUiState(
+                    name = emailState.name!!,
+                    email = emailState.email2!!.toSHA256(),
+                    score = 0,
+                )
+
+                dbPlayers.add(player)
+                    //on success
+                    .addOnSuccessListener {
+                        changeEmail(emailState.email2!!.toSHA256())
+                        onClick()
+                    }
+                    //on failure
+                    .addOnFailureListener { e ->
+                        Toast.makeText(
+                            context,
+                            "Fail! Try again \n$e",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+            }
     }
 }
 

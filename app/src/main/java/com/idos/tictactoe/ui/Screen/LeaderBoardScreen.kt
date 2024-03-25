@@ -283,7 +283,7 @@ fun getPlayer(email: String, context: Context): MainPlayerUiState {
                 val list = queryDocumentSnapshots.documents
                 try {
                     player = list.find {
-                        it.toObject(MainPlayerUiState::class.java)!!.email == email
+                        it.toObject(MainPlayerUiState::class.java)!!.email == email.toSHA256()
                     }?.toObject(MainPlayerUiState::class.java)!!
                 } catch (e: Exception) {
                     player = MainPlayerUiState()
