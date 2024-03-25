@@ -24,12 +24,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
 
 @Composable
 fun ShowGameFinalScore(uiState: OnlineGameRememberedValues, navController: NavController, codeGameViewModel: CodeGameViewModel) {
+    val player1CurrentImage = GetXO(uiState.player1.currentImage)
+    val player2CurrentImage = GetXO(uiState.player1.currentImage)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
@@ -48,7 +51,7 @@ fun ShowGameFinalScore(uiState: OnlineGameRememberedValues, navController: NavCo
                     shape = RoundedCornerShape(125.dp)
                     ) {
                     Image(
-                        painter = painterResource(id = uiState.player1.currentImage),
+                        painter = painterResource(id = player1CurrentImage),
                         contentDescription = null,
                         contentScale = ContentScale.Crop
                     )
@@ -67,7 +70,7 @@ fun ShowGameFinalScore(uiState: OnlineGameRememberedValues, navController: NavCo
                     shape = RoundedCornerShape(125.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = uiState.player2.currentImage),
+                        painter = painterResource(id = player2CurrentImage),
                         contentDescription = null,
                         contentScale = ContentScale.Crop
                     )

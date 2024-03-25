@@ -27,6 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.google.firebase.firestore.FirebaseFirestore
+import com.idos.tictactoe.data.GetO
+import com.idos.tictactoe.data.GetX
+import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.ui.theme.*
 
@@ -190,6 +193,9 @@ fun ShowTopPlayers(
 //show player's information
 @Composable
 fun showPlayer(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
+    val currentX = GetX(player.currentX)
+    val currentO = GetO(player.currentO)
+    val currentImage = GetXO(player.currentImage)
     Dialog(
         onDismissRequest = onCloseClicked
     ) {
@@ -207,7 +213,7 @@ fun showPlayer(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Image(
-                            painter = painterResource(player.currentImage),
+                            painter = painterResource(currentImage),
                             contentDescription = null,
                             Modifier
                                 .size(110.dp)
@@ -218,11 +224,11 @@ fun showPlayer(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
                         .weight(1f)
                         .height(130.dp)) {
-                        Image(painter = painterResource(id = player.currentX) , contentDescription = "Player's X", modifier = Modifier
+                        Image(painter = painterResource(id = currentX) , contentDescription = "Player's X", modifier = Modifier
                             .weight(1f)
                             .background(BackGround))
                         Spacer(modifier = Modifier.height(5.dp))
-                        Image(painter = painterResource(id = player.currentO) , contentDescription = "Player's O", modifier = Modifier
+                        Image(painter = painterResource(id = currentO) , contentDescription = "Player's O", modifier = Modifier
                             .weight(1f)
                             .background(BackGround))
                         Spacer(modifier = Modifier.height(30.dp))

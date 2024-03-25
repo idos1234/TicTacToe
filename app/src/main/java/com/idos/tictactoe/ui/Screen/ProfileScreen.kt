@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,6 +50,9 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.idos.tictactoe.data.GetO
+import com.idos.tictactoe.data.GetX
+import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
@@ -73,15 +75,22 @@ fun ProfileScreen(player: String, context: Context) {
     }
     //get Players collection from database
     profile = getPlayer(player, context)
+
+    val currentX = GetX(profile.currentX)
+    val currentO = GetO(profile.currentO)
+    val currentImage = GetXO(profile.currentImage)
+
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxSize()
             .background(BackGround)
     ) {
         item {
-            Card(
-                backgroundColor = Primery, modifier = Modifier
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
                     .fillMaxWidth()
+                    .background(BackGround)
                     .height(200.dp)
             ) {
                 Column(
@@ -96,7 +105,7 @@ fun ProfileScreen(player: String, context: Context) {
                                 .size(90.dp)
                         ) {
                             Image(
-                                painter = painterResource(id = profile.currentImage),
+                                painter = painterResource(id = currentImage),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop
                             )
@@ -109,7 +118,12 @@ fun ProfileScreen(player: String, context: Context) {
                     }
                     Text(
                         text = profile.name,
-                        fontSize = 30.sp,
+                        fontSize = 25.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        text = "Level ${profile.level}",
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
                 }
@@ -128,7 +142,7 @@ fun ProfileScreen(player: String, context: Context) {
                         .padding(20.dp), shape = Shapes.small, backgroundColor = Secondery
                 ) {
                     Image(
-                        painter = painterResource(id = profile.currentX),
+                        painter = painterResource(id = currentX),
                         contentDescription = "player's current X",
                         contentScale = ContentScale.Inside,
                         modifier = Modifier.clickable(
@@ -142,7 +156,7 @@ fun ProfileScreen(player: String, context: Context) {
                         .padding(20.dp), shape = Shapes.small, backgroundColor = Secondery
                 ) {
                     Image(
-                        painter = painterResource(id = profile.currentO),
+                        painter = painterResource(id = currentO),
                         contentDescription = "player's current O",
                         contentScale = ContentScale.Inside,
                         modifier = Modifier.clickable(
@@ -195,7 +209,7 @@ fun ShowPlayersImages(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
         mutableStateOf(false)
     }
     var Image by remember {
-        mutableIntStateOf(player.currentImage)
+        mutableStateOf(player.currentImage)
     }
     Dialog(onDismissRequest = onCloseClicked) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
@@ -207,7 +221,7 @@ fun ShowPlayersImages(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                 content = {
                     items(player.unlockedImages) { photo ->
                         AsyncImage(
-                            model = photo,
+                            model = GetXO( photo ),
                             contentScale = ContentScale.Crop,
                             contentDescription = null,
                             modifier = Modifier
@@ -235,7 +249,7 @@ fun ShowPlayersImages(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                     items(player.lockedImages) { photo ->
                         Box(contentAlignment = Alignment.Center) {
                             AsyncImage(
-                                model = photo,
+                                model = GetXO( photo ),
                                 contentScale = ContentScale.Crop,
                                 contentDescription = null,
                                 modifier = Modifier
@@ -279,7 +293,7 @@ fun ShowPlayerX(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                 content = {
                     items(player.unlockedX) { X ->
                         AsyncImage(
-                            model = X,
+                            model = GetX( X ),
                             contentScale = ContentScale.Crop,
                             contentDescription = null,
                             modifier = Modifier
@@ -291,7 +305,7 @@ fun ShowPlayerX(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                                 )
                                 .clickable(onClick = {
                                     changeImage = true
-                                    Image = X
+                                    Image =  X
                                 })
 
                         )
@@ -307,7 +321,7 @@ fun ShowPlayerX(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                     items(player.lockedX) { X ->
                         Box(contentAlignment = Alignment.Center) {
                             AsyncImage(
-                                model = X,
+                                model = GetX( X ),
                                 contentScale = ContentScale.Crop,
                                 contentDescription = null,
                                 modifier = Modifier
@@ -384,7 +398,7 @@ fun ShowPlayerO(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                 content = {
                     items(player.unlockedO) { O ->
                         AsyncImage(
-                            model = O,
+                            model = GetO( O ),
                             contentScale = ContentScale.Crop,
                             contentDescription = null,
                             modifier = Modifier
@@ -412,7 +426,7 @@ fun ShowPlayerO(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                     items(player.lockedO) { O ->
                         Box(contentAlignment = Alignment.Center) {
                             AsyncImage(
-                                model = O,
+                                model = GetO( O ),
                                 contentScale = ContentScale.Crop,
                                 contentDescription = null,
                                 modifier = Modifier
@@ -505,7 +519,7 @@ fun PlayerGraph(
 }
 
 @Composable
-fun ChangeImage(image: Int, player: MainPlayerUiState) {
+fun ChangeImage(image: String, player: MainPlayerUiState) {
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     val updatedPlayer = player.copy(currentImage = image)

@@ -6,10 +6,21 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Card
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,12 +34,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.idos.tictactoe.R
+import com.idos.tictactoe.data.GetO
+import com.idos.tictactoe.data.GetX
+import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.UiState
 import com.idos.tictactoe.ui.CheckWinner
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
-import java.util.*
 
 /**
  * Show a single button in the two players game grid
@@ -47,8 +60,8 @@ fun GameButton(box: String, onClick: () -> Unit = {}, context: Context = LocalCo
         Image(
             painter = painterResource(
                 id = when (box) {
-                    "X" -> player.currentX
-                    "O" -> player.currentO
+                    "X" -> GetX( player.currentX )
+                    "O" -> GetO( player.currentO )
                     else -> {
                         R.drawable.o_1}
                 }
@@ -304,6 +317,8 @@ fun TicTacToeScreen(
     val screenWidth = configuration.screenWidthDp.dp
     val size = (screenWidth/10)*3
 
+    val currentImage = GetXO(player.currentImage)
+
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
@@ -314,7 +329,7 @@ fun TicTacToeScreen(
                 .weight(3f)
                 , elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "X") Primery else { Secondery})) {
                 Image(
-                    painterResource(id = player.currentImage),
+                    painterResource(id = currentImage),
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )
@@ -326,7 +341,7 @@ fun TicTacToeScreen(
                 .size(size)
                 .weight(3f), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "O") Primery else { Secondery})) {
                 Image(
-                    painterResource(id = player.currentImage),
+                    painterResource(id = currentImage),
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )

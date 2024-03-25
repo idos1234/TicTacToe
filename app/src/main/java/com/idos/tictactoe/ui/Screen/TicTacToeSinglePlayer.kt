@@ -25,6 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.idos.tictactoe.R
+import com.idos.tictactoe.data.GetO
+import com.idos.tictactoe.data.GetX
+import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.UiState
 import com.idos.tictactoe.ui.CheckWinner
 import com.idos.tictactoe.ui.theme.BackGround
@@ -51,8 +54,8 @@ fun SinglePlayerGameButton(box: String, onClick: () -> Unit = {}, viewModel: Tic
         Image(
             painter = painterResource(
                 id = when (box) {
-                    "X" -> player.currentX
-                    "O" -> player.currentO
+                    "X" -> GetX( player.currentX )
+                    "O" -> GetO( player.currentO )
                     else -> {
                         R.drawable.o_1}
                 }
@@ -307,6 +310,8 @@ fun TicTacToeSinglePlayerScreen(
     val screenWidth = configuration.screenWidthDp.dp
     val size = (screenWidth/10)*3
 
+    val currentImage = GetXO(player.currentImage)
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -319,7 +324,7 @@ fun TicTacToeSinglePlayerScreen(
                 .size(size)
                 .weight(3f), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "X") Primery else { Secondery})) {
                 Image(
-                    painterResource(id = player.currentImage),
+                    painterResource(id = currentImage),
                     contentDescription = null,
                     contentScale = ContentScale.Crop
                 )

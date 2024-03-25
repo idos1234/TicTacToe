@@ -73,6 +73,9 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:1.0.0"
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
     implementation "androidx.security:security-crypto-ktx:1.1.0-alpha06"
+    //tests
+    implementation 'androidx.test:monitor:1.6.1'
+    androidTestImplementation 'junit:junit:4.13.2'
     def nav_version = "2.7.7"
 
     //Compose Dependency

@@ -36,6 +36,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.idos.tictactoe.R
 import com.idos.tictactoe.data.Boxes
+import com.idos.tictactoe.data.GetO
+import com.idos.tictactoe.data.GetX
+import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.theme.BackGround
@@ -148,8 +151,8 @@ fun OnlineGameButton(
         Image(
             painter = painterResource(
                 id = when (box) {
-                    "X" -> player1.currentX
-                    "O" -> player2.currentO
+                    "X" -> GetX( player1.currentX )
+                    "O" -> GetO( player2.currentO )
                     else -> {R.drawable.o_1}
                 }
             ),
@@ -407,6 +410,9 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2: MainPlayerUiState, onZeroSecs: () -> Unit) {
+    val player1CurrentImage = GetXO(player1.currentImage)
+    val player2CurrentImage = GetXO(player1.currentImage)
+
     var secondsToNextRound by remember {
         mutableStateOf(3)
     }
@@ -434,7 +440,7 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
                                 .size(90.dp)
                         ) {
                             Image(
-                                painter = painterResource(id = player1.currentImage),
+                                painter = painterResource(id = player1CurrentImage),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop
                             )
@@ -462,7 +468,7 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
                                 .size(90.dp)
                         ) {
                             Image(
-                                painter = painterResource(id = player2.currentImage),
+                                painter = painterResource(id = player2CurrentImage),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop
                             )
@@ -753,10 +759,10 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
         mutableStateOf(false)
     }
     var lockedPhotos by remember {
-        mutableStateOf<List<Int>>(listOf())
+        mutableStateOf<List<String>>(listOf())
     }
     var unlockedPhotos by remember {
-        mutableStateOf<List<Int>>(listOf())
+        mutableStateOf<List<String>>(listOf())
     }
     var updatedPlayer by remember {
         mutableStateOf(MainPlayerUiState())
@@ -765,16 +771,16 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
         mutableStateOf(0)
     }
     var lockedX by remember {
-        mutableStateOf<List<Int>>(listOf())
+        mutableStateOf<List<String>>(listOf())
     }
     var lockedO by remember {
-        mutableStateOf<List<Int>>(listOf())
+        mutableStateOf<List<String>>(listOf())
     }
     var unlockedX by remember {
-        mutableStateOf<List<Int>>(listOf())
+        mutableStateOf<List<String>>(listOf())
     }
     var unlockedO by remember {
-        mutableStateOf<List<Int>>(listOf())
+        mutableStateOf<List<String>>(listOf())
     }
 
     var failed by remember {
@@ -801,142 +807,142 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
                         if (addedScore == 1) {
                             when (score) {
                                 25 -> if (player.level == 1) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_2)
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_2)
-                                    lockedX = player.lockedX.minus(R.drawable.x_2)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_2)
-                                    lockedO = player.lockedO.minus(R.drawable.o_2)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_2)
+                                    lockedPhotos = player.lockedImages.minus("xo_2")
+                                    unlockedPhotos = player.unlockedImages.plus("xo_2")
+                                    lockedX = player.lockedX.minus("x_2")
+                                    unlockedX = player.unlockedX.plus("x_2")
+                                    lockedO = player.lockedO.minus("o_2")
+                                    unlockedO = player.unlockedO.plus("o_2")
                                     newLevel = 2
                                     levelUp = true
                                 }
                                 50 -> if (player.level == 2) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_3)
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_3)
-                                    lockedX = player.lockedX.minus(R.drawable.x_3)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_3)
-                                    lockedO = player.lockedO.minus(R.drawable.o_3)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_3)
+                                    lockedPhotos = player.lockedImages.minus("xo_3")
+                                    unlockedPhotos = player.unlockedImages.plus("xo_3")
+                                    lockedX = player.lockedX.minus("x_3")
+                                    unlockedX = player.unlockedX.plus("x_3")
+                                    lockedO = player.lockedO.minus("o_3")
+                                    unlockedO = player.unlockedO.plus("o_3")
                                     newLevel = 3
                                     levelUp = true
                                 }
                                 100 -> if (player.level == 3) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_4)
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_4)
-                                    lockedX = player.lockedX.minus(R.drawable.x_4)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_4)
-                                    lockedO = player.lockedO.minus(R.drawable.o_4)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_4)
+                                    lockedPhotos = player.lockedImages.minus("xo_4")
+                                    unlockedPhotos = player.unlockedImages.plus("xo_4")
+                                    lockedX = player.lockedX.minus("x_4")
+                                    unlockedX = player.unlockedX.plus("x_4")
+                                    lockedO = player.lockedO.minus("o_4")
+                                    unlockedO = player.unlockedO.plus("o_4")
                                     newLevel = 4
                                     levelUp = true
                                 }
                                 150 -> if (player.level == 4) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_5_1) - R.drawable.xo_5_2
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_5_1) + R.drawable.xo_5_2
-                                    lockedX = player.lockedX.minus(R.drawable.x_5)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_5)
-                                    lockedO = player.lockedO.minus(R.drawable.o_5)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_5)
+                                    lockedPhotos = player.lockedImages.minus("xo_5_1") - "xo_5_2"
+                                    unlockedPhotos = player.unlockedImages.plus("xo_5_1") + "xo_5_2"
+                                    lockedX = player.lockedX.minus("x_5")
+                                    unlockedX = player.unlockedX.plus("x_5")
+                                    lockedO = player.lockedO.minus("o_5")
+                                    unlockedO = player.unlockedO.plus("o_5")
                                     newLevel = 5
                                     levelUp = true
                                 }
                                 200 -> if (player.level == 5) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_6)
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_6)
-                                    lockedX = player.lockedX.minus(R.drawable.x_6)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_6)
-                                    lockedO = player.lockedO.minus(R.drawable.o_6)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_6)
+                                    lockedPhotos = player.lockedImages.minus("xo_6")
+                                    unlockedPhotos = player.unlockedImages.plus("xo_6")
+                                    lockedX = player.lockedX.minus("x_6")
+                                    unlockedX = player.unlockedX.plus("x_6")
+                                    lockedO = player.lockedO.minus("o_6")
+                                    unlockedO = player.unlockedO.plus("o_6")
                                     newLevel = 6
                                     levelUp = true
                                 }
                                 300 -> if (player.level == 6) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_7)
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_7)
-                                    lockedX = player.lockedX.minus(R.drawable.x_7)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_7)
-                                    lockedO = player.lockedO.minus(R.drawable.o_7)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_7)
+                                    lockedPhotos = player.lockedImages.minus("xo_7")
+                                    unlockedPhotos = player.unlockedImages.plus("xo_7")
+                                    lockedX = player.lockedX.minus("x_7")
+                                    unlockedX = player.unlockedX.plus("x_7")
+                                    lockedO = player.lockedO.minus("o_7")
+                                    unlockedO = player.unlockedO.plus("o_7")
                                     newLevel = 7
                                     levelUp = true
                                 }
                                 400 -> if (player.level == 7) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_8)
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_8)
-                                    lockedX = player.lockedX.minus(R.drawable.x_8)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_8)
-                                    lockedO = player.lockedO.minus(R.drawable.o_8)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_8)
+                                    lockedPhotos = player.lockedImages.minus("xo_8")
+                                    unlockedPhotos = player.unlockedImages.plus("xo_8")
+                                    lockedX = player.lockedX.minus("x_8")
+                                    unlockedX = player.unlockedX.plus("x_8")
+                                    lockedO = player.lockedO.minus("o_8")
+                                    unlockedO = player.unlockedO.plus("o_8")
                                     newLevel = 8
                                     levelUp = true
                                 }
                                 500 -> if (player.level == 8) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_9)
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_9)
-                                    lockedX = player.lockedX.minus(R.drawable.x_9)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_9)
-                                    lockedO = player.lockedO.minus(R.drawable.o_9)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_9)
+                                    lockedPhotos = player.lockedImages.minus("xo_9")
+                                    unlockedPhotos = player.unlockedImages.plus("xo_9")
+                                    lockedX = player.lockedX.minus("x_9")
+                                    unlockedX = player.unlockedX.plus("x_9")
+                                    lockedO = player.lockedO.minus("o_9")
+                                    unlockedO = player.unlockedO.plus("o_9")
                                     newLevel = 9
                                     levelUp = true
                                 }
                                 600 -> if (player.level == 9) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_10_1) - R.drawable.xo_10_2
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_10_1) + R.drawable.xo_10_2
-                                    lockedX = player.lockedX.minus(R.drawable.x_10)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_10)
-                                    lockedO = player.lockedO.minus(R.drawable.o_10)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_10)
+                                    lockedPhotos = player.lockedImages.minus("xo_10_1") - "xo_10_2"
+                                    unlockedPhotos = player.unlockedImages.plus("xo_10_1") + "xo_10_2"
+                                    lockedX = player.lockedX.minus("x_10")
+                                    unlockedX = player.unlockedX.plus("x_10")
+                                    lockedO = player.lockedO.minus("o_10")
+                                    unlockedO = player.unlockedO.plus("o_10")
                                     newLevel = 10
                                     levelUp = true
                                 }
                                 700 -> if (player.level == 10) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_11)
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_11)
-                                    lockedX = player.lockedX.minus(R.drawable.x_11)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_11)
-                                    lockedO = player.lockedO.minus(R.drawable.o_11)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_11)
+                                    lockedPhotos = player.lockedImages.minus("xo_11")
+                                    unlockedPhotos = player.unlockedImages.plus("xo_11")
+                                    lockedX = player.lockedX.minus("x_11")
+                                    unlockedX = player.unlockedX.plus("x_11")
+                                    lockedO = player.lockedO.minus("o_11")
+                                    unlockedO = player.unlockedO.plus("o_11")
                                     newLevel = 11
                                     levelUp = true
                                 }
                                 800 -> if (player.level == 11) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_12)
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_12)
-                                    lockedX = player.lockedX.minus(R.drawable.x_12)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_12)
-                                    lockedO = player.lockedO.minus(R.drawable.o_12)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_12)
+                                    lockedPhotos = player.lockedImages.minus("xo_12")
+                                    unlockedPhotos = player.unlockedImages.plus("xo_12")
+                                    lockedX = player.lockedX.minus("x_12")
+                                    unlockedX = player.unlockedX.plus("x_12")
+                                    lockedO = player.lockedO.minus("o_12")
+                                    unlockedO = player.unlockedO.plus("o_12")
                                     newLevel = 12
                                     levelUp = true
                                 }
                                 900 -> if (player.level == 12) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_13)
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_13)
-                                    lockedX = player.lockedX.minus(R.drawable.x_13)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_13)
-                                    lockedO = player.lockedO.minus(R.drawable.o_13)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_13)
+                                    lockedPhotos = player.lockedImages.minus("xo_13")
+                                    unlockedPhotos = player.unlockedImages.plus("xo_13")
+                                    lockedX = player.lockedX.minus("x_13")
+                                    unlockedX = player.unlockedX.plus("x_13")
+                                    lockedO = player.lockedO.minus("o_13")
+                                    unlockedO = player.unlockedO.plus("o_13")
                                     newLevel = 13
                                     levelUp = true
                                 }
                                 1000 -> if (player.level == 13) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_14)
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_14)
-                                    lockedX = player.lockedX.minus(R.drawable.x_14)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_14)
-                                    lockedO = player.lockedO.minus(R.drawable.o_14)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_14)
+                                    lockedPhotos = player.lockedImages.minus("xo_14")
+                                    unlockedPhotos = player.unlockedImages.plus("xo_14")
+                                    lockedX = player.lockedX.minus("x_14")
+                                    unlockedX = player.unlockedX.plus("x_14")
+                                    lockedO = player.lockedO.minus("o_14")
+                                    unlockedO = player.unlockedO.plus("o_14")
                                     newLevel = 14
                                     levelUp = true
                                 }
                                 1200 -> if (player.level == 14) {
-                                    lockedPhotos = player.lockedImages.minus(R.drawable.xo_15_1) - R.drawable.xo_15_2
-                                    unlockedPhotos = player.unlockedImages.plus(R.drawable.xo_15_1) + R.drawable.xo_15_2
-                                    lockedX = player.lockedX.minus(R.drawable.x_15)
-                                    unlockedX = player.unlockedX.plus(R.drawable.x_15)
-                                    lockedO = player.lockedO.minus(R.drawable.o_15)
-                                    unlockedO = player.unlockedO.plus(R.drawable.o_15)
+                                    lockedPhotos = player.lockedImages.minus("xo_15_1") - "xo_15_2"
+                                    unlockedPhotos = player.unlockedImages.plus("xo_15_1") + "xo_15_2"
+                                    lockedX = player.lockedX.minus("x_15")
+                                    unlockedX = player.unlockedX.plus("x_15")
+                                    lockedO = player.lockedO.minus("o_15")
+                                    unlockedO = player.unlockedO.plus("o_15")
                                     newLevel = 15
                                     levelUp = true
                                 }

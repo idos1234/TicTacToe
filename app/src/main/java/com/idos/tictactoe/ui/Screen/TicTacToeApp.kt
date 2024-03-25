@@ -35,6 +35,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.dataStore.SharedPreferencesDataStore
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInScreen
 import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInViewModel
@@ -137,13 +138,14 @@ fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChang
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun TopHomeScreenMenu(modifier: Modifier, context: Context, email: String, navController: NavHostController, onChangeScreen: () -> Unit) {
-
     var player by remember {
         mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
     }
 
     //get Players collection from database
     player = getPlayer(email, context)
+
+    val currentImage = GetXO(player.currentImage)
 
     Box(modifier = modifier
         .clickable(
@@ -162,7 +164,7 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, email: String, navCo
                 modifier = Modifier
                     .size(90.dp)
             ) {
-                Image(painter = painterResource(id = player.currentImage), contentDescription = null, contentScale = ContentScale.Crop)
+                Image(painter = painterResource(id = currentImage), contentDescription = null, contentScale = ContentScale.Crop)
                 }
 
             Spacer(modifier = Modifier.width(15.dp))

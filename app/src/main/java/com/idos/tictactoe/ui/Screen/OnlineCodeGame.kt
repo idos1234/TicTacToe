@@ -57,6 +57,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
+import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.theme.BackGround
@@ -99,6 +100,9 @@ class CodeGameService : Service() {
 
 @Composable
 fun playersBar(player1: MainPlayerUiState, player2: MainPlayerUiState, size: Dp, modifier: Modifier, currentGame: OnlineGameUiState, foundPlayer: Boolean) {
+    val player1CurrentImage = GetXO(player1.currentImage)
+    val player2CurrentImage = GetXO(player1.currentImage)
+
     Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
         Spacer(modifier = Modifier.weight(1f))
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
@@ -115,7 +119,7 @@ fun playersBar(player1: MainPlayerUiState, player2: MainPlayerUiState, size: Dp,
                     )
                 ) {
                     Image(
-                        painter = painterResource(id = player1.currentImage),
+                        painter = painterResource(id = player1CurrentImage),
                         contentDescription = null,
                         contentScale = ContentScale.Crop
                     )
@@ -154,7 +158,7 @@ fun playersBar(player1: MainPlayerUiState, player2: MainPlayerUiState, size: Dp,
                     )
                 ) {
                     Image(
-                        painter = painterResource(id = player2.currentImage),
+                        painter = painterResource(id = player2CurrentImage),
                         contentDescription = null,
                         contentScale = ContentScale.Crop
                     )
