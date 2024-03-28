@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Screen
+package com.idos.tictactoe.ui.Online
 
 import android.annotation.SuppressLint
 import android.app.Service
@@ -41,6 +41,8 @@ import com.idos.tictactoe.data.GetX
 import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
+import com.idos.tictactoe.ui.Screen.GameScreen
+import com.idos.tictactoe.ui.Screen.getPlayer
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
 import kotlinx.coroutines.delay

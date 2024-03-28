@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Screen.GoogleSignIn
+package com.idos.tictactoe.ui.GoogleSignIn
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.idos.tictactoe.data.GetXO
+import com.idos.tictactoe.ui.Online.CodeGameViewModel
+import com.idos.tictactoe.ui.Online.OnlineGameRememberedValues
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery

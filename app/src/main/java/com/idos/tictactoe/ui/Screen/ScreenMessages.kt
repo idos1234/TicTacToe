@@ -35,8 +35,8 @@ import androidx.navigation.NavController
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.idos.tictactoe.data.MainPlayerUiState
-import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleEmail
-import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInViewModel
+import com.idos.tictactoe.ui.GoogleSignIn.GoogleEmail
+import com.idos.tictactoe.ui.GoogleSignIn.GoogleSignInViewModel
 import java.security.MessageDigest
 
 fun String.toSHA256(): String {

@@ -37,8 +37,14 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.dataStore.SharedPreferencesDataStore
-import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInScreen
-import com.idos.tictactoe.ui.Screen.GoogleSignIn.GoogleSignInViewModel
+import com.idos.tictactoe.ui.GoogleSignIn.GoogleSignInScreen
+import com.idos.tictactoe.ui.GoogleSignIn.GoogleSignInViewModel
+import com.idos.tictactoe.ui.Online.CheckExitOnlineGame
+import com.idos.tictactoe.ui.Online.CodeGameViewModel
+import com.idos.tictactoe.ui.Online.EnterOnlineGameWithCode
+import com.idos.tictactoe.ui.Online.OnlineTicTacToe
+import com.idos.tictactoe.ui.Online.OpenOnlineGameWithCode
+import com.idos.tictactoe.ui.Online.codeGameScreen
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
 import com.idos.tictactoe.ui.theme.Shapes
@@ -501,6 +507,7 @@ fun TicTacToeApp(
         ) {
             //home screen
             composable(route = GameScreen.Start.title) {
+                backStackEntry?.arguments?.getString("gameId")
                 HomeScreen(
                     onTwoPlayersClick = { navController.navigate(GameScreen.TwoPlayers.title) },
                     onSinglePlayerClick = { navController.navigate(GameScreen.SinglePlayer.title) },

@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Screen
+package com.idos.tictactoe.ui.Online
 
 import android.app.Service
 import android.content.Context
@@ -60,6 +60,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
+import com.idos.tictactoe.ui.Screen.GameScreen
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery

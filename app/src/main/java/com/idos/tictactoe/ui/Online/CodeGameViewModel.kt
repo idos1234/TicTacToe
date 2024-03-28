@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Screen
+package com.idos.tictactoe.ui.Online
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

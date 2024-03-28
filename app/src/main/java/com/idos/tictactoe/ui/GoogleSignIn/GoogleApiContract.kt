@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Screen.GoogleSignIn
+package com.idos.tictactoe.ui.GoogleSignIn
 
 import android.app.Activity
 import android.content.Context

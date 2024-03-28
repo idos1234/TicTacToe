@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TicTacToe"
         android:resizeableActivity="false"
-        tools:targetApi="tiramisu"
+        tools:targetApi="upside_down_cake"
         android:sharedUserMaxSdkVersion="33">
         <activity
             android:name=".MainActivity"
@@ -48,10 +48,10 @@
         </service>
 
         <service
-            android:name=".ui.Screen.CodeGameService"
+            android:name=".ui.Online.CodeGameService"
             android:stopWithTask="false"/>
         <service
-            android:name=".ui.Screen.OnlineGameService"
+            android:name=".ui.Online.OnlineGameService"
             android:stopWithTask="false"/>
 
     </application>
