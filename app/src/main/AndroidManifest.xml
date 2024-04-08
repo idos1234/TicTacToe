@@ -22,7 +22,7 @@
         android:theme="@style/Theme.TicTacToe"
         android:resizeableActivity="false"
         tools:targetApi="upside_down_cake"
-        android:sharedUserMaxSdkVersion="33">
+        android:sharedUserMaxSdkVersion="34">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
