@@ -43,6 +43,7 @@ import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.Screen.GameScreen
 import com.idos.tictactoe.ui.Screen.getPlayer
+import com.idos.tictactoe.ui.Screen.toSHA256
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
 import kotlinx.coroutines.delay
@@ -636,7 +637,7 @@ fun OnlineTicTacToe(
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
-                        databaseReference.child(game.id).child("player2").setValue(player)
+                        databaseReference.child(game.id).child("player2").setValue(player.toSHA256())
                         currentGame = updatedGame
                         foundPlayer = true
                         myTurn = "O"
@@ -648,7 +649,7 @@ fun OnlineTicTacToe(
                     val key: String = databaseReference.push().key!!.takeLast(5)
                     val newGame = OnlineGameUiState(
                         id = key,
-                        player1 = player,
+                        player1 = player.toSHA256(),
                         player2 = "",
                         winner = "",
                         boxes = Boxes()

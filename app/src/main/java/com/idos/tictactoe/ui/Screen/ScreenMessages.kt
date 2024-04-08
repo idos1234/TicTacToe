@@ -123,6 +123,7 @@ fun ChooseName(
                     //on success
                     .addOnSuccessListener {
                         changeEmail(emailState.email2!!.toSHA256())
+                        done = false
                         onClick()
                     }
                     //on failure
