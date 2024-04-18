@@ -10,13 +10,25 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,7 +43,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.tictactoe.ui.Screen.CheckOnlineWinner
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.idos.tictactoe.R
@@ -43,7 +59,6 @@ import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.Screen.GameScreen
 import com.idos.tictactoe.ui.Screen.getPlayer
-import com.idos.tictactoe.ui.Screen.toSHA256
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
 import kotlinx.coroutines.delay
@@ -577,7 +592,6 @@ fun OnlineTicTacToe(
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("Games")
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     if(waitingTimeFlag) {
         waitingTimeFlag = false
@@ -598,7 +612,7 @@ fun OnlineTicTacToe(
             while (times == 1) {
                 Loop@ for (Game in snapshot.children) {
                     val game = Game.getValue(OnlineGameUiState::class.java)
-                    //open room
+                    //enter room
                     if ((game!!.player2 == "")) {
                         val updatedGame = OnlineGameUiState(
                             id = game.id,
@@ -608,36 +622,7 @@ fun OnlineTicTacToe(
                             boxes = game.boxes
                         )
                         onlineGameId = game.id
-                        //get Players collection from database
-                        db.collection("Players").get()
-                            //on success
-                            .addOnSuccessListener { queryDocumentSnapshots ->
-                                //check if collection is empty
-                                if (!queryDocumentSnapshots.isEmpty) {
-                                    val list = queryDocumentSnapshots.documents
-                                    for (d in list) {
-                                        val p: MainPlayerUiState? = d.toObject(
-                                            MainPlayerUiState::class.java)
-                                        //find player using database
-                                        if (p?.email == game.player1){
-                                            player1 = p
-                                        }
-                                        if (p?.email == player){
-                                            player2 = p
-                                        }
-
-                                    }
-                                }
-                            }
-                            //on failure
-                            .addOnFailureListener {
-                                Toast.makeText(
-                                    context,
-                                    "Fail to get the data.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        databaseReference.child(game.id).child("player2").setValue(player.toSHA256())
+                        databaseReference.child(game.id).child("player2").setValue(player)
                         currentGame = updatedGame
                         foundPlayer = true
                         myTurn = "O"
@@ -649,37 +634,12 @@ fun OnlineTicTacToe(
                     val key: String = databaseReference.push().key!!.takeLast(5)
                     val newGame = OnlineGameUiState(
                         id = key,
-                        player1 = player.toSHA256(),
+                        player1 = player,
                         player2 = "",
                         winner = "",
                         boxes = Boxes()
                     )
                     onlineGameId = key
-                    //get Players collection from database
-                    db.collection("Players").get()
-                        //on success
-                        .addOnSuccessListener { queryDocumentSnapshots ->
-                            //check if collection is empty
-                            if (!queryDocumentSnapshots.isEmpty) {
-                                val list = queryDocumentSnapshots.documents
-                                for (d in list) {
-                                    val p: MainPlayerUiState? = d.toObject(
-                                        MainPlayerUiState::class.java)
-                                    //find player using database
-                                    if (p?.email == player){
-                                        player1 = p
-                                    }
-                                }
-                            }
-                        }
-                        //on failure
-                        .addOnFailureListener {
-                            Toast.makeText(
-                                context,
-                                "Fail to get the data.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
                     databaseReference.child(key).setValue(newGame)
                     currentGame = newGame
                     myTurn = "X"
@@ -692,31 +652,6 @@ fun OnlineTicTacToe(
                     currentGame = game
                     if (currentGame.player2 != "") {
                         foundPlayer = true
-                        //get Players collection from database
-                        db.collection("Players").get()
-                            //on success
-                            .addOnSuccessListener { queryDocumentSnapshots ->
-                                //check if collection is empty
-                                if (!queryDocumentSnapshots.isEmpty) {
-                                    val list = queryDocumentSnapshots.documents
-                                    for (d in list) {
-                                        val p: MainPlayerUiState? = d.toObject(
-                                            MainPlayerUiState::class.java)
-                                        if (p?.name == currentGame.player2){
-                                            player2 = p
-                                        }
-
-                                    }
-                                }
-                            }
-                            //on failure
-                            .addOnFailureListener {
-                                Toast.makeText(
-                                    context,
-                                    "Fail to get the data.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
                     }
                 }
             }
@@ -732,6 +667,9 @@ fun OnlineTicTacToe(
         }
     }
     )
+
+    player1 = getPlayer(email = currentGame.player1, context = context)
+    player2 = getPlayer(email = currentGame.player2, context = context)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)

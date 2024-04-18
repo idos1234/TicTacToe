@@ -62,15 +62,15 @@ dependencies {
     // FireBase Dependency
     //data base
     implementation 'com.google.firebase:firebase-database-ktx:20.3.1'
-    implementation 'com.google.firebase:firebase-firestore-ktx:24.11.0'
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.11.1'
     //messaging
     implementation 'com.google.firebase:firebase-messaging-ktx:23.4.1'
     //crashlytics
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
-    implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
     // preferences DataStore
-    implementation "androidx.datastore:datastore-preferences:1.0.0"
+    implementation "androidx.datastore:datastore-preferences:1.1.0"
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
     implementation "androidx.security:security-crypto-ktx:1.1.0-alpha06"
     //tests

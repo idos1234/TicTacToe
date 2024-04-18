@@ -147,7 +147,7 @@ fun playersBar(player1: MainPlayerUiState, player2: MainPlayerUiState, size: Dp,
         Text("${currentGame.player1Score} : ${currentGame.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
         Spacer(modifier = Modifier.weight(1f))
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
-            if (foundPlayer) {
+            if (player2 != MainPlayerUiState()) {
                 Card(
                     modifier = Modifier.size(size),
                     elevation = 5.dp,

@@ -489,7 +489,7 @@ fun TicTacToeApp(
                         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
                     )
 
-                    encryptedSharedPreferences.edit().putString("email", email.value).apply()
+                    encryptedSharedPreferences.edit().putString("email", "").apply()
                 }
             )
         }

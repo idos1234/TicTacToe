@@ -93,7 +93,7 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
             //if user is existed
         if (isPlayerExisted) {
             //log in
-            changeEmail(user?.email!!)
+            changeEmail(user?.email!!.toSHA256())
             onClick()
         } else if (!isPlayerExisted && searchedPlayer) {
             //sign up
