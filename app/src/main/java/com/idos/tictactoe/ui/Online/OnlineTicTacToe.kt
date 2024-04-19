@@ -103,8 +103,7 @@ fun SetBoxOnline(
     game: OnlineGameUiState,
     boxNumber: Int,
     playerTurn: String,
-    databaseReference: DatabaseReference,
-    gameId: String
+    databaseReference: DatabaseReference
 ) {
 
     val boxes: Boxes? = when(boxNumber) {
@@ -120,34 +119,34 @@ fun SetBoxOnline(
         else -> null
     }
 
-    databaseReference.child(gameId).child("boxes").setValue(boxes)
-    databaseReference.child(gameId).child("times").setValue(game.times.plus(1))
+    databaseReference.child(onlineGameId).child("boxes").setValue(boxes)
+    databaseReference.child(onlineGameId).child("times").setValue(game.times.plus(1))
 }
 
 @Composable
-fun changePlayerTurn(game: OnlineGameUiState, databaseReference: DatabaseReference, gameId: String) {
+fun changePlayerTurn(game: OnlineGameUiState, databaseReference: DatabaseReference, onlineGameId: String): String {
     val PlayerTurn = if(game.playerTurn == "X") {
         "O"
     } else {
         "X"
     }
 
-    databaseReference.child(gameId).child("playerTurn").setValue(PlayerTurn)
+    databaseReference.child(onlineGameId).child("playerTurn").setValue(PlayerTurn)
+
+    return PlayerTurn
 }
 
 @Composable
 fun OnlineGameButton(
-    game: OnlineGameUiState,
+    gameState: OnlineGameRememberedValues,
     boxNumber: Int,
-    setBox:(String) -> Unit,
+    setBox: (String) -> Unit,
     box: String,
-    enabled: Boolean,
+    enableState: Enable,
     context: Context = LocalContext.current,
     databaseReference: DatabaseReference,
-    FindGame: (OnlineGameUiState) -> Unit,
-    gameId: String,
     modifier: Modifier,
-    enableClick: (Boolean) -> Unit
+    myTurn: String?
 ) {
     var player1 by remember {
         mutableStateOf(MainPlayerUiState())
@@ -181,26 +180,25 @@ fun OnlineGameButton(
                 .size(100.dp)
                 .clickable(
                     onClick = {
-                        enableClick(false)
+                        enableState.enable = false
                         SetBox = true
                     },
-                    enabled = (box == "") && enabled,
+                    enabled = (box == "") && enableState.enable && gameState.game.playerTurn == myTurn && wasGameStarted,
                 )
         )
     }
 
     if (SetBox) {
-        changePlayerTurn(game, databaseReference = databaseReference, gameId)
-        setBox(game.playerTurn)
+        val turn = changePlayerTurn(gameState.game, databaseReference = databaseReference, onlineGameId)
+        setBox(gameState.game.playerTurn)
         SetBoxOnline(
-            game = game,
+            game = gameState.game,
             boxNumber = boxNumber,
-            playerTurn = game.playerTurn,
+            playerTurn = gameState.game.playerTurn,
             databaseReference = databaseReference,
-            gameId
         )
-        FindGame(findGame(gameId = gameId, databaseReference = databaseReference))
-        enableClick(true)
+        gameState.game.playerTurn = turn
+        enableState.enable = true
         SetBox = false
     }
 }
@@ -209,13 +207,21 @@ fun OnlineGameButton(
     "SuspiciousIndentation"
 )
 @Composable
-fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, player: String, player1: MainPlayerUiState, player2: MainPlayerUiState, databaseReference: DatabaseReference, viewModel: CodeGameViewModel, navController: NavController, enableState: Enable, modifier: Modifier) {
+fun OnlineButtonGrid(
+    myTurn: String?,
+    gameStarted: Boolean,
+    player: String,
+    databaseReference: DatabaseReference,
+    viewModel: CodeGameViewModel,
+    navController: NavController,
+    enableState: Enable,
+    gameState: OnlineGameRememberedValues,
+    modifier: Modifier,
+    gameId: String
+) {
 
     wasGameStarted = gameStarted
-
-    var game by remember {
-        mutableStateOf(OnlineGameUiState())
-    }
+    onlineGameId = gameId
 
     var foundWinner by remember {
         mutableStateOf(false)
@@ -228,7 +234,7 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
     }
 
     var boxes by remember {
-        mutableStateOf(game.boxes)
+        mutableStateOf(gameState.game.boxes)
     }
 
     val configuration = LocalConfiguration.current
@@ -241,150 +247,228 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
         Spacer(modifier = Modifier.weight(0.5f))
         Row(modifier = Modifier.weight(5f)) {
             Spacer(modifier = Modifier.weight(1f))
-            OnlineGameButton(game = game, boxNumber = 1, setBox = {boxes.Box1 = it}, box = boxes.Box1, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
-                .weight(5f)
-                .size(size)) {
-                viewModel.changeEnable(it)
-            }
+            OnlineGameButton(
+                gameState = gameState,
+                boxNumber = 1,
+                setBox = {boxes.Box1 = it},
+                box = boxes.Box1,
+                enableState = enableState,
+                databaseReference = databaseReference,
+                modifier = Modifier
+                    .weight(5f)
+                    .size(size),
+                myTurn = myTurn
+            )
             Spacer(modifier = Modifier.weight(1f))
-            OnlineGameButton(game = game, boxNumber = 2, setBox = {boxes.Box2 = it}, box = boxes.Box2, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
-                .weight(5f)
-                .size(size)) {
-                viewModel.changeEnable(it)
-            }
+            OnlineGameButton(
+                gameState = gameState,
+                boxNumber = 2,
+                setBox = {boxes.Box2 = it},
+                box = boxes.Box2,
+                enableState = enableState,
+                databaseReference = databaseReference,
+                modifier = Modifier
+                    .weight(5f)
+                    .size(size),
+                myTurn = myTurn
+            )
             Spacer(modifier = Modifier.weight(1f))
-            OnlineGameButton(game = game, boxNumber = 3, setBox = {boxes.Box3 = it}, box = boxes.Box3, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
-                .weight(5f)
-                .size(size)) {
-                viewModel.changeEnable(it)
-            }
+            OnlineGameButton(
+                gameState = gameState,
+                boxNumber = 3,
+                setBox = {boxes.Box3 = it},
+                box = boxes.Box3,
+                enableState = enableState,
+                databaseReference = databaseReference,
+                modifier = Modifier
+                    .weight(5f)
+                    .size(size),
+                myTurn = myTurn
+            )
             Spacer(modifier = Modifier.weight(1f))
         }
         Spacer(modifier = Modifier.weight(0.5f))
         Row(modifier = Modifier.weight(5f)) {
             Spacer(modifier = Modifier.weight(1f))
-            OnlineGameButton(game = game, boxNumber = 4, setBox = {boxes.Box4 = it}, box = boxes.Box4, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
-                .weight(5f)
-                .size(size)) {
-                viewModel.changeEnable(it)
-            }
+            OnlineGameButton(
+                gameState = gameState,
+                boxNumber = 4,
+                setBox = {boxes.Box4 = it},
+                box = boxes.Box4,
+                enableState = enableState,
+                databaseReference = databaseReference,
+                modifier = Modifier
+                    .weight(5f)
+                    .size(size),
+                myTurn = myTurn
+            )
             Spacer(modifier = Modifier.weight(1f))
-            OnlineGameButton(game = game, boxNumber = 5, setBox = {boxes.Box5 = it}, box = boxes.Box5, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
-                .weight(5f)
-                .size(size)) {
-                viewModel.changeEnable(it)
-            }
+            OnlineGameButton(
+                gameState = gameState,
+                boxNumber = 5,
+                setBox = {boxes.Box5 = it},
+                box = boxes.Box5,
+                enableState = enableState,
+                databaseReference = databaseReference,
+                modifier = Modifier
+                    .weight(5f)
+                    .size(size),
+                myTurn = myTurn
+            )
             Spacer(modifier = Modifier.weight(1f))
-            OnlineGameButton(game = game, boxNumber = 6, setBox = {boxes.Box6 = it}, box = boxes.Box6, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
-                .weight(5f)
-                .size(size)) {
-                viewModel.changeEnable(it)
-            }
+            OnlineGameButton(
+                gameState = gameState,
+                boxNumber = 6,
+                setBox = {boxes.Box6 = it},
+                box = boxes.Box6,
+                enableState = enableState,
+                databaseReference = databaseReference,
+                modifier = Modifier
+                    .weight(5f)
+                    .size(size),
+                myTurn = myTurn
+            )
             Spacer(modifier = Modifier.weight(1f))
         }
         Spacer(modifier = Modifier.weight(0.5f))
         Row(modifier = Modifier.weight(5f)) {
             Spacer(modifier = Modifier.weight(1f))
-            OnlineGameButton(game = game, boxNumber = 7, setBox = {boxes.Box7 = it}, box = boxes.Box7, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
-                .weight(5f)
-                .size(size)) {
-                viewModel.changeEnable(it)
-            }
+            OnlineGameButton(
+                gameState = gameState,
+                boxNumber = 7,
+                setBox = {boxes.Box7 = it},
+                box = boxes.Box7,
+                enableState = enableState,
+                databaseReference = databaseReference,
+                modifier = Modifier
+                    .weight(5f)
+                    .size(size),
+                myTurn = myTurn
+            )
             Spacer(modifier = Modifier.weight(1f))
-            OnlineGameButton(game = game, boxNumber = 8, setBox = {boxes.Box8 = it}, box = boxes.Box8, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
-                .weight(5f)
-                .size(size)) {
-                viewModel.changeEnable(it)
-            }
+            OnlineGameButton(
+                gameState = gameState,
+                boxNumber = 8,
+                setBox = {boxes.Box8 = it},
+                box = boxes.Box8,
+                enableState = enableState,
+                databaseReference = databaseReference,
+                modifier = Modifier
+                    .weight(5f)
+                    .size(size),
+                myTurn = myTurn
+            )
             Spacer(modifier = Modifier.weight(1f))
-            OnlineGameButton(game = game, boxNumber = 9, setBox = {boxes.Box9 = it}, box = boxes.Box9, enabled = enableState.enable && myTurn == game.playerTurn  && gameStarted, databaseReference = databaseReference, FindGame = {game = it}, gameId = gameId, modifier = Modifier
-                .weight(5f)
-                .size(size)) {
-                viewModel.changeEnable(it)
-            }
+            OnlineGameButton(
+                gameState = gameState,
+                boxNumber = 9,
+                setBox = {boxes.Box9 = it},
+                box = boxes.Box9,
+                enableState = enableState,
+                databaseReference = databaseReference,
+                modifier = Modifier
+                    .weight(5f)
+                    .size(size),
+                myTurn = myTurn
+            )
             Spacer(modifier = Modifier.weight(1f))
         }
     }
 
-    game = findGame(gameId = gameId, databaseReference = databaseReference)
-    boxes = game.boxes
+    gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
+    boxes = gameState.game.boxes
     //if can be a winner
-    if(game.times >= 5) {
-        databaseReference.child(gameId).child("winner").setValue(CheckOnlineWinner(boxes))
+    if(gameState.game.times >= 5) {
+        databaseReference.child(onlineGameId).child("winner").setValue(CheckOnlineWinner(boxes))
         //if has winner
-        if(game.winner.isNotEmpty()) {
+        if(gameState.game.winner.isNotEmpty()) {
             //if no one found the winner
-            if (!game.foundWinner) {
-                databaseReference.child(gameId).child("foundWinner").setValue(true)
+            if (!gameState.game.foundWinner) {
+                databaseReference.child(onlineGameId).child("foundWinner").setValue(true)
                 //update game score
-                if (game.winner == "X") {
+                if (gameState.game.winner == "X") {
                     viewModel.changeEnable(false)
-                    databaseReference.child(gameId).child("player1Score").setValue(game.player1Score.plus(1))
-                    databaseReference.child(gameId).child("rounds").setValue(game.rounds.plus(1))
+                    databaseReference.child(onlineGameId).child("player1Score").setValue(gameState.game.player1Score.plus(1))
+                    databaseReference.child(onlineGameId).child("rounds").setValue(gameState.game.rounds.plus(1))
                 }
-                if ((game.winner == "O")) {
+                if ((gameState.game.winner == "O")) {
                     viewModel.changeEnable(false)
-                    databaseReference.child(gameId).child("player2Score").setValue(game.player2Score.plus(1))
-                    databaseReference.child(gameId).child("rounds").setValue(game.rounds.plus(1))
+                    databaseReference.child(onlineGameId).child("player2Score").setValue(gameState.game.player2Score.plus(1))
+                    databaseReference.child(onlineGameId).child("rounds").setValue(gameState.game.rounds.plus(1))
                 }
             }
 
             // if has final winner
-            if (game.player1Score == 2) {
+            if (gameState.game.player1Score == 2) {
                 if (myTurn == "X") {
                     //show winner
                     //won
                     updateScore(playerName = player, addedScore = 1, context = LocalContext.current)
-                    viewModel.updateFinalScoreScreenData("You won!", game, player1,  player2)
+                    viewModel.updateFinalScoreScreenData("You won!", gameState.game, gameState.player1,  gameState.player2)
                 } else if (myTurn == "O") {
                     //show winner
                     //lose
                     updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
-                    viewModel.updateFinalScoreScreenData("You lose", game, player1,  player2)
+                    viewModel.updateFinalScoreScreenData("You lose", gameState.game, gameState.player1,  gameState.player2)
                 }
                 navController.navigate(GameScreen.ShowGameFinalScore.title)
-            } else if (game.player2Score == 2) {
+            } else if (gameState.game.player2Score == 2) {
                 if (myTurn == "O") {
                     //show winner
                     //won
                     updateScore(playerName = player, addedScore = 1, context = LocalContext.current)
-                    viewModel.updateFinalScoreScreenData("You won!", game, player1,  player2)
+                    viewModel.updateFinalScoreScreenData("You won!", gameState.game, gameState.player1,  gameState.player2)
                 } else if (myTurn == "X") {
                     //show winner
                     //lose
                     updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
-                    viewModel.updateFinalScoreScreenData("You lose", game, player1,  player2)
+                    viewModel.updateFinalScoreScreenData("You lose", gameState.game, gameState.player1,  gameState.player2)
                 }
                 // show score screen
                 navController.navigate(GameScreen.ShowGameFinalScore.title)
             } else
                 //new round
-                game = findGame(gameId = gameId, databaseReference = databaseReference)
-                boxes = game.boxes
-                if (game.foundWinner && game.player1Score != 2 && game.player2Score != 2) {
+                gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
+                boxes = gameState.game.boxes
+                if (gameState.game.foundWinner && gameState.game.player1Score != 2 && gameState.game.player2Score != 2) {
                     scope.launch {
                         delay(3000)
-                        ResetGame(game = game, databaseReference = databaseReference, gameId)
+                        if(gameState.game.boxes != Boxes()) {
+                            ResetGame(
+                                game = gameState.game,
+                                databaseReference = databaseReference,
+                                onFinish = {
+                                    enableState.enable = true
+                                }
+                            )
+                        }
                         viewModel.changeEnable(true)
                     }
             }
         }
         //tie
-        else if (game.times == 9){
+        else if (gameState.game.times == 9){
             //if didn't update round
-            if (!game.editedRounds) {
+            if (!gameState.game.editedRounds) {
                 //update round
-                databaseReference.child(gameId).child("editedRounds").setValue(true)
-                databaseReference.child(gameId).child("rounds").setValue(game.rounds.plus(1))
+                databaseReference.child(onlineGameId).child("editedRounds").setValue(true)
+                databaseReference.child(onlineGameId).child("rounds").setValue(gameState.game.rounds.plus(1))
             }
-            game = findGame(gameId = gameId, databaseReference = databaseReference)
-            boxes = game.boxes
+            gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
+            boxes = gameState.game.boxes
             //reset round
-            if (game.player1Score != 2 && game.player2Score != 2) {
+            if (gameState.game.player1Score != 2 && gameState.game.player2Score != 2) {
                 scope.launch {
                     delay(3000)
-                    ResetGame(game = game, databaseReference = databaseReference, gameId)
-                    viewModel.changeEnable(true)
+                    if(gameState.game.boxes != Boxes()) {
+                        ResetGame(
+                            game = gameState.game,
+                            databaseReference = databaseReference,
+                            onFinish = {
+                                enableState.enable = true
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -392,15 +476,15 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
 
 
     if (!startedCountDown) {
-        foundWinner = game.foundWinner
+        foundWinner = gameState.game.foundWinner
     }
     //show countDown dialog for winning
-    if (foundWinner && (game.player1Score != 2) && (game.player2Score != 2)) {
+    if (foundWinner && (gameState.game.player1Score != 2) && (gameState.game.player2Score != 2)) {
         startedCountDown = true
         NextRoundDialog(
-            game = findGame(gameId = gameId, databaseReference = databaseReference),
-            player1 = player1,
-            player2 = player2,
+            game = findGame(gameId = onlineGameId, databaseReference = databaseReference),
+            player1 = gameState.player1,
+            player2 = gameState.player2,
             onZeroSecs = {
                 foundWinner = false
                 startedCountDown = false
@@ -408,15 +492,15 @@ fun OnlineButtonGrid(gameId: String, myTurn: String?, gameStarted: Boolean, play
         )
     }
     if (!startedCountDown) {
-        times = game.times
+        times = gameState.game.times
     }
     //show countDown dialog for tie
-    if ((times == 9) && (game.player1Score != 2) && (game.player2Score != 2)) {
+    if ((times == 9) && (gameState.game.player1Score != 2) && (gameState.game.player2Score != 2)) {
         startedCountDown = true
         NextRoundDialog(
-            game = findGame(gameId = gameId, databaseReference = databaseReference),
-            player1 = player1,
-            player2 = player2,
+            game = findGame(gameId = onlineGameId, databaseReference = databaseReference),
+            player1 = gameState.player1,
+            player2 = gameState.player2,
             onZeroSecs = {
                 times = 0
                 startedCountDown = false
@@ -541,18 +625,18 @@ fun findGame(gameId: String, databaseReference: DatabaseReference, context: Cont
     return game
 }
 
-fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference, gameId: String) {
-    databaseReference.child(gameId).child("winner").setValue("")
-    databaseReference.child(gameId).child("boxes").setValue(Boxes())
-    databaseReference.child(gameId).child("times").setValue(0)
-    databaseReference.child(gameId).child("foundWinner").setValue(false)
-    databaseReference.child(gameId).child("editedRounds").setValue(false)
+fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference, onFinish: () -> Unit) {
+    databaseReference.child(onlineGameId).child("winner").setValue("")
+    databaseReference.child(onlineGameId).child("boxes").setValue(Boxes())
+    databaseReference.child(onlineGameId).child("times").setValue(0)
+    databaseReference.child(onlineGameId).child("foundWinner").setValue(false)
+    databaseReference.child(onlineGameId).child("editedRounds").setValue(false)
     val playerTurn = if ((game.rounds % 2) == 0) {
         "O"
     } else if ((game.rounds % 2) == 1) {
         "X"
     } else null
-    databaseReference.child(gameId).child("playerTurn").setValue(playerTurn)
+    databaseReference.child(onlineGameId).child("playerTurn").setValue(playerTurn)
 }
 
 @Composable
@@ -563,9 +647,10 @@ fun OnlineTicTacToe(
     navController: NavController,
     enableState: Enable
 ) {
-    var currentGame by remember {
-        mutableStateOf(OnlineGameUiState())
+    val currentGame by remember {
+        mutableStateOf(OnlineGameRememberedValues())
     }
+
     var foundPlayer by remember {
         mutableStateOf(false)
     }
@@ -574,12 +659,6 @@ fun OnlineTicTacToe(
     }
     var myTurn by remember {
         mutableStateOf<String?>(null)
-    }
-    var player1 by remember {
-        mutableStateOf(MainPlayerUiState())
-    }
-    var player2 by remember {
-        mutableStateOf(MainPlayerUiState())
     }
     var waitingTimeFlag by remember {
         mutableStateOf(true)
@@ -597,8 +676,8 @@ fun OnlineTicTacToe(
         waitingTimeFlag = false
 
         Timer().schedule(60000) {
-            if(currentGame.player2 == "" && navController.currentDestination?.route == GameScreen.Online.title) {
-                viewModel.removeGame(currentGame.id, databaseReference, 0){
+            if(currentGame.player2.email == "" && navController.currentDestination?.route == GameScreen.Online.title) {
+                viewModel.removeGame(onlineGameId, databaseReference, 0){
                     navController.navigate(GameScreen.TimeUp.title)
                 }
             }
@@ -623,14 +702,14 @@ fun OnlineTicTacToe(
                         )
                         onlineGameId = game.id
                         databaseReference.child(game.id).child("player2").setValue(player)
-                        currentGame = updatedGame
+                        currentGame.game = updatedGame
                         foundPlayer = true
                         myTurn = "O"
                         break@Loop
                     }
                 }
                 //open room
-                if (currentGame == OnlineGameUiState()) {
+                if (currentGame.game == OnlineGameUiState()) {
                     val key: String = databaseReference.push().key!!.takeLast(5)
                     val newGame = OnlineGameUiState(
                         id = key,
@@ -641,16 +720,16 @@ fun OnlineTicTacToe(
                     )
                     onlineGameId = key
                     databaseReference.child(key).setValue(newGame)
-                    currentGame = newGame
+                    currentGame.game = newGame
                     myTurn = "X"
                 }
                 times++
             }
             for (Game in snapshot.children) {
                 val game = Game.getValue(OnlineGameUiState::class.java)
-                if (game!!.id == currentGame.id) {
-                    currentGame = game
-                    if (currentGame.player2 != "") {
+                if (game!!.id == onlineGameId) {
+                    currentGame.game = game
+                    if (currentGame.game.player2 != "") {
                         foundPlayer = true
                     }
                 }
@@ -668,22 +747,31 @@ fun OnlineTicTacToe(
     }
     )
 
-    player1 = getPlayer(email = currentGame.player1, context = context)
-    player2 = getPlayer(email = currentGame.player2, context = context)
+    currentGame.player1 = getPlayer(email = currentGame.game.player1, context = context)
+    currentGame.player2 = getPlayer(email = currentGame.game.player2, context = context)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
         .fillMaxSize()) {
         playersBar(
-            player1 = player1,
-            player2 = player2,
             size = size,
             modifier = Modifier.weight(2f),
-            currentGame = currentGame,
-            foundPlayer = foundPlayer
+            gameId = onlineGameId,
+            databaseReference = databaseReference
         )
         Spacer(modifier = Modifier.weight(1f))
-        OnlineButtonGrid(gameId = currentGame.id, myTurn = myTurn, gameStarted = foundPlayer, player = player, player1 = player1, player2 = player2, databaseReference = databaseReference, viewModel = viewModel, navController = navController, enableState = enableState, modifier = Modifier.weight(6f))
+        OnlineButtonGrid(
+            myTurn = myTurn,
+            gameStarted = foundPlayer,
+            player = player,
+            databaseReference = databaseReference,
+            viewModel = viewModel,
+            navController = navController,
+            enableState = enableState,
+            gameState = currentGame,
+            modifier = Modifier.weight(6f),
+            onlineGameId
+        )
         Spacer(modifier = Modifier.weight(1f))
     }
 }
