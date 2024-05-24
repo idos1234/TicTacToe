@@ -61,6 +61,22 @@ class CodeGameViewModel: ViewModel() {
             }
         }
     }
+
+    fun playerQuit(player: String, databaseReference: DatabaseReference, id: String, times: Int = 0) {
+        if (times < 50) {
+
+
+            if (player == "X") {
+                if (!databaseReference.child(id).child("player1Quit").setValue(true).isSuccessful) {
+                    playerQuit(player, databaseReference, id, times + 1)
+                }
+            } else {
+                if (!databaseReference.child(id).child("player2Quit").setValue(true).isSuccessful) {
+                    playerQuit(player, databaseReference, id, times + 1)
+                }
+            }
+        }
+    }
 }
 
 data class OnlineGameRememberedValues(

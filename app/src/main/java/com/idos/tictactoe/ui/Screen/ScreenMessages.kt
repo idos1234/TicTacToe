@@ -140,21 +140,38 @@ fun ChooseName(
 
 @Composable
 fun TimeUp(navController: NavController) {
-    Dialog(onDismissRequest = {navController.navigate(GameScreen.Start.title)}) {
-        Column(modifier = Modifier
-            .background(Color.White)
-            .fillMaxWidth(0.8f),
+    Dialog(onDismissRequest = { navController.navigate(GameScreen.Start.title) }) {
+        Column(
+            modifier = Modifier
+                .background(Color.White)
+                .fillMaxWidth(0.8f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "There are no players online", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Left)
-            Text(text = "Try again in 5 minutes", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Left)
+            Text(
+                text = "There are no players online",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Left
+            )
+            Text(
+                text = "Try again in 5 minutes",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Left
+            )
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = { navController.navigate(GameScreen.Start.title) }, modifier = Modifier.weight(1f)) {
+                TextButton(
+                    onClick = { navController.navigate(GameScreen.Start.title) },
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(text = "Back")
                 }
-                TextButton(onClick = { navController.navigateUp()}, modifier = Modifier.weight(1f)) {
+                TextButton(
+                    onClick = { navController.navigateUp() },
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(text = "Try again")
                 }
             }

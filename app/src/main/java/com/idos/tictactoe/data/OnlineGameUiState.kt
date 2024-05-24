@@ -24,7 +24,11 @@ data class OnlineGameUiState(
     //number of rounds
     var rounds: Int = 1,
     //if round cleared
-    var editedRounds: Boolean = false
+    var editedRounds: Boolean = false,
+    //if player 1 quit
+    var player1Quit: Boolean = false,
+    //if player 2 quit
+    var player2Quit: Boolean = false,
 )
 
 data class Boxes (

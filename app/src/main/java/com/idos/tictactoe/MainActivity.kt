@@ -16,6 +16,18 @@ class MainActivity : ComponentActivity() {
             TicTacToeTheme {
                 TicTacToeApp()
                 Firebase.messaging.subscribeToTopic("Ido")
+
+
+                /*var time by remember {
+                    mutableIntStateOf(0)
+                }
+                LaunchedEffect(time) {
+                    while (true) {
+                        delay(1000)
+                        time++
+                    }
+                }
+                Text(text = time.toString())*/
             }
         }
     }

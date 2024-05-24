@@ -1,5 +1,7 @@
 package com.idos.tictactoe.ui.Screen
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -19,22 +21,41 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.database.FirebaseDatabase
 import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.ui.Online.CodeGameViewModel
+import com.idos.tictactoe.ui.Online.MyTurn
 import com.idos.tictactoe.ui.Online.OnlineGameRememberedValues
+import com.idos.tictactoe.ui.Online.OnlineGameService
+import com.idos.tictactoe.ui.Online.findGame
+import com.idos.tictactoe.ui.Online.onlineGameId
+import com.idos.tictactoe.ui.Online.otherPlayerQuit
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
 
 @Composable
-fun ShowGameFinalScore(uiState: OnlineGameRememberedValues, navController: NavController, codeGameViewModel: CodeGameViewModel) {
+fun ShowGameFinalScore(
+    uiState: OnlineGameRememberedValues,
+    navController: NavController,
+    codeGameViewModel: CodeGameViewModel,
+    context: Context = LocalContext.current
+) {
     val player1CurrentImage = GetXO(uiState.player1.currentImage)
     val player2CurrentImage = GetXO(uiState.player1.currentImage)
+
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("Games")
+    uiState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
+    if(uiState.game.player2Quit || uiState.game.player1Quit) {
+        otherPlayerQuit = true
+    }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .background(BackGround)
@@ -83,6 +104,29 @@ fun ShowGameFinalScore(uiState: OnlineGameRememberedValues, navController: NavCo
         Spacer(modifier = Modifier.height(200.dp))
         Button(
             onClick = {
+                //other player quit
+                if(otherPlayerQuit) {
+                    //deletes game
+                    CodeGameViewModel().removeGame(onlineGameId, databaseReference, 0) {
+                        context.stopService(
+                            Intent(
+                                context,
+                                OnlineGameService::class.java
+                            )
+                        )
+                    }
+                } else {
+                    //player quit
+                    CodeGameViewModel().playerQuit(MyTurn, databaseReference, onlineGameId)
+                    context.stopService(
+                        Intent(
+                            context,
+                            OnlineGameService::class.java
+                        )
+                    )
+                }
+                otherPlayerQuit = false
+
                 //clears code after quit game
                 codeGameViewModel.clearCode()
                 navController.navigate(GameScreen.Start.title)

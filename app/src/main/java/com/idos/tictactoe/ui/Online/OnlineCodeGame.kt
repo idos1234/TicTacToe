@@ -107,7 +107,7 @@ fun playersBar(
     modifier: Modifier,
     gameId: String,
     databaseReference: DatabaseReference,
-    context: Context = LocalContext.current
+    context: Context = LocalContext.current,
 ) {
     var game by remember {
         mutableStateOf(OnlineGameUiState())
@@ -423,7 +423,6 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("GamesWithCode")
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     databaseReference.addValueEventListener(object : ValueEventListener {
         //on success

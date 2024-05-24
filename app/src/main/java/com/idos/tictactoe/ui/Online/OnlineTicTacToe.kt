@@ -67,7 +67,9 @@ import java.util.Timer
 import kotlin.concurrent.schedule
 
 private var wasGameStarted = false
-private var onlineGameId: String = ""
+var onlineGameId: String = ""
+var MyTurn: String = ""
+var otherPlayerQuit = false
 
 class OnlineGameService : Service() {
     override fun onBind(intent: Intent?): IBinder? {
@@ -86,6 +88,7 @@ class OnlineGameService : Service() {
         val databaseReference = firebaseDatabase.getReference("Games")
 
         if(!wasGameStarted) {
+            //deletes game
             CodeGameViewModel().removeGame(onlineGameId, databaseReference, 0) {
                 stopService(
                     Intent(
@@ -94,6 +97,28 @@ class OnlineGameService : Service() {
                     )
                 )
             }
+        } else {
+                //other player quit
+                if(otherPlayerQuit) {
+                    //deletes game
+                    CodeGameViewModel().removeGame(onlineGameId, databaseReference, 0) {
+                        stopService(
+                            Intent(
+                                baseContext,
+                                OnlineGameService::class.java
+                            )
+                        )
+                    }
+                } else {
+                    //player quit
+                    CodeGameViewModel().playerQuit(MyTurn, databaseReference, onlineGameId)
+                    stopService(
+                        Intent(
+                            baseContext,
+                            OnlineGameService::class.java
+                        )
+                    )
+                }
         }
     }
 }
@@ -411,6 +436,7 @@ fun OnlineButtonGrid(
                     updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
                     viewModel.updateFinalScoreScreenData("You lose", gameState.game, gameState.player1,  gameState.player2)
                 }
+                // show score screen
                 navController.navigate(GameScreen.ShowGameFinalScore.title)
             } else if (gameState.game.player2Score == 2) {
                 if (myTurn == "O") {
@@ -426,24 +452,21 @@ fun OnlineButtonGrid(
                 }
                 // show score screen
                 navController.navigate(GameScreen.ShowGameFinalScore.title)
-            } else
+            } else {
                 //new round
                 gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
                 boxes = gameState.game.boxes
                 if (gameState.game.foundWinner && gameState.game.player1Score != 2 && gameState.game.player2Score != 2) {
                     scope.launch {
-                        delay(3000)
-                        if(gameState.game.boxes != Boxes()) {
+                        if (gameState.game.boxes != Boxes()) {
                             ResetGame(
                                 game = gameState.game,
-                                databaseReference = databaseReference,
-                                onFinish = {
-                                    enableState.enable = true
-                                }
+                                databaseReference = databaseReference
                             )
                         }
                         viewModel.changeEnable(true)
                     }
+                }
             }
         }
         //tie
@@ -463,15 +486,14 @@ fun OnlineButtonGrid(
                     if(gameState.game.boxes != Boxes()) {
                         ResetGame(
                             game = gameState.game,
-                            databaseReference = databaseReference,
-                            onFinish = {
-                                enableState.enable = true
-                            }
+                            databaseReference = databaseReference
                         )
                     }
                 }
             }
         }
+    } else if(wasGameStarted) {
+        databaseReference.child(onlineGameId).child("winner").setValue("")
     }
 
 
@@ -506,6 +528,10 @@ fun OnlineButtonGrid(
                 startedCountDown = false
             }
         )
+    }
+
+    if(gameState.game.player1Quit || gameState.game.player2Quit) {
+        otherPlayerQuit = true
     }
 }
 
@@ -625,9 +651,9 @@ fun findGame(gameId: String, databaseReference: DatabaseReference, context: Cont
     return game
 }
 
-fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference, onFinish: () -> Unit) {
-    databaseReference.child(onlineGameId).child("winner").setValue("")
+fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
     databaseReference.child(onlineGameId).child("boxes").setValue(Boxes())
+    databaseReference.child(onlineGameId).child("winner").setValue("")
     databaseReference.child(onlineGameId).child("times").setValue(0)
     databaseReference.child(onlineGameId).child("foundWinner").setValue(false)
     databaseReference.child(onlineGameId).child("editedRounds").setValue(false)
@@ -645,11 +671,9 @@ fun OnlineTicTacToe(
     context: Context,
     viewModel: CodeGameViewModel,
     navController: NavController,
-    enableState: Enable
+    enableState: Enable,
+    currentGame: OnlineGameRememberedValues
 ) {
-    val currentGame by remember {
-        mutableStateOf(OnlineGameRememberedValues())
-    }
 
     var foundPlayer by remember {
         mutableStateOf(false)
@@ -705,6 +729,9 @@ fun OnlineTicTacToe(
                         currentGame.game = updatedGame
                         foundPlayer = true
                         myTurn = "O"
+                        MyTurn = "O"
+                        wasGameStarted = true
+
                         break@Loop
                     }
                 }
@@ -722,6 +749,7 @@ fun OnlineTicTacToe(
                     databaseReference.child(key).setValue(newGame)
                     currentGame.game = newGame
                     myTurn = "X"
+                    MyTurn = "X"
                 }
                 times++
             }
@@ -731,6 +759,7 @@ fun OnlineTicTacToe(
                     currentGame.game = game
                     if (currentGame.game.player2 != "") {
                         foundPlayer = true
+                        wasGameStarted = true
                     }
                 }
             }
@@ -1033,7 +1062,7 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
 }
 
 @Composable
-fun CheckExitOnlineGame(onQuitClick: () -> Unit, onCancelClick: () -> Unit, navController: NavController) {
+fun CheckExitOnlineGame(onQuitClick: () -> Unit, onCancelClick: () -> Unit, navController: NavController, context: Context = LocalContext.current) {
 
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("Games")
@@ -1047,11 +1076,39 @@ fun CheckExitOnlineGame(onQuitClick: () -> Unit, onCancelClick: () -> Unit, navC
                 onQuitClick()
                 if(!wasGameStarted) {
                     CodeGameViewModel().removeGame(onlineGameId, databaseReference, 0) {
-                        navController.navigateUp()
+                        context.stopService(
+                            Intent(
+                                context,
+                                OnlineGameService::class.java
+                            )
+                        )
                     }
                 } else {
-                    navController.navigateUp()
+                    //other player quit
+                    if(otherPlayerQuit) {
+                        //deletes game
+                        CodeGameViewModel().removeGame(onlineGameId, databaseReference, 0) {
+                            context.stopService(
+                                Intent(
+                                    context,
+                                    OnlineGameService::class.java
+                                )
+                            )
+                        }
+                    } else {
+                        //player quit
+                        CodeGameViewModel().playerQuit(MyTurn, databaseReference, onlineGameId)
+                        context.stopService(
+                            Intent(
+                                context,
+                                OnlineGameService::class.java
+                            )
+                        )
+                    }
+                    otherPlayerQuit = false
+                    wasGameStarted = false
                 }
+                navController.navigateUp()
             }) {
                 Text(text = "Quit")
             }
