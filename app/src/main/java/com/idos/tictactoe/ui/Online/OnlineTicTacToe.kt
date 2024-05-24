@@ -101,6 +101,7 @@ class OnlineGameService : Service() {
                 //other player quit
                 if(otherPlayerQuit) {
                     //deletes game
+                    wasGameStarted = false
                     CodeGameViewModel().removeGame(onlineGameId, databaseReference, 0) {
                         stopService(
                             Intent(
@@ -1086,6 +1087,7 @@ fun CheckExitOnlineGame(onQuitClick: () -> Unit, onCancelClick: () -> Unit, navC
                 } else {
                     //other player quit
                     if(otherPlayerQuit) {
+                        wasGameStarted = false
                         //deletes game
                         CodeGameViewModel().removeGame(onlineGameId, databaseReference, 0) {
                             context.stopService(
