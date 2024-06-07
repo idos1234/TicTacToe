@@ -20,20 +20,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,7 +62,6 @@ import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.dataStore.SharedPreferencesDataStore
 import com.idos.tictactoe.ui.GoogleSignIn.GoogleSignInScreen
 import com.idos.tictactoe.ui.GoogleSignIn.GoogleSignInViewModel
-import com.idos.tictactoe.ui.Online.CheckExitOnlineGame
 import com.idos.tictactoe.ui.Online.CodeGameViewModel
 import com.idos.tictactoe.ui.Online.EnterOnlineGameWithCode
 import com.idos.tictactoe.ui.Online.OnlineTicTacToe
@@ -116,7 +114,7 @@ fun CheckLogOut(
 
     AlertDialog(
         title = { Text(text = "Are you sure you want to log out?")},
-        backgroundColor = Secondery,
+        containerColor = Secondery,
         onDismissRequest = {},
         dismissButton = {
             TextButton(
@@ -190,7 +188,7 @@ fun TopHomeScreenMenu(modifier: Modifier, context: Context, email: String, navCo
         Row(verticalAlignment = Alignment.CenterVertically) {
             Card(
                 shape = RoundedCornerShape(125.dp),
-                elevation = 10.dp,
+                elevation = CardDefaults.cardElevation(10.dp),
                 modifier = Modifier
                     .size(90.dp)
             ) {
@@ -310,9 +308,6 @@ fun TicTacToeApp(
     val context = LocalContext.current
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentScreen = GameScreen.valueOf(
-        backStackEntry?.destination?.route ?: GameScreen.Start.title
-    )
 
     // viewModel and uiState
     val scaffoldState = rememberScaffoldState()
@@ -378,108 +373,6 @@ fun TicTacToeApp(
 
     Scaffold(
         scaffoldState = scaffoldState,
-        topBar = {
-            when (currentScreen) {
-                GameScreen.Start ->
-                    TopAppBar(
-                        onClick = {
-                            scope.launch {
-                                scaffoldState.drawerState.open()
-                            }
-                        },
-                        icon = Icons.Default.Menu
-                    )
-
-                GameScreen.LeaderBoard ->
-                    TopAppBar(
-                        onClick = {
-                            scope.launch {
-                                scaffoldState.drawerState.open()
-                            }
-                        },
-                        icon = Icons.Default.Menu
-                    )
-
-                GameScreen.CodeGame ->
-                    TopAppBar(
-                        onClick = {
-                            scope.launch {
-                                scaffoldState.drawerState.open()
-                            }
-                        },
-                        icon = Icons.Default.Menu
-                    )
-
-                GameScreen.SignUp ->
-                    TopAppBar(
-                        icon = null,
-                        onClick = {},
-                        isBar = false
-                    )
-
-                GameScreen.LogIn ->
-                    TopAppBar(
-                        icon = null,
-                        onClick = {},
-                        isBar = false
-                    )
-
-                GameScreen.Online ->
-                    TopAppBar(
-                        onClick = {
-                            open = true
-                        },
-                        icon = Icons.AutoMirrored.Filled.ArrowBack
-                    )
-
-                GameScreen.EnterGameWithCode ->
-                    TopAppBar(
-                        onClick = {
-                            open = true
-                        },
-                        icon = Icons.AutoMirrored.Filled.ArrowBack
-                    )
-
-                GameScreen.OpenGameWithCode ->
-                    TopAppBar(
-                        onClick = {
-                            open = true
-                        },
-                        icon = Icons.AutoMirrored.Filled.ArrowBack
-                    )
-
-                GameScreen.ShowGameFinalScore ->
-                    TopAppBar(
-                        icon = null,
-                        onClick = {},
-                        isBar = false
-                    )
-
-                GameScreen.GoogleSignIn ->
-                    TopAppBar(
-                        icon = null,
-                        onClick = {},
-                        isBar = false
-                    )
-
-                else -> {
-                    TopAppBar(
-                        onClick = { navController.navigateUp() },
-                        icon = Icons.AutoMirrored.Filled.ArrowBack
-                    )
-                }
-            }
-            if (open) {
-                CheckExitOnlineGame(
-                    onCancelClick = { open = false },
-                    onQuitClick = {
-                        codeGameViewModel.clearCode()
-                        open = false
-                                  },
-                    navController = navController
-                )
-            }
-        },
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
         drawerContent = {
             HomeScreenMenu(
@@ -535,7 +428,8 @@ fun TicTacToeApp(
                 HomeScreen(
                     onTwoPlayersClick = { navController.navigate(GameScreen.TwoPlayers.title) },
                     onSinglePlayerClick = { navController.navigate(GameScreen.SinglePlayer.title) },
-                    onOnlineClick = { navController.navigate(GameScreen.Online.title) },
+                    onFriendlyBattleClick = {navController.navigate(GameScreen.CodeGame.title)},
+                            onOnlineClick = { navController.navigate(GameScreen.Online.title) },
                     onBackClick = {
                         sharedPreferencesUiState.lastTimeSeen = (System.currentTimeMillis() / 1000)
 

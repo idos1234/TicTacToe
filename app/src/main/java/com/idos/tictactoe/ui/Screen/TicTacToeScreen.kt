@@ -6,16 +6,24 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Card
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +31,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.layout.ContentScale
@@ -32,15 +42,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.idos.tictactoe.R
 import com.idos.tictactoe.data.GetO
 import com.idos.tictactoe.data.GetX
 import com.idos.tictactoe.data.GetXO
+import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.UiState
 import com.idos.tictactoe.ui.CheckWinner
-import com.idos.tictactoe.ui.theme.BackGround
-import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
 
 /**
@@ -50,13 +60,31 @@ import com.idos.tictactoe.ui.theme.Secondery
 @Composable
 fun GameButton(box: String, onClick: () -> Unit = {}, context: Context = LocalContext.current, playerName: String, modifier: Modifier) {
     var player by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
 
     //get Players collection from database
     player = getPlayer(playerName, context)
 
-    Card(modifier = modifier,shape = RoundedCornerShape(100.dp), border = BorderStroke(3.dp, color = Secondery)) {
+
+    val colors = MaterialTheme.colorScheme
+
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+
+    Card(
+        shape = RoundedCornerShape(20),
+        modifier = modifier
+            .padding(5.dp)
+            .size(((screenWidth - 20 - 30) / 3).dp)
+            .background(Color.Transparent)
+            .clickable(
+                onClick = onClick,
+                enabled = box.isEmpty(),
+            ),
+        border = BorderStroke(1.dp, colors.onPrimary),
+        colors = CardDefaults.cardColors(containerColor = colors.primary)
+    ) {
         Image(
             painter = painterResource(
                 id = when (box) {
@@ -66,15 +94,9 @@ fun GameButton(box: String, onClick: () -> Unit = {}, context: Context = LocalCo
                         R.drawable.o_1}
                 }
             ),
-            contentDescription = null,
             alpha = if (box != "") DefaultAlpha else 0f,
-            modifier = Modifier
-                .background(Color.Gray)
-                .size(100.dp)
-                .clickable(
-                    onClick = onClick,
-                    enabled = box.isEmpty(),
-                )
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize()
         )
     }
 }
@@ -93,10 +115,6 @@ fun ButtonGrid(
     navController: NavController,
     modifier: Modifier
 ) {
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val size = (screenWidth/19)*5
-
     //if need to check winner
     if(uiState.ToCheck) {
         uiState.winner = CheckWinner(uiState)
@@ -136,12 +154,14 @@ fun ButtonGrid(
     }
 
 
-
-    Column(modifier = modifier) {
-        Spacer(modifier = Modifier.weight(0.5f))
-        Row(modifier = Modifier.weight(5f)) {
-            Spacer(modifier = Modifier.weight(1f))
-            //box1
+    Column(
+        modifier = modifier
+            .background(Color.Transparent)
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)) {
             GameButton(
                 box = uiState.boxes.Box1,
                 onClick = {
@@ -151,10 +171,9 @@ fun ButtonGrid(
                     }
                 },
                 playerName = playerName,
-                modifier = Modifier.weight(5f).size(size)
+                modifier = Modifier
+                    .weight(1f)
             )
-            Spacer(modifier = Modifier.weight(1f))
-            //box2
             GameButton(
                 box = uiState.boxes.Box2,
                 onClick = {
@@ -164,10 +183,9 @@ fun ButtonGrid(
                     }
                 },
                 playerName = playerName,
-                modifier = Modifier.weight(5f).size(size)
+                modifier = Modifier
+                    .weight(1f)
             )
-            Spacer(modifier = Modifier.weight(1f))
-            //box3
             GameButton(
                 box = uiState.boxes.Box3,
                 onClick = {
@@ -177,14 +195,15 @@ fun ButtonGrid(
                     }
                 },
                 playerName = playerName,
-                modifier = Modifier.weight(5f).size(size)
+                modifier = Modifier
+                    .weight(1f)
             )
-            Spacer(modifier = Modifier.weight(1f))
         }
-        Spacer(modifier = Modifier.weight(0.5f))
-        Row(modifier = Modifier.weight(5f)) {
-            Spacer(modifier = Modifier.weight(1f))
-            //box4
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)) {
             GameButton(
                 box = uiState.boxes.Box4,
                 onClick = {
@@ -194,10 +213,9 @@ fun ButtonGrid(
                     }
                 },
                 playerName = playerName,
-                modifier = Modifier.weight(5f).size(size)
+                modifier = Modifier
+                    .weight(1f)
             )
-            Spacer(modifier = Modifier.weight(1f))
-            //box5
             GameButton(
                 box = uiState.boxes.Box5,
                 onClick = {
@@ -207,10 +225,9 @@ fun ButtonGrid(
                     }
                 },
                 playerName = playerName,
-                modifier = Modifier.weight(5f).size(size)
+                modifier = Modifier
+                    .weight(1f)
             )
-            Spacer(modifier = Modifier.weight(1f))
-            //box6
             GameButton(
                 box = uiState.boxes.Box6,
                 onClick = {
@@ -220,14 +237,15 @@ fun ButtonGrid(
                     }
                 },
                 playerName = playerName,
-                modifier = Modifier.weight(5f).size(size)
+                modifier = Modifier
+                    .weight(1f)
             )
-            Spacer(modifier = Modifier.weight(1f))
         }
-        Spacer(modifier = Modifier.weight(0.5f))
-        Row(modifier = Modifier.weight(5f)) {
-            Spacer(modifier = Modifier.weight(1f))
-            //box7
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)) {
             GameButton(
                 box = uiState.boxes.Box7,
                 onClick = {
@@ -237,11 +255,9 @@ fun ButtonGrid(
                     }
                 },
                 playerName = playerName,
-                modifier = Modifier.weight(5f).size(size)
-
+                modifier = Modifier
+                    .weight(1f)
             )
-            Spacer(modifier = Modifier.weight(1f))
-            //box8
             GameButton(
                 box = uiState.boxes.Box8,
                 onClick = {
@@ -251,10 +267,9 @@ fun ButtonGrid(
                     }
                 },
                 playerName = playerName,
-                modifier = Modifier.weight(5f).size(size)
+                modifier = Modifier
+                    .weight(1f)
             )
-            Spacer(modifier = Modifier.weight(1f))
-            //box9
             GameButton(
                 box = uiState.boxes.Box9,
                 onClick = {
@@ -264,9 +279,9 @@ fun ButtonGrid(
                     }
                 },
                 playerName = playerName,
-                modifier = Modifier.weight(5f).size(size)
+                modifier = Modifier
+                    .weight(1f)
             )
-            Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
@@ -279,7 +294,7 @@ fun ButtonGrid(
 fun showWinner(winner: String, text: String, onPlayAgain: () -> Unit, navController: NavController) {
 
     AlertDialog(
-        backgroundColor = Secondery,
+        containerColor = Secondery,
         onDismissRequest = {},
         title = { Text(text = winner, fontWeight = FontWeight.ExtraBold, color = Color.Black, textAlign = TextAlign.Center)},
         text = { Text(text = text, color = Color.Black, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)},
@@ -300,6 +315,87 @@ fun showWinner(winner: String, text: String, onPlayAgain: () -> Unit, navControl
     )
 }
 
+
+@Composable
+private fun ShowPlayersBar(
+    modifier: Modifier,
+    colors: ColorScheme,
+    screenWidth: Int,
+    player: MainPlayerUiState,
+    uiState: UiState
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Absolute.Left,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            Modifier.weight(2f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Card(
+                modifier = Modifier
+                    .size(((screenWidth - 40) / 4).dp),
+                shape = RoundedCornerShape(20),
+                border = BorderStroke(2.dp, if (uiState.player_Turn == "X") colors.tertiary else { colors.background})
+            ) {
+                Image(
+                    painter = painterResource(id = GetXO(player.currentImage)),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(20))
+                )
+            }
+            Text(
+                text = "Player 1",
+                fontSize = screenWidth.sp * 0.05,
+                color = colors.onBackground
+            )
+        }
+        Card(
+            colors = CardDefaults.cardColors(containerColor = colors.primary),
+            modifier = Modifier
+                .height(((screenWidth - 40) / 3 / 3).dp)
+                .weight(1f)
+        ) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "${uiState.player1Score} : ${uiState.player2Score}",
+                    fontSize = screenWidth.sp * 0.04,
+                    color = colors.onPrimary
+                )
+            }
+        }
+        Column(
+            Modifier.weight(2f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Card(
+                modifier = Modifier
+                    .size(((screenWidth - 40) / 4).dp),
+                shape = RoundedCornerShape(20),
+                border = BorderStroke(2.dp, if (uiState.player_Turn == "O") colors.tertiary else { colors.background})
+            ) {
+                Image(
+                    painter = painterResource(id = GetXO(player.currentImage)),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(20))
+                )
+            }
+            Text(
+                text = "Player 2",
+                fontSize = screenWidth.sp * 0.05,
+                color = colors.onBackground
+            )
+        }
+    }
+}
+
 /**
  * Show the two players game screen
  */
@@ -315,40 +411,22 @@ fun TicTacToeScreen(
     val player = getPlayer(email = playerName, context = LocalContext.current)
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
-    val size = (screenWidth/10)*3
+    val colors = MaterialTheme.colorScheme
+    val brush = Brush.verticalGradient(listOf(colors.background, colors.primary))
 
-    val currentImage = GetXO(player.currentImage)
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-        .background(BackGround)
-        .fillMaxSize()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(2f)) {
-            Spacer(modifier = Modifier.weight(1f))
-            Card(modifier = Modifier
-                .size(size)
-                .weight(3f)
-                , elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "X") Primery else { Secondery})) {
-                Image(
-                    painterResource(id = currentImage),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Text("${uiState.player1Score} : ${uiState.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
-            Spacer(modifier = Modifier.weight(1f))
-            Card(modifier = Modifier
-                .size(size)
-                .weight(3f), elevation = 5.dp, backgroundColor = Secondery, border = BorderStroke(2.dp, if (uiState.player_Turn == "O") Primery else { Secondery})) {
-                Image(
-                    painterResource(id = currentImage),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-        }
-        Spacer(modifier = Modifier.weight(1f))
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .background(brush)
+            .fillMaxSize()
+    ) {
+        ShowPlayersBar(
+            modifier = Modifier.weight(2f),
+            colors = colors,
+            screenWidth = screenWidth.value.toInt(),
+            player = player,
+            uiState = uiState
+        )
         ButtonGrid(
             viewModel = viewModel,
             onPlayAgain = {
@@ -357,7 +435,10 @@ fun TicTacToeScreen(
             uiState = uiState,
             playerName = playerName,
             navController = navController,
-            modifier = Modifier.weight(6f)
+            modifier = Modifier
+                .padding(10.dp)
+                .weight(3f)
+                .fillMaxSize()
         )
         Spacer(modifier = Modifier.weight(1f))
     }

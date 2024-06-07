@@ -19,20 +19,17 @@ data class MainPlayerUiState(
         "xo_2",
         "xo_3",
         "xo_4",
-        "xo_5_1",
-        "xo_5_2",
+        "xo_5",
         "xo_6",
         "xo_7",
         "xo_8",
         "xo_9",
-        "xo_10_1",
-        "xo_10_2",
+        "xo_10",
         "xo_11",
         "xo_12",
         "xo_13",
         "xo_14",
-        "xo_15_1",
-        "xo_15_2"
+        "xo_15",
     ),
     var wins: Int = 0,
     var loses: Int = 0,
@@ -81,20 +78,17 @@ fun GetXO(xo: String): Int {
         "xo_2"-> R.drawable.xo_2
         "xo_3"-> R.drawable.xo_3
         "xo_4"-> R.drawable.xo_4
-        "xo_5_1"-> R.drawable.xo_5_1
-        "xo_5_2"-> R.drawable.xo_5_2
+        "xo_5"-> R.drawable.xo_5
         "xo_6"-> R.drawable.xo_6
         "xo_7"-> R.drawable.xo_7
         "xo_8"-> R.drawable.xo_8
         "xo_9"-> R.drawable.xo_9
-        "xo_10_1"-> R.drawable.xo_10_1
-        "xo_10_2"-> R.drawable.xo_10_2
+        "xo_10"-> R.drawable.xo_10
         "xo_11"-> R.drawable.xo_11
         "xo_12"-> R.drawable.xo_12
         "xo_13"-> R.drawable.xo_13
         "xo_14"-> R.drawable.xo_14
-        "xo_15_1"-> R.drawable.xo_15_1
-        "xo_15_2"-> R.drawable.xo_15_2
+        "xo_15"-> R.drawable.xo_15
         else -> 0
     }
 }

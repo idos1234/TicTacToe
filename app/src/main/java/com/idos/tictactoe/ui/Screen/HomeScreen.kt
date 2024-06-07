@@ -4,15 +4,40 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -20,11 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.idos.tictactoe.R
 import com.idos.tictactoe.ui.Online.OnlineGameService
-import com.idos.tictactoe.ui.theme.BackGround
-import com.idos.tictactoe.ui.theme.Primery
-import com.idos.tictactoe.ui.theme.Secondery
 import com.idos.tictactoe.ui.theme.Shapes
 import kotlin.system.exitProcess
 
@@ -33,7 +54,14 @@ import kotlin.system.exitProcess
  */
 
 @Composable
-fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Unit = {}, onOnlineClick: () -> Unit = {}, onBackClick: () -> Unit, context: Context) {
+fun HomeScreen(
+    onTwoPlayersClick: () -> Unit = {},
+    onSinglePlayerClick: () -> Unit = {},
+    onFriendlyBattleClick: () -> Unit,
+    onOnlineClick: () -> Unit = {},
+    onBackClick: () -> Unit,
+    context: Context
+) {
     BackHandler(
         onBack = {
             onBackClick()
@@ -43,66 +71,128 @@ fun HomeScreen(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Un
     var showTrainingGames by remember {
         mutableStateOf(false)
     }
+
+    val configuration = LocalConfiguration.current
+
+    val screenHeight = configuration.screenHeightDp.dp
+
+    val colors = MaterialTheme.colorScheme
+    val type = MaterialTheme.typography
+    val brush = Brush.verticalGradient(listOf(colors.background, colors.primary))
+
+
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-            .background(BackGround)
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .background(brush = brush)
             .fillMaxSize()
-    )
-    {
-        Spacer(modifier = Modifier.weight(2f))
+    ) {
+        Spacer(modifier = Modifier.fillMaxHeight(0.1f))
+        //"XO" text- Big
         Text(
-            text = stringResource(id = R.string.app_name),
-            fontWeight = FontWeight.ExtraBold,
-            fontStyle = FontStyle.Italic,
-            fontSize = 50.sp,
-            color = Color.Black
+            text = "xo",
+            style = type.headlineLarge.copy(
+                drawStyle = Stroke(
+                    width = 6f,
+                    join = StrokeJoin.Round
+                )
+            ),
+            fontSize = screenHeight.value.sp * 0.25,
+            color = colors.onBackground,
+            textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.weight(1f))
+        //"Tic Tac Toe" text- Small
+        Text(
+            "Tic Tac Toe",
+            color = colors.onBackground,
+            fontSize = screenHeight.value.sp * 0.02,
+        )
 
-        //training game button(offline)
-        Button(
-            onClick = { showTrainingGames = true },
-            colors = ButtonDefaults.buttonColors(Primery),
-            shape = Shapes.large,
-        ) {
-            Text(
-                text = "Training games",
-                fontWeight = FontWeight.ExtraBold,
-                fontStyle = FontStyle.Italic,
-                fontSize = 30.sp,
-                color = Color.Black
-            )
-        }
+        Spacer(modifier = Modifier.fillMaxHeight(0.2f))
 
-        //online game button
-        Button(
-            onClick = {
-                context.startService(Intent(context, OnlineGameService::class.java))
-                onOnlineClick()
-                      },
-            colors = ButtonDefaults.buttonColors(Primery),
-            shape = Shapes.large,
-        ) {
-            Text(
-                text = "Online",
-                fontWeight = FontWeight.ExtraBold,
-                fontStyle = FontStyle.Italic,
-                fontSize = 30.sp,
-                color = Color.Black
-            )
+        //the buttons
+        Box {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .background(Color.Transparent)
+                    .fillMaxSize()
+            ) {
+                //training games button
+                Button(
+                    onClick = { showTrainingGames = true },
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .fillMaxWidth(0.5f),
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
+                ) {
+                    Text(
+                        text = "Training",
+                        fontSize = screenHeight.value.sp*0.03,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.onPrimary
+                    )
+                }
+
+                Spacer(modifier = Modifier.fillMaxHeight(0.1f))
+
+                //online game button
+                Button(
+                    onClick = {
+                        context.startService(Intent(context, OnlineGameService::class.java))
+                        onOnlineClick()
+                    },
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .fillMaxWidth(0.5f),
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
+                ) {
+                    Text(
+                        text = "Play",
+                        style = type.bodyMedium,
+                        fontSize = screenHeight.value.sp*0.03,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.onPrimary
+                    )
+                }
+
+                Spacer(modifier = Modifier.fillMaxHeight(0.1f))
+
+                //online game button
+                Button(
+                    onClick = onFriendlyBattleClick,
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .fillMaxWidth(0.7f),
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
+                ) {
+                    Text(
+                        text = "Friendly Battle",
+                        style = type.bodyMedium,
+                        fontSize = screenHeight.value.sp*0.03,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.onPrimary
+                    )
+                }
+            }
         }
 
         if (showTrainingGames) {
             TrainingGames(onTwoPlayersClick, onSinglePlayerClick, onCloseClicked = {showTrainingGames = false})
         }
 
-        Spacer(modifier = Modifier.weight(4f))
+        Spacer(modifier = Modifier.fillMaxHeight(0.1f))
     }
 }
 
 //training games dialog(offline)
 @Composable
-fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Unit = {}, onCloseClicked: () -> Unit) {
+fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () -> Unit = {}, onCloseClicked: () -> Unit = {}) {
+    val colors = MaterialTheme.colorScheme
+    val configuration = LocalConfiguration.current
+
+    val screenHeight = configuration.screenHeightDp.dp
+
     Dialog(
         onDismissRequest = {},
         properties = DialogProperties(
@@ -110,18 +200,18 @@ fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () ->
         )
     ) {
         Card(
-            backgroundColor = Secondery,
-            elevation = 4.dp,
-            modifier = Modifier.fillMaxWidth(0.60f)
+            colors = CardDefaults.cardColors(containerColor = colors.background),
+            elevation = CardDefaults.cardElevation(4.dp),
+            modifier = Modifier.wrapContentWidth().wrapContentHeight()
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(20.dp)) {
 
                 Row(modifier = Modifier.align(Alignment.Start)) {
                     IconButton(onClick = onCloseClicked) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = null,
-                            tint = Color.Black
+                            tint = colors.onBackground
                         )
                     }
                 }
@@ -129,8 +219,8 @@ fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () ->
                 Text(
                     text = "Training",
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.Black,
-                    fontSize = 30.sp,
+                    color = colors.onBackground,
+                    fontSize = screenHeight.value.sp*0.03,
                     textAlign = TextAlign.Center
                 )
 
@@ -139,7 +229,7 @@ fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () ->
                 //single player
                 Button(
                     onClick = onSinglePlayerClick,
-                    colors = ButtonDefaults.buttonColors(Primery),
+                    colors = ButtonDefaults.buttonColors(colors.primary),
                     shape = Shapes.large,
 
                     ) {
@@ -147,8 +237,8 @@ fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () ->
                         text = "Single Player",
                         fontWeight = FontWeight.ExtraBold,
                         fontStyle = FontStyle.Italic,
-                        fontSize = 20.sp,
-                        color = Color.Black
+                        fontSize = screenHeight.value.sp*0.02,
+                        color = colors.onPrimary
                     )
                 }
 
@@ -157,15 +247,15 @@ fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () ->
                 //two players
                 Button(
                     onClick = onTwoPlayersClick,
-                    colors = ButtonDefaults.buttonColors(Primery),
+                    colors = ButtonDefaults.buttonColors(colors.primary),
                     shape = Shapes.large,
                 ) {
                     Text(
                         text = "Two Players",
                         fontWeight = FontWeight.ExtraBold,
                         fontStyle = FontStyle.Italic,
-                        fontSize = 20.sp,
-                        color = Color.Black
+                        fontSize = screenHeight.value.sp*0.02,
+                        color = colors.onPrimary
                     )
                 }
 

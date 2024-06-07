@@ -61,38 +61,42 @@ dependencies {
 
     // FireBase Dependency
     //data base
-    implementation 'com.google.firebase:firebase-database-ktx:20.3.1'
-    implementation 'com.google.firebase:firebase-firestore-ktx:24.11.1'
+    implementation 'com.google.firebase:firebase-database-ktx:21.0.0'
+    implementation 'com.google.firebase:firebase-firestore-ktx:25.0.0'
     //messaging
-    implementation 'com.google.firebase:firebase-messaging-ktx:23.4.1'
+    implementation 'com.google.firebase:firebase-messaging-ktx:24.0.0'
     //crashlytics
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
-    implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
     // preferences DataStore
-    implementation "androidx.datastore:datastore-preferences:1.1.0"
+    implementation "androidx.datastore:datastore-preferences:1.1.1"
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
     implementation "androidx.security:security-crypto-ktx:1.1.0-alpha06"
     //tests
     implementation 'androidx.test:monitor:1.6.1'
+    implementation 'androidx.compose.material3:material3-android:1.2.1'
     androidTestImplementation 'junit:junit:4.13.2'
     def nav_version = "2.7.7"
 
     //Compose Dependency
     implementation "androidx.navigation:navigation-compose:$nav_version"
-    implementation 'androidx.activity:activity-compose:1.8.2'
+    implementation 'androidx.activity:activity-compose:1.9.0'
     implementation "androidx.compose.material:material"
     implementation "androidx.compose.ui:ui"
     implementation "androidx.compose.ui:ui-tooling"
     implementation "androidx.compose.ui:ui-tooling-preview"
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0"
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.1'
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.8.1"
 
     //Icons
     implementation "androidx.compose.material:material-icons-extended:$compose_ui_version"
     implementation("io.coil-kt:coil-compose:2.4.0")
 
     //google sign in
-    implementation 'com.google.android.gms:play-services-auth:21.0.0'
+    implementation 'com.google.android.gms:play-services-auth:21.2.0'
+
+    //status bar
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
 
 }

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,27 +17,32 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter.Companion.tint
 import androidx.compose.ui.layout.ContentScale
@@ -54,10 +58,8 @@ import com.idos.tictactoe.data.GetO
 import com.idos.tictactoe.data.GetX
 import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
-import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Primery
 import com.idos.tictactoe.ui.theme.Secondery
-import com.idos.tictactoe.ui.theme.Shapes
 
 @Composable
 fun ProfileScreen(player: String, context: Context) {
@@ -73,6 +75,10 @@ fun ProfileScreen(player: String, context: Context) {
     var showPlayerO by remember {
         mutableStateOf(false)
     }
+
+    val colors = MaterialTheme.colorScheme
+    val brush = Brush.verticalGradient(listOf(colors.background, colors.primary))
+
     //get Players collection from database
     profile = getPlayer(player, context)
 
@@ -80,115 +86,238 @@ fun ProfileScreen(player: String, context: Context) {
     val currentO = GetO(profile.currentO)
     val currentImage = GetXO(profile.currentImage)
 
+    val scoreFromCurrentLevel = getPrevLevelScore(profile.level)
+    val scoreToNextLevel = getNextLevelScore(profile.level)
+    val progress:Float = if(profile.level != 15) {
+        (profile.score-scoreFromCurrentLevel)/(scoreToNextLevel-scoreFromCurrentLevel).toFloat()
+    } else {
+        1f
+    }
+
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxSize()
-            .background(BackGround)
+            .background(brush)
     ) {
         item {
-            Box(
-                contentAlignment = Alignment.Center,
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(BackGround)
-                    .height(200.dp)
+                    .background(Color.Transparent)
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(colors.primary),
+                elevation = CardDefaults.cardElevation(20.dp),
+                shape = RoundedCornerShape(40.dp),
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Absolute.Left,
+                    modifier = Modifier.padding(12.dp)
                 ) {
-                    Box(contentAlignment = Alignment.BottomEnd) {
-                        Card(
-                            shape = RoundedCornerShape(125.dp),
-                            elevation = 10.dp,
+                    Column(
+                        modifier = Modifier
+                            .size(150.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        //image
+                        Box(
                             modifier = Modifier
-                                .size(90.dp)
+                                .fillMaxSize(0.7f)
+                                .weight(2f),
+                            contentAlignment = Alignment.BottomEnd
                         ) {
                             Image(
                                 painter = painterResource(id = currentImage),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop
+                                contentDescription = "Player's image",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(20))
+                            )
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit",
+                                tint = Color.Black,
+                                modifier = Modifier.clickable(onClick = { showPhotos = true })
                             )
                         }
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "edit icon",
-                            modifier = Modifier.clickable(onClick = { showPhotos = true })
+                        //x and o
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Absolute.Left,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxSize(0.7f)
+                                .padding(5.dp)
+                        ) {
+                            //x
+                            Card(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 2.5.dp)
+                                    .clickable(
+                                        onClick = { showPlayerX = true }
+                                    ),
+                                shape = RoundedCornerShape(20),
+                                elevation = CardDefaults.cardElevation(8.dp),
+                                colors = CardDefaults.cardColors(containerColor = colors.onPrimary)
+                            ) {
+                                Image(
+                                    painter = painterResource(id = currentX),
+                                    contentDescription = "Player's X",
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                            //o
+                            Card(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 2.5.dp)
+                                    .clickable(
+                                        onClick = { showPlayerO = true }
+                                    ),
+                                shape = RoundedCornerShape(20),
+                                elevation = CardDefaults.cardElevation(8.dp),
+                                colors = CardDefaults.cardColors(containerColor = colors.onPrimary)
+                            ) {
+                                Image(
+                                    painter = painterResource(id = currentO),
+                                    contentDescription = "Player's O",
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                        }
+                    }
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        //name
+                        Text(
+                            text = profile.name,
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.onBackground
+                        )
+
+                        Box(modifier = Modifier.padding(top = 16.dp)) {
+                            //wins
+                            Column {
+                                Text(
+                                    text = "Wins: ${profile.wins}",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colors.onBackground
+                                )
+                                //loses
+                                Text(
+                                    text = "Loses: ${profile.loses}",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colors.onBackground
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        //progress to the next rank
+        item {
+            Box(modifier = Modifier.fillMaxWidth(0.9f)) {
+                Column(Modifier.fillMaxWidth()) {
+                    //progress line
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        CustomLinearProgressIndicator(
+                            progress = progress,
+                            progressColor = colors.secondary,
+                            backgroundColor = Color.DarkGray,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(15.dp),
+                            clipShape = RoundedCornerShape(20.dp)
+                        )
+                        var text by remember {
+                            mutableStateOf("")
+                        }
+                        var size by remember {
+                            mutableStateOf(0.sp)
+                        }
+                        var color by remember {
+                            mutableStateOf(colors.primary)
+                        }
+                        if (profile.level == 15) {
+                            text = "Max"
+                            size = 15.sp
+                        } else {
+                            text = "Level: ${profile.level}"
+                            size = 10.sp
+                        }
+
+                        if (progress > 0.5f) {
+                            color = colors.onSecondary
+                        } else {
+                            color = Color.White
+                        }
+                        Text(
+                            text = text,
+                            color = color,
+                            fontSize = size,
+                            fontWeight = FontWeight.ExtraBold
                         )
                     }
-                    Text(
-                        text = profile.name,
-                        fontSize = 25.sp,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Text(
-                        text = "Level ${profile.level}",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Absolute.Left,
+                    ) {
+                        //stars from this level
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.95f)
+                                .weight(1f),
+                            contentAlignment = AbsoluteAlignment.CenterLeft
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.Absolute.Left
+                            ) {
+                                Text(
+                                    text = scoreFromCurrentLevel.toString(),
+                                    fontSize = 20.sp,
+                                    color = colors.secondary,
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "Star",
+                                    tint = Color.Yellow
+                                )
+                            }
+                        }
+                        //stars to next level
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.95f)
+                                .weight(1f),
+                            contentAlignment = AbsoluteAlignment.CenterRight
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.Absolute.Left
+                            ) {
+                                Text(
+                                    text = scoreToNextLevel.toString(),
+                                    fontSize = 20.sp,
+                                    color = colors.secondary,
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "Star",
+                                    tint = Color.Yellow
+                                )
+                            }
+                        }
+                    }
                 }
             }
-        }
-
-        item {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Card(
-                    modifier = Modifier
-                        .weight(1f)
-                        .size(120.dp)
-                        .padding(20.dp), shape = Shapes.small, backgroundColor = Secondery
-                ) {
-                    Image(
-                        painter = painterResource(id = currentX),
-                        contentDescription = "player's current X",
-                        contentScale = ContentScale.Inside,
-                        modifier = Modifier.clickable(
-                            onClick = { showPlayerX = true }
-                        ))
-                }
-                Card(
-                    modifier = Modifier
-                        .weight(1f)
-                        .size(120.dp)
-                        .padding(20.dp), shape = Shapes.small, backgroundColor = Secondery
-                ) {
-                    Image(
-                        painter = painterResource(id = currentO),
-                        contentDescription = "player's current O",
-                        contentScale = ContentScale.Inside,
-                        modifier = Modifier.clickable(
-                            onClick = { showPlayerO = true }
-                        ))
-                }
-            }
-        }
-
-        item {
-            Column(horizontalAlignment = Alignment.Start) {
-                Row(horizontalArrangement = Arrangement.Start) {
-                    Card(Modifier.size(15.dp), backgroundColor = Color.Red) {}
-                    Text(text = "Wins = ${profile.wins}", Modifier.padding(start = 4.dp))
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.Start) {
-                    Card(Modifier.size(15.dp), backgroundColor = Color.Yellow) {}
-                    Text(text = "Loses = ${profile.loses}", Modifier.padding(start = 4.dp))
-                }
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            PlayerGraph(
-                profile = profile,
-                winsColor = Color.Red,
-                losesColor = Color.Yellow,
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .height(10.dp)
-                    .clip(RoundedCornerShape(50)),
-            )
-
         }
     }
 
@@ -215,7 +344,7 @@ fun ShowPlayersImages(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxWidth(0.9f)
             .background(Secondery)
-            .fillMaxHeight(0.87f)) {
+            .wrapContentHeight()) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
                 content = {
@@ -241,13 +370,13 @@ fun ShowPlayersImages(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                 },
                 modifier = Modifier
                     .padding(10.dp)
-                    .height(200.dp)
+                    .wrapContentHeight()
             )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
                 content = {
                     items(player.lockedImages) { photo ->
-                        Box(contentAlignment = Alignment.Center) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.wrapContentSize()) {
                             AsyncImage(
                                 model = GetXO( photo ),
                                 contentScale = ContentScale.Crop,
@@ -263,12 +392,9 @@ fun ShowPlayersImages(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                 },
                 modifier = Modifier
                     .padding(10.dp)
-                    .height(200.dp)
-            )
+                    .wrapContentHeight()
 
-            OutlinedButton(onClick = onCloseClicked) {
-                Text(text = "Close")
-            }
+            )
         }
     }
     if (changeImage) {
@@ -287,7 +413,7 @@ fun ShowPlayerX(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxWidth(0.9f)
             .background(Secondery)
-            .fillMaxHeight(0.87f)) {
+            .wrapContentHeight()) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
                 content = {
@@ -305,7 +431,7 @@ fun ShowPlayerX(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                                 )
                                 .clickable(onClick = {
                                     changeImage = true
-                                    Image =  X
+                                    Image = X
                                 })
 
                         )
@@ -313,7 +439,7 @@ fun ShowPlayerX(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                 },
                 modifier = Modifier
                     .padding(10.dp)
-                    .height(200.dp)
+                    .wrapContentHeight()
             )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
@@ -335,12 +461,8 @@ fun ShowPlayerX(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                 },
                 modifier = Modifier
                     .padding(10.dp)
-                    .height(200.dp)
+                    .wrapContentHeight()
             )
-
-            OutlinedButton(onClick = onCloseClicked) {
-                Text(text = "Close")
-            }
         }
     }
     if (changeImage) {
@@ -390,8 +512,8 @@ fun ShowPlayerO(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
     Dialog(onDismissRequest = onCloseClicked) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxWidth(0.9f)
-            .background(Secondery)
-            .fillMaxHeight(0.87f)) {
+            .background(MaterialTheme.colorScheme.background)
+            .wrapContentHeight()) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
                 content = {
@@ -417,7 +539,8 @@ fun ShowPlayerO(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                 },
                 modifier = Modifier
                     .padding(10.dp)
-                    .height(200.dp)
+                    .wrapContentHeight()
+                    .background(MaterialTheme.colorScheme.primary)
             )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
@@ -439,12 +562,9 @@ fun ShowPlayerO(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
                 },
                 modifier = Modifier
                     .padding(10.dp)
-                    .height(200.dp)
+                    .wrapContentHeight()
+                    .background(MaterialTheme.colorScheme.primary)
             )
-
-            OutlinedButton(onClick = onCloseClicked) {
-                Text(text = "Close")
-            }
         }
     }
     if (changeImage) {
@@ -497,7 +617,7 @@ fun PlayerGraph(
             Card(
                 modifier = Modifier
                     .weight(weight = profile.wins.toFloat()),
-                backgroundColor = winsColor,
+                colors = CardDefaults.cardColors(winsColor),
                 shape = RoundedCornerShape(0)
             ) {
                 Text(text = "")
@@ -507,7 +627,7 @@ fun PlayerGraph(
             Card(
                 modifier = Modifier
                     .weight(weight = profile.loses.toFloat()),
-                backgroundColor = losesColor,
+                colors = CardDefaults.cardColors(losesColor),
                 shape = RoundedCornerShape(0)
             ) {
                 Text(text = "")
@@ -533,4 +653,68 @@ fun ChangeImage(image: String, player: MainPlayerUiState) {
                 )
             }
         }
+}
+
+@Composable
+fun CustomLinearProgressIndicator(
+    modifier: Modifier = Modifier,
+    progress: Float,
+    progressColor: Color,
+    backgroundColor: Color,
+    clipShape: RoundedCornerShape = RoundedCornerShape(16.dp)
+) {
+    Box(
+        modifier = modifier
+            .clip(clipShape)
+            .background(backgroundColor)
+            .height(8.dp),
+        contentAlignment = AbsoluteAlignment.CenterLeft
+    ) {
+        Box(
+            modifier = Modifier
+                .background(progressColor)
+                .fillMaxHeight()
+                .fillMaxWidth(progress)
+        )
+    }
+}
+
+fun getNextLevelScore(currentLevel: Int): Int {
+    return when(currentLevel) {
+        1 -> 25
+        2 -> 50
+        3 -> 100
+        4 -> 150
+        5 -> 200
+        6 -> 300
+        7 -> 400
+        8 -> 500
+        9 -> 600
+        10 -> 700
+        11 -> 800
+        12 -> 900
+        13 -> 1000
+        14 -> 1200
+        else -> 0
+    }
+}
+
+fun getPrevLevelScore(currentLevel: Int): Int {
+    return when(currentLevel) {
+        1 -> 0
+        2 -> 25
+        3 -> 50
+        4 -> 100
+        5 -> 150
+        6 -> 200
+        7 -> 300
+        8 -> 400
+        9 -> 500
+        10 -> 600
+        11 -> 700
+        12 -> 800
+        13 -> 900
+        14 -> 1000
+        else -> 0
+    }
 }
