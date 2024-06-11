@@ -52,10 +52,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.idos.tictactoe.data.GetXO
@@ -66,6 +68,7 @@ import com.idos.tictactoe.ui.Online.CodeGameViewModel
 import com.idos.tictactoe.ui.Online.EnterOnlineGameWithCode
 import com.idos.tictactoe.ui.Online.OnlineTicTacToe
 import com.idos.tictactoe.ui.Online.OpenOnlineGameWithCode
+import com.idos.tictactoe.ui.Online.SearchGameScreen
 import com.idos.tictactoe.ui.Online.codeGameScreen
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
@@ -93,7 +96,8 @@ enum class GameScreen(val title: String) {
     ShowGameFinalScore("ShowGameFinalScore"),
     GoogleSignIn("GoogleSignIn"),
     NewName("NewName"),
-    TimeUp("TimeUp")
+    TimeUp("TimeUp"),
+    SearchGame("SearchGame")
 }
 
 data class sharedPreferences(
@@ -429,7 +433,7 @@ fun TicTacToeApp(
                     onTwoPlayersClick = { navController.navigate(GameScreen.TwoPlayers.title) },
                     onSinglePlayerClick = { navController.navigate(GameScreen.SinglePlayer.title) },
                     onFriendlyBattleClick = {navController.navigate(GameScreen.CodeGame.title)},
-                            onOnlineClick = { navController.navigate(GameScreen.Online.title) },
+                    onOnlineClick = { navController.navigate(GameScreen.SearchGame.title) },
                     onBackClick = {
                         sharedPreferencesUiState.lastTimeSeen = (System.currentTimeMillis() / 1000)
 
@@ -487,14 +491,22 @@ fun TicTacToeApp(
             }
 
             //online game screen
-            composable(route = GameScreen.Online.title) {
+            composable(
+                route = "${GameScreen.Online.title}/{myTurn}",
+                arguments = listOf(
+                    navArgument("myTurn") {
+                        type = NavType.StringType
+                    }
+                )
+            ) {
+                val myTurn = it.arguments?.getString("myTurn")
                 OnlineTicTacToe(
                     player = email.value,
-                    context = LocalContext.current,
                     viewModel = codeGameViewModel,
                     navController = navController,
                     enableState = enableState,
-                    currentGame = onlineGameValuesUiState
+                    currentGame = onlineGameValuesUiState,
+                    myTurn = myTurn
                 )
             }
 
@@ -618,6 +630,16 @@ fun TicTacToeApp(
             
             composable(GameScreen.TimeUp.title) {
                 TimeUp(navController = navController)
+            }
+            
+            composable(GameScreen.SearchGame.title) {
+                SearchGameScreen(
+                    navController = navController,
+                    player = email.value,
+                    currentGame = onlineGameValuesUiState,
+                    context = context,
+                    viewModel = codeGameViewModel
+                )
             }
 
         }

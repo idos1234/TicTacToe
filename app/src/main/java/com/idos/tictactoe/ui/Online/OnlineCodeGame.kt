@@ -20,15 +20,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -37,6 +41,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -47,6 +53,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,9 +70,6 @@ import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.Screen.GameScreen
 import com.idos.tictactoe.ui.Screen.getPlayer
-import com.idos.tictactoe.ui.theme.BackGround
-import com.idos.tictactoe.ui.theme.Primery
-import com.idos.tictactoe.ui.theme.Secondery
 
 private var enteredGame = false
 private var gameStarted = false
@@ -103,11 +107,12 @@ class CodeGameService : Service() {
 
 @Composable
 fun playersBar(
-    size: Dp,
     modifier: Modifier,
     gameId: String,
     databaseReference: DatabaseReference,
     context: Context = LocalContext.current,
+    screenWidth: Int,
+    colors: ColorScheme
 ) {
     var game by remember {
         mutableStateOf(OnlineGameUiState())
@@ -120,84 +125,76 @@ fun playersBar(
     val player1CurrentImage = GetXO(player1.currentImage)
     val player2CurrentImage = GetXO(player1.currentImage)
 
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
-        Spacer(modifier = Modifier.weight(1f))
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
-            if (player1 != MainPlayerUiState()) {
-                Card(
-                    modifier = Modifier.size(size),
-                    elevation = 5.dp,
-                    backgroundColor = Secondery,
-                    border = BorderStroke(
-                        5.dp,
-                        if (game.playerTurn == "X") Primery else {
-                            Secondery
-                        }
-                    )
-                ) {
-                    Image(
-                        painter = painterResource(id = player1CurrentImage),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                Text(player1.name, fontSize = 10.sp, color = Color.White)
-            } else {
-                Card(
-                    modifier = Modifier.size(size),
-                    elevation = 5.dp,
-                    backgroundColor = Secondery,
-                    border = BorderStroke(
-                        2.dp,
-                        if (game.playerTurn == "O") Primery else {
-                            Secondery
-                        }
-                    )
-                ) {
-                    CircularProgressIndicator()
-                }
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Absolute.Left,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            Modifier.weight(2f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Card(
+                modifier = Modifier
+                    .size(((screenWidth - 40) / 4).dp),
+                shape = RoundedCornerShape(20),
+                border = BorderStroke(2.dp, if (game.playerTurn == "X") colors.tertiary else { colors.background})
+            ) {
+                Image(
+                    painter = painterResource(id = player1CurrentImage),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(20))
+                )
+            }
+            Text(
+                player1.name,
+                fontSize = screenWidth.sp * 0.05,
+                color = colors.onBackground
+            )
+        }
+        Card(
+            colors = CardDefaults.cardColors(containerColor = colors.primary),
+            modifier = Modifier
+                .height(((screenWidth - 40) / 3 / 3).dp)
+                .weight(1f)
+        ) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "${game.player1Score} : ${game.player2Score}",
+                    fontSize = screenWidth.sp * 0.04,
+                    color = colors.onPrimary
+                )
             }
         }
-        Spacer(modifier = Modifier.weight(1f))
-        Text("${game.player1Score} : ${game.player2Score}", fontWeight = FontWeight.Bold, color = Color.White)
-        Spacer(modifier = Modifier.weight(1f))
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(3f)) {
-            if (player2 != MainPlayerUiState()) {
-                Card(
-                    modifier = Modifier.size(size),
-                    elevation = 5.dp,
-                    backgroundColor = Secondery,
-                    border = BorderStroke(
-                        5.dp,
-                        if (game.playerTurn == "O") Primery else {
-                            Secondery
-                        }
-                    )
-                ) {
-                    Image(
-                        painter = painterResource(id = player2CurrentImage),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                Text(player2.name, fontSize = 10.sp, color = Color.White)
-            } else {
-                Card(
-                    modifier = Modifier.size(size),
-                    elevation = 5.dp,
-                    backgroundColor = Secondery,
-                    border = BorderStroke(
-                        2.dp,
-                        if (game.playerTurn == "O") Primery else {
-                            Secondery
-                        }
-                    )
-                ) {
-                    CircularProgressIndicator()
-                }
+        Column(
+            Modifier.weight(2f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Card(
+                modifier = Modifier
+                    .size(((screenWidth - 40) / 4).dp),
+                shape = RoundedCornerShape(20),
+                border = BorderStroke(2.dp, if (game.playerTurn == "O") colors.tertiary else { colors.background})
+            ) {
+                Image(
+                    painter = painterResource(id = player2CurrentImage),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(20))
+                )
             }
+            Text(
+                player2.name,
+                fontSize = screenWidth.sp * 0.05,
+                color = colors.onBackground
+
+            )
         }
-        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
@@ -222,6 +219,9 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val size = (screenWidth/10)*3
+
+    val colors = MaterialTheme.colorScheme
+    val brush = Brush.verticalGradient(listOf(colors.background, colors.primary))
 
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
@@ -321,14 +321,17 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
         }
     })
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-        .background(BackGround)
-        .fillMaxSize()) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .background(brush)
+            .fillMaxSize()) {
         playersBar(
-            size = size,
             modifier = Modifier.weight(2f),
             gameId = codeGameId,
-            databaseReference = databaseReference
+            databaseReference = databaseReference,
+            screenWidth = screenWidth.value.toInt(),
+            colors = colors
         )
         Spacer(modifier = Modifier.weight(1f))
         OnlineButtonGrid(
@@ -420,6 +423,9 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
     val screenWidth = configuration.screenWidthDp.dp
     val size = (screenWidth/10)*3
 
+    val colors = MaterialTheme.colorScheme
+    val brush = Brush.verticalGradient(listOf(colors.background, colors.primary))
+
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("GamesWithCode")
@@ -467,14 +473,17 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
     currentGame.player1 = getPlayer(email = currentGame.game.player1, context = context)
     currentGame.player2 = getPlayer(email = currentGame.game.player2, context = context)
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-        .background(BackGround)
-        .fillMaxSize()) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .background(brush)
+            .fillMaxSize()) {
         playersBar(
-            size = size,
             modifier = Modifier.weight(2f),
             gameId = codeGameId,
-            databaseReference = databaseReference
+            databaseReference = databaseReference,
+            screenWidth = screenWidth.value.toInt(),
+            colors = colors
         )
         Spacer(modifier = Modifier.weight(1f))
         OnlineButtonGrid(
@@ -494,18 +503,52 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
 }
 
 @Composable
-fun openNewGameButton(modifier: Modifier, navController: NavController, context: Context) {
+fun openNewGameButton(modifier: Modifier, navController: NavController, context: Context, screenHeight: Dp, colors: ColorScheme) {
     var openGame by remember {
         mutableStateOf(false)
     }
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = modifier
-            .fillMaxSize()
-            .background(BackGround)) {
-        Button(onClick = {openGame = true}, colors = ButtonDefaults.buttonColors(backgroundColor = Primery)) {
-            Text(text = "Open new game", fontSize = 30.sp)
+    Box(modifier = modifier
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = "Create Room",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = screenHeight.value.sp * 0.035,
+                textAlign = TextAlign.Center,
+                color = colors.onSecondary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(colors.secondary)
+                    .weight(1f)
+            )
+            Text(
+                text = "Open room\nReceive a code\nShare the code with your friends and play together",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = screenHeight.value.sp * 0.02,
+                color = colors.onBackground,
+                textAlign = TextAlign.Left,
+                modifier = Modifier
+                    .padding(10.dp)
+                    .weight(4f)
+            )
+            Spacer(modifier = Modifier.weight(2.2f))
+            Button(
+                onClick = {openGame = true},
+                colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                modifier = Modifier.wrapContentSize()
+            ) {
+                Text(
+                    text = "Create",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = screenHeight.value.sp * 0.03,
+                    textAlign = TextAlign.Center,
+                    color = colors.onPrimary,
+                    modifier = Modifier
+                )
+            }
         }
     }
     if (openGame) {
@@ -518,7 +561,14 @@ fun openNewGameButton(modifier: Modifier, navController: NavController, context:
 }
 
 @Composable
-fun enterGameWithCodeButton(modifier: Modifier, codeGameViewModel: CodeGameViewModel, codeGameUiState: OnlineGameRememberedValues, navController: NavController) {
+fun enterGameWithCodeButton(
+    modifier: Modifier,
+    codeGameViewModel: CodeGameViewModel,
+    codeGameUiState: OnlineGameRememberedValues,
+    navController: NavController,
+    screenHeight: Dp,
+    colors: ColorScheme
+) {
     var checkGame by remember {
         mutableStateOf(false)
     }
@@ -526,29 +576,74 @@ fun enterGameWithCodeButton(modifier: Modifier, codeGameViewModel: CodeGameViewM
     //controls the keyboard
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = modifier
-            .fillMaxSize()
-            .background(BackGround)
+    Box(modifier = modifier
     ) {
-        TextField(
-            value = codeGameUiState.gameCode,
-            onValueChange = { codeGameViewModel.updateGameCode(it) },
-            placeholder = { Text(text = "Code:")},
-            colors = TextFieldDefaults.textFieldColors(backgroundColor = Secondery),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                enteredGame = false
-                checkGame = true
-                      },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Primery)) {
-            Text(text = "Enter game", fontSize = 30.sp)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = "Join Room",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = screenHeight.value.sp*0.035,
+                textAlign = TextAlign.Center,
+                color = colors.onSecondary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(colors.secondary)
+                    .weight(1f)
+            )
+            Text(
+                text = "Enter room code",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = screenHeight.value.sp*0.025,
+                color = colors.onPrimary,
+                modifier = Modifier
+                    .padding(10.dp)
+                    .weight(4f)
+            )
+            TextField(
+                value = codeGameUiState.gameCode,
+                onValueChange = { codeGameViewModel.updateGameCode(it) },
+                modifier = Modifier
+                    .wrapContentSize()
+                    .fillMaxWidth(0.9f),
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = colors.onPrimary.copy(0.5f),
+                    focusedContainerColor = colors.onPrimary,
+                    focusedTextColor = colors.primary,
+                    unfocusedTextColor = colors.primary
+                ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
+                maxLines = 1,
+                placeholder = {
+                    Text(
+                        text = "Code:",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = screenHeight.value.sp*0.02,
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
+                    )
+                }
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Button(
+                onClick = {
+                    enteredGame = false
+                    checkGame = true
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = colors.onPrimary),
+                modifier = Modifier.wrapContentSize()
+            ) {
+                Text(
+                    text = "Join Room",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = screenHeight.value.sp*0.03,
+                    textAlign = TextAlign.Center,
+                    color = colors.primary
+                )
+            }
         }
     }
 
@@ -625,12 +720,17 @@ fun CheckForGame(gameId: String, context: Context, onFindGame: () -> Unit, notFi
 fun codeGameScreen(codeGameViewModel: CodeGameViewModel, codeGameUiState: OnlineGameRememberedValues, navController: NavController, context: Context) {
     //controls the keyboard
     val keyboardController = LocalSoftwareKeyboardController.current
+    val colors = MaterialTheme.colorScheme
+    val brush = Brush.verticalGradient(listOf(colors.background, colors.primary))
+    val configuration = LocalConfiguration.current
+
+    val screenHeight = configuration.screenHeightDp.dp
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .background(BackGround)
+            .background(brush = brush)
             .pointerInput(key1 = null) {
                 // hide keyboard on tap
                 detectTapGestures(
@@ -638,7 +738,26 @@ fun codeGameScreen(codeGameViewModel: CodeGameViewModel, codeGameUiState: Online
                 )
             }
     ) {
-        enterGameWithCodeButton(modifier = Modifier.weight(1f), codeGameUiState = codeGameUiState, codeGameViewModel = codeGameViewModel, navController = navController)
-        openNewGameButton(modifier = Modifier.weight(1f), navController = navController, context = context)
+        enterGameWithCodeButton(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .padding(10.dp),
+            codeGameUiState = codeGameUiState,
+            codeGameViewModel = codeGameViewModel,
+            navController = navController,
+            screenHeight = screenHeight,
+            colors = colors
+        )
+        openNewGameButton(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .padding(10.dp),
+            navController = navController,
+            context = context,
+            screenHeight = screenHeight,
+            colors = colors
+        )
     }
 }

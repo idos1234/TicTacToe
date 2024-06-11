@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,12 +17,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.layout.ContentScale
@@ -59,14 +64,10 @@ import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.Screen.GameScreen
 import com.idos.tictactoe.ui.Screen.getPlayer
-import com.idos.tictactoe.ui.theme.BackGround
-import com.idos.tictactoe.ui.theme.Secondery
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.Timer
-import kotlin.concurrent.schedule
 
-private var wasGameStarted = false
+var wasGameStarted = false
 var onlineGameId: String = ""
 var MyTurn: String = ""
 var otherPlayerQuit = false
@@ -185,32 +186,44 @@ fun OnlineGameButton(
     player1 = getPlayer(email = player1.email, context = context)
     player2 = getPlayer(email = player2.email, context = context)
 
+    val colors = MaterialTheme.colorScheme
+
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
 
     var SetBox by remember {
         mutableStateOf(false)
     }
 
-    Card(modifier = modifier,shape = RoundedCornerShape(100.dp), border = BorderStroke(3.dp, color = Secondery)) {
+    Card(
+        shape = RoundedCornerShape(20),
+        modifier = modifier
+            .padding(5.dp)
+            .size(((screenWidth - 20 - 30) / 3).dp)
+            .background(Color.Transparent)
+            .clickable(
+                onClick = {
+                    enableState.enable = false
+                    SetBox = true
+                },
+                enabled = (box == "") && enableState.enable && gameState.game.playerTurn == myTurn && wasGameStarted,
+            ),
+        border = BorderStroke(1.dp, colors.onPrimary),
+        colors = CardDefaults.cardColors(containerColor = colors.primary)
+    ) {
         Image(
             painter = painterResource(
                 id = when (box) {
-                    "X" -> GetX( player1.currentX )
-                    "O" -> GetO( player2.currentO )
-                    else -> {R.drawable.o_1}
+                    "X" -> GetX(player1.currentX)
+                    "O" -> GetO(player2.currentO)
+                    else -> {
+                        R.drawable.o_1
+                    }
                 }
             ),
             contentDescription = null,
             alpha = if (box != "") DefaultAlpha else 0f,
-            modifier = Modifier
-                .background(Color.Gray)
-                .size(100.dp)
-                .clickable(
-                    onClick = {
-                        enableState.enable = false
-                        SetBox = true
-                    },
-                    enabled = (box == "") && enableState.enable && gameState.game.playerTurn == myTurn && wasGameStarted,
-                )
+            modifier = Modifier.fillMaxSize()
         )
     }
 
@@ -269,10 +282,14 @@ fun OnlineButtonGrid(
 
     val scope = rememberCoroutineScope()
 
-    Column(modifier = modifier) {
-        Spacer(modifier = Modifier.weight(0.5f))
-        Row(modifier = Modifier.weight(5f)) {
-            Spacer(modifier = Modifier.weight(1f))
+    Column(
+        modifier = modifier
+            .background(Color.Transparent)
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)) {
             OnlineGameButton(
                 gameState = gameState,
                 boxNumber = 1,
@@ -281,11 +298,9 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(5f)
-                    .size(size),
+                    .weight(1f),
                 myTurn = myTurn
             )
-            Spacer(modifier = Modifier.weight(1f))
             OnlineGameButton(
                 gameState = gameState,
                 boxNumber = 2,
@@ -294,11 +309,9 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(5f)
-                    .size(size),
+                    .weight(1f),
                 myTurn = myTurn
             )
-            Spacer(modifier = Modifier.weight(1f))
             OnlineGameButton(
                 gameState = gameState,
                 boxNumber = 3,
@@ -307,15 +320,14 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(5f)
-                    .size(size),
+                    .weight(1f),
                 myTurn = myTurn
             )
-            Spacer(modifier = Modifier.weight(1f))
         }
-        Spacer(modifier = Modifier.weight(0.5f))
-        Row(modifier = Modifier.weight(5f)) {
-            Spacer(modifier = Modifier.weight(1f))
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)) {
             OnlineGameButton(
                 gameState = gameState,
                 boxNumber = 4,
@@ -324,11 +336,9 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(5f)
-                    .size(size),
+                    .weight(1f),
                 myTurn = myTurn
             )
-            Spacer(modifier = Modifier.weight(1f))
             OnlineGameButton(
                 gameState = gameState,
                 boxNumber = 5,
@@ -337,11 +347,9 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(5f)
-                    .size(size),
+                    .weight(1f),
                 myTurn = myTurn
             )
-            Spacer(modifier = Modifier.weight(1f))
             OnlineGameButton(
                 gameState = gameState,
                 boxNumber = 6,
@@ -350,15 +358,14 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(5f)
-                    .size(size),
+                    .weight(1f),
                 myTurn = myTurn
             )
-            Spacer(modifier = Modifier.weight(1f))
         }
-        Spacer(modifier = Modifier.weight(0.5f))
-        Row(modifier = Modifier.weight(5f)) {
-            Spacer(modifier = Modifier.weight(1f))
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)) {
             OnlineGameButton(
                 gameState = gameState,
                 boxNumber = 7,
@@ -367,11 +374,9 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(5f)
-                    .size(size),
+                    .weight(1f),
                 myTurn = myTurn
             )
-            Spacer(modifier = Modifier.weight(1f))
             OnlineGameButton(
                 gameState = gameState,
                 boxNumber = 8,
@@ -380,11 +385,9 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(5f)
-                    .size(size),
+                    .weight(1f),
                 myTurn = myTurn
             )
-            Spacer(modifier = Modifier.weight(1f))
             OnlineGameButton(
                 gameState = gameState,
                 boxNumber = 9,
@@ -393,11 +396,9 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(5f)
-                    .size(size),
+                    .weight(1f),
                 myTurn = myTurn
             )
-            Spacer(modifier = Modifier.weight(1f))
         }
     }
 
@@ -564,7 +565,7 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Card(
                             shape = RoundedCornerShape(125.dp),
-                            elevation = 10.dp,
+                            elevation = CardDefaults.cardElevation(10.dp),
                             modifier = Modifier
                                 .size(90.dp)
                         ) {
@@ -592,7 +593,7 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Card(
                             shape = RoundedCornerShape(125.dp),
-                            elevation = 10.dp,
+                            elevation = CardDefaults.cardElevation(10.dp),
                             modifier = Modifier
                                 .size(90.dp)
                         ) {
@@ -669,137 +670,49 @@ fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
 @Composable
 fun OnlineTicTacToe(
     player: String,
-    context: Context,
     viewModel: CodeGameViewModel,
     navController: NavController,
     enableState: Enable,
-    currentGame: OnlineGameRememberedValues
+    currentGame: OnlineGameRememberedValues,
+    myTurn: String?
 ) {
-
-    var foundPlayer by remember {
-        mutableStateOf(false)
-    }
-    var times by remember {
-        mutableStateOf(1)
-    }
-    var myTurn by remember {
-        mutableStateOf<String?>(null)
-    }
-    var waitingTimeFlag by remember {
-        mutableStateOf(true)
-    }
+    BackHandler {}
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
-    val size = (screenWidth/10)*3
+
+    val colors = MaterialTheme.colorScheme
+    val brush = Brush.verticalGradient(listOf(colors.background, colors.primary))
 
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("Games")
 
-    if(waitingTimeFlag) {
-        waitingTimeFlag = false
-
-        Timer().schedule(60000) {
-            if(currentGame.player2.email == "" && navController.currentDestination?.route == GameScreen.Online.title) {
-                viewModel.removeGame(onlineGameId, databaseReference, 0){
-                    navController.navigate(GameScreen.TimeUp.title)
-                }
-            }
-        }
-    }
-
-    //get Players collection from database
-    databaseReference.addValueEventListener(object : ValueEventListener {
-        //on success
-        override fun onDataChange(snapshot: DataSnapshot) {
-            while (times == 1) {
-                Loop@ for (Game in snapshot.children) {
-                    val game = Game.getValue(OnlineGameUiState::class.java)
-                    //enter room
-                    if ((game!!.player2 == "")) {
-                        val updatedGame = OnlineGameUiState(
-                            id = game.id,
-                            player1 = game.player1,
-                            player2 = player,
-                            winner = game.winner,
-                            boxes = game.boxes
-                        )
-                        onlineGameId = game.id
-                        databaseReference.child(game.id).child("player2").setValue(player)
-                        currentGame.game = updatedGame
-                        foundPlayer = true
-                        myTurn = "O"
-                        MyTurn = "O"
-                        wasGameStarted = true
-
-                        break@Loop
-                    }
-                }
-                //open room
-                if (currentGame.game == OnlineGameUiState()) {
-                    val key: String = databaseReference.push().key!!.takeLast(5)
-                    val newGame = OnlineGameUiState(
-                        id = key,
-                        player1 = player,
-                        player2 = "",
-                        winner = "",
-                        boxes = Boxes()
-                    )
-                    onlineGameId = key
-                    databaseReference.child(key).setValue(newGame)
-                    currentGame.game = newGame
-                    myTurn = "X"
-                    MyTurn = "X"
-                }
-                times++
-            }
-            for (Game in snapshot.children) {
-                val game = Game.getValue(OnlineGameUiState::class.java)
-                if (game!!.id == onlineGameId) {
-                    currentGame.game = game
-                    if (currentGame.game.player2 != "") {
-                        foundPlayer = true
-                        wasGameStarted = true
-                    }
-                }
-            }
-        }
-
-        //on failure
-        override fun onCancelled(error: DatabaseError) {
-            Toast.makeText(
-                context,
-                "Fail to get the data.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
-    )
-
-    currentGame.player1 = getPlayer(email = currentGame.game.player1, context = context)
-    currentGame.player2 = getPlayer(email = currentGame.game.player2, context = context)
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-        .background(BackGround)
-        .fillMaxSize()) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .background(brush)
+            .fillMaxSize()) {
         playersBar(
-            size = size,
             modifier = Modifier.weight(2f),
             gameId = onlineGameId,
-            databaseReference = databaseReference
+            databaseReference = databaseReference,
+            screenWidth = screenWidth.value.toInt(),
+            colors = colors
         )
-        Spacer(modifier = Modifier.weight(1f))
         OnlineButtonGrid(
             myTurn = myTurn,
-            gameStarted = foundPlayer,
+            gameStarted = true,
             player = player,
             databaseReference = databaseReference,
             viewModel = viewModel,
             navController = navController,
             enableState = enableState,
             gameState = currentGame,
-            modifier = Modifier.weight(6f),
+            modifier = Modifier
+                .padding(10.dp)
+                .weight(3f)
+                .fillMaxSize(),
             onlineGameId
         )
         Spacer(modifier = Modifier.weight(1f))
