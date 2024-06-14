@@ -6,19 +6,21 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -35,6 +37,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultAlpha
@@ -46,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.example.tictactoe.ui.Screen.CheckOnlineWinner
 import com.google.firebase.database.DataSnapshot
@@ -276,10 +280,6 @@ fun OnlineButtonGrid(
         mutableStateOf(gameState.game.boxes)
     }
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val size = (screenWidth/19)*5
-
     val scope = rememberCoroutineScope()
 
     Column(
@@ -505,12 +505,11 @@ fun OnlineButtonGrid(
     //show countDown dialog for winning
     if (foundWinner && (gameState.game.player1Score != 2) && (gameState.game.player2Score != 2)) {
         startedCountDown = true
+        gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
         NextRoundDialog(
-            game = findGame(gameId = onlineGameId, databaseReference = databaseReference),
-            player1 = gameState.player1,
-            player2 = gameState.player2,
+            gameState = gameState,
             onZeroSecs = {
-                foundWinner = false
+                times = 0
                 startedCountDown = false
             }
         )
@@ -521,10 +520,9 @@ fun OnlineButtonGrid(
     //show countDown dialog for tie
     if ((times == 9) && (gameState.game.player1Score != 2) && (gameState.game.player2Score != 2)) {
         startedCountDown = true
+        gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
         NextRoundDialog(
-            game = findGame(gameId = onlineGameId, databaseReference = databaseReference),
-            player1 = gameState.player1,
-            player2 = gameState.player2,
+            gameState = gameState,
             onZeroSecs = {
                 times = 0
                 startedCountDown = false
@@ -539,9 +537,10 @@ fun OnlineButtonGrid(
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2: MainPlayerUiState, onZeroSecs: () -> Unit) {
-    val player1CurrentImage = GetXO(player1.currentImage)
-    val player2CurrentImage = GetXO(player1.currentImage)
+fun NextRoundDialog(gameState: OnlineGameRememberedValues, onZeroSecs: () -> Unit) {
+
+    val player1CurrentImage = GetXO(gameState.player1.currentImage)
+    val player2CurrentImage = GetXO(gameState.player1.currentImage)
 
     var secondsToNextRound by remember {
         mutableStateOf(3)
@@ -555,69 +554,102 @@ fun NextRoundDialog(game: OnlineGameUiState, player1: MainPlayerUiState, player2
         }
     }
 
-    Dialog(onDismissRequest = {}) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-            .fillMaxWidth(0.98f)
-            .background(Color.White)) {
-            Text(text = "Next round in: $secondsToNextRound", fontWeight = FontWeight.Bold, fontSize = 30.sp, color = Color.Black)
-            Row() {
-                Box(modifier = Modifier.weight(2f), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Card(
-                            shape = RoundedCornerShape(125.dp),
-                            elevation = CardDefaults.cardElevation(10.dp),
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+
+    val colors = MaterialTheme.colorScheme
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .wrapContentHeight()
+                .background(colors.background),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Next round in: $secondsToNextRound",
+                fontWeight = FontWeight.Bold,
+                fontSize = screenWidth.sp * 0.1,
+                color = colors.onBackground
+            )
+            Spacer(modifier = Modifier.height((screenWidth/10).dp))
+            //show players
+            Row(
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .background(Color.Transparent),
+                horizontalArrangement = Arrangement.Absolute.Left,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    Modifier.weight(2f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .size(((screenWidth - 40) / 4).dp),
+                        shape = RoundedCornerShape(20),
+                    ) {
+                        Image(
+                            painter = painterResource(id = player1CurrentImage),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .size(90.dp)
-                        ) {
-                            Image(
-                                painter = painterResource(id = player1CurrentImage),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop
-                            )
-                        }
-                        Text(
-                            text = player1.name,
-                            fontSize = 25.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(20))
                         )
+                    }
+                    Text(
+                        gameState.player1.name,
+                        fontSize = screenWidth.sp * 0.05,
+                        color = colors.onBackground
+                    )
+                }
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = colors.primary),
+                    modifier = Modifier
+                        .height(((screenWidth - 40) / 3 / 3).dp)
+                        .weight(1f)
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = game.player1Score.toString(),
-                            fontSize = 25.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                            text = "${gameState.game.player1Score} : ${gameState.game.player2Score}",
+                            fontSize = screenWidth.sp * 0.04,
+                            color = colors.onPrimary
                         )
                     }
                 }
-                Box(modifier = Modifier.weight(2f), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Card(
-                            shape = RoundedCornerShape(125.dp),
-                            elevation = CardDefaults.cardElevation(10.dp),
+                Column(
+                    Modifier.weight(2f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .size(((screenWidth - 40) / 4).dp),
+                        shape = RoundedCornerShape(20),
+                    ) {
+                        Image(
+                            painter = painterResource(id = player2CurrentImage),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .size(90.dp)
-                        ) {
-                            Image(
-                                painter = painterResource(id = player2CurrentImage),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop
-                            )
-                        }
-                        Text(
-                            text = player2.name,
-                            fontSize = 25.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        )
-                        Text(
-                            text = game.player2Score.toString(),
-                            fontSize = 25.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(20))
                         )
                     }
+                    Text(
+                        gameState.player2.name,
+                        fontSize = screenWidth.sp * 0.05,
+                        color = colors.onBackground
+
+                    )
                 }
             }
+            //end players
+            Spacer(modifier = Modifier.height((screenWidth/20).dp))
         }
     }
 }
@@ -676,7 +708,8 @@ fun OnlineTicTacToe(
     currentGame: OnlineGameRememberedValues,
     myTurn: String?
 ) {
-    BackHandler {}
+    currentGame.player1 = getPlayer(email = currentGame.game.player1, context = LocalContext.current)
+    currentGame.player2 = getPlayer(email = currentGame.game.player2, context = LocalContext.current)
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp

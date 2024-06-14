@@ -2,7 +2,6 @@ package com.idos.tictactoe.ui.Online
 
 import android.content.Context
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -56,7 +55,6 @@ fun SearchGameScreen(
     context: Context,
     viewModel: CodeGameViewModel,
     ) {
-    BackHandler {}
 
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()

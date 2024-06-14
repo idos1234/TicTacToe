@@ -2,6 +2,7 @@ package com.idos.tictactoe.ui.Screen
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -415,7 +416,6 @@ fun TicTacToeApp(
             )
         }
     ) {
-
         val startDestination = if (email.value == "") {
             GameScreen.GoogleSignIn.title
         } else {
@@ -445,6 +445,7 @@ fun TicTacToeApp(
 
             //game screen
             composable(route = GameScreen.TwoPlayers.title) {
+                BackHandler {}
                 TicTacToeScreen(
                     viewModel = viewModel,
                     uiState = uiState,
@@ -466,6 +467,7 @@ fun TicTacToeApp(
 
             //single player game screen
             composable(route = GameScreen.SinglePlayer.title) {
+                BackHandler {}
                 TicTacToeSinglePlayerScreen(
                     viewModel = viewModel,
                     uiState = uiState,
@@ -499,6 +501,7 @@ fun TicTacToeApp(
                     }
                 )
             ) {
+                BackHandler {}
                 val myTurn = it.arguments?.getString("myTurn")
                 OnlineTicTacToe(
                     player = email.value,
@@ -512,16 +515,19 @@ fun TicTacToeApp(
 
             //leaderboard screen
             composable(route = GameScreen.LeaderBoard.title) {
+                BackHandler {}
                 LeaderBoardScreen(context = LocalContext.current, yourPlayer = email.value)
             }
 
             //profile screen
             composable(route = GameScreen.ProfileScreen.title) {
+                BackHandler {}
                 ProfileScreen(player = email.value, context = LocalContext.current)
             }
 
             //codeGame
             composable(route = GameScreen.CodeGame.title) {
+                BackHandler {}
                 codeGameScreen(
                     codeGameViewModel = codeGameViewModel,
                     codeGameUiState = onlineGameValuesUiState,
@@ -532,6 +538,7 @@ fun TicTacToeApp(
 
             //open game with code
             composable(route = GameScreen.OpenGameWithCode.title) {
+                BackHandler {}
                 OpenOnlineGameWithCode(
                     context = LocalContext.current,
                     player = email.value,
@@ -544,6 +551,7 @@ fun TicTacToeApp(
 
             //enter game with code
             composable(route = GameScreen.EnterGameWithCode.title) {
+                BackHandler {}
                 EnterOnlineGameWithCode(
                     context = LocalContext.current,
                     player = email.value,
@@ -568,6 +576,7 @@ fun TicTacToeApp(
                     slideInVertically(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
                 }
             ) {
+                BackHandler {}
                 ShowGameFinalScore(
                     uiState = onlineGameValuesUiState,
                     navController = navController,
@@ -577,6 +586,7 @@ fun TicTacToeApp(
 
             // google sign in
             composable(GameScreen.GoogleSignIn.title) {
+                BackHandler {}
                 GoogleSignInScreen(
                     viewModel = googleSignInViewModel,
                     changeEmail = { email.value = it },
@@ -604,6 +614,7 @@ fun TicTacToeApp(
             composable(
                 route = GameScreen.NewName.title
             ) {
+                BackHandler {}
                 ChooseName(
                     changeEmail = { email.value = it },
                     viewModel = googleSignInViewModel,
@@ -629,10 +640,12 @@ fun TicTacToeApp(
             }
             
             composable(GameScreen.TimeUp.title) {
+                BackHandler {}
                 TimeUp(navController = navController)
             }
             
             composable(GameScreen.SearchGame.title) {
+                BackHandler {}
                 SearchGameScreen(
                     navController = navController,
                     player = email.value,

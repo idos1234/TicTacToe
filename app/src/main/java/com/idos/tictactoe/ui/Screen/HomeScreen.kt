@@ -194,7 +194,7 @@ fun TrainingGames(onTwoPlayersClick: () -> Unit = {}, onSinglePlayerClick: () ->
     val screenHeight = configuration.screenHeightDp.dp
 
     Dialog(
-        onDismissRequest = {},
+        onDismissRequest = onCloseClicked,
         properties = DialogProperties(
             usePlatformDefaultWidth = false
         )
