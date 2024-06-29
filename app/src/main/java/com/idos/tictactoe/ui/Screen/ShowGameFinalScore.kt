@@ -55,11 +55,9 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -77,30 +75,6 @@ import com.idos.tictactoe.ui.Online.findGame
 import com.idos.tictactoe.ui.Online.onlineGameId
 import com.idos.tictactoe.ui.Online.otherPlayerQuit
 import kotlinx.coroutines.delay
-
-@Preview(device = "spec:width=1080px,height=2340px,dpi=480")
-@Composable
-fun h() {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(Color.Black)) {
-        GameScoreDialog(
-            OnlineGameRememberedValues(FinalScoreText = "You Won"),
-            NavController(LocalContext.current),
-            CodeGameViewModel(),
-            LocalContext.current,
-            14,
-            false,
-            MainPlayerUiState(
-                score = 10,
-                level = 1,
-                coins = 0
-            ),
-            won = false
-        )
-    }
-}
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
