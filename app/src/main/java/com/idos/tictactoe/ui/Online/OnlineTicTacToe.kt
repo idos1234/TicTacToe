@@ -10,8 +10,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,17 +29,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultAlpha
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -63,10 +60,10 @@ import com.idos.tictactoe.R
 import com.idos.tictactoe.data.Boxes
 import com.idos.tictactoe.data.GetO
 import com.idos.tictactoe.data.GetX
-import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
-import com.idos.tictactoe.ui.Screen.GameScreen
+import com.idos.tictactoe.ui.Screen.GameScoreDialog
+import com.idos.tictactoe.ui.Screen.ShowPlayersDialog
 import com.idos.tictactoe.ui.Screen.getPlayer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -92,40 +89,48 @@ class OnlineGameService : Service() {
         val firebaseDatabase = FirebaseDatabase.getInstance()
         val databaseReference = firebaseDatabase.getReference("Games")
 
-        if(!wasGameStarted) {
+        deleteGame(this, databaseReference)
+    }
+}
+
+fun deleteGame(context: Context, databaseReference: DatabaseReference) {
+    if(!wasGameStarted) {
+        //deletes game
+        CodeGameViewModel().removeGame(onlineGameId, databaseReference, 0) {
+            context.stopService(
+                Intent(
+                    context,
+                    OnlineGameService::class.java
+                )
+            )
+        }
+    } else {
+        //other player quit
+        if(otherPlayerQuit) {
             //deletes game
+            wasGameStarted = false
             CodeGameViewModel().removeGame(onlineGameId, databaseReference, 0) {
-                stopService(
+                context.stopService(
                     Intent(
-                        baseContext,
+                        context,
                         OnlineGameService::class.java
                     )
                 )
             }
         } else {
-                //other player quit
-                if(otherPlayerQuit) {
-                    //deletes game
-                    wasGameStarted = false
-                    CodeGameViewModel().removeGame(onlineGameId, databaseReference, 0) {
-                        stopService(
-                            Intent(
-                                baseContext,
-                                OnlineGameService::class.java
-                            )
-                        )
-                    }
-                } else {
-                    //player quit
-                    CodeGameViewModel().playerQuit(MyTurn, databaseReference, onlineGameId)
-                    stopService(
-                        Intent(
-                            baseContext,
-                            OnlineGameService::class.java
-                        )
-                    )
-                }
+            //player quit
+            CodeGameViewModel().playerQuit(MyTurn, databaseReference, onlineGameId, 0, context)
+            context.stopService(
+                Intent(
+                    context,
+                    OnlineGameService::class.java
+                )
+            )
         }
+        wasGameStarted = false
+        onlineGameId = ""
+        MyTurn = ""
+        otherPlayerQuit = false
     }
 }
 
@@ -137,6 +142,9 @@ fun SetBoxOnline(
     databaseReference: DatabaseReference
 ) {
 
+    if(game.id == "") {
+        return
+    }
     val boxes: Boxes? = when(boxNumber) {
         1 -> game.boxes.copy(Box1 = playerTurn)
         2 -> game.boxes.copy(Box2 = playerTurn)
@@ -156,6 +164,10 @@ fun SetBoxOnline(
 
 @Composable
 fun changePlayerTurn(game: OnlineGameUiState, databaseReference: DatabaseReference, onlineGameId: String): String {
+    if(game.id == "") {
+        return game.playerTurn
+    }
+
     val PlayerTurn = if(game.playerTurn == "X") {
         "O"
     } else {
@@ -262,9 +274,14 @@ fun OnlineButtonGrid(
     modifier: Modifier,
     gameId: String
 ) {
-
-    wasGameStarted = gameStarted
-    onlineGameId = gameId
+    var setData by remember {
+        mutableStateOf(false)
+    }
+    if (!setData) {
+        setData = true
+        wasGameStarted = gameStarted
+        onlineGameId = gameId
+    }
 
     var foundWinner by remember {
         mutableStateOf(false)
@@ -275,7 +292,6 @@ fun OnlineButtonGrid(
     var startedCountDown by remember {
         mutableStateOf(false)
     }
-
     var boxes by remember {
         mutableStateOf(gameState.game.boxes)
     }
@@ -405,55 +421,91 @@ fun OnlineButtonGrid(
     gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
     boxes = gameState.game.boxes
     //if can be a winner
-    if(gameState.game.times >= 5) {
-        databaseReference.child(onlineGameId).child("winner").setValue(CheckOnlineWinner(boxes))
+    if(gameState.game.times >= 5 && wasGameStarted) {
+        if (findGame(gameId = onlineGameId, databaseReference =databaseReference) != OnlineGameUiState()) {
+            databaseReference.child(onlineGameId).child("winner").setValue(CheckOnlineWinner(boxes))
+        }
         //if has winner
         if(gameState.game.winner.isNotEmpty()) {
             //if no one found the winner
             if (!gameState.game.foundWinner) {
-                databaseReference.child(onlineGameId).child("foundWinner").setValue(true)
+                if (findGame(gameId = onlineGameId, databaseReference =databaseReference) != OnlineGameUiState()) {
+                    databaseReference.child(onlineGameId).child("foundWinner").setValue(true)
+                }
                 //update game score
                 if (gameState.game.winner == "X") {
                     viewModel.changeEnable(false)
-                    databaseReference.child(onlineGameId).child("player1Score").setValue(gameState.game.player1Score.plus(1))
-                    databaseReference.child(onlineGameId).child("rounds").setValue(gameState.game.rounds.plus(1))
+                    if (findGame(gameId = onlineGameId, databaseReference =databaseReference) != OnlineGameUiState()) {
+                        databaseReference.child(onlineGameId).child("player1Score")
+                            .setValue(gameState.game.player1Score.plus(1))
+                        databaseReference.child(onlineGameId).child("rounds")
+                            .setValue(gameState.game.rounds.plus(1))
+                    }
                 }
                 if ((gameState.game.winner == "O")) {
                     viewModel.changeEnable(false)
-                    databaseReference.child(onlineGameId).child("player2Score").setValue(gameState.game.player2Score.plus(1))
-                    databaseReference.child(onlineGameId).child("rounds").setValue(gameState.game.rounds.plus(1))
+                    if (findGame(gameId = onlineGameId, databaseReference =databaseReference) != OnlineGameUiState()) {
+                        databaseReference.child(onlineGameId).child("player2Score")
+                            .setValue(gameState.game.player2Score.plus(1))
+                        databaseReference.child(onlineGameId).child("rounds")
+                            .setValue(gameState.game.rounds.plus(1))
+                    }
                 }
             }
 
             // if has final winner
             if (gameState.game.player1Score == 2) {
                 if (myTurn == "X") {
-                    //show winner
                     //won
-                    updateScore(playerName = player, addedScore = 1, context = LocalContext.current)
-                    viewModel.updateFinalScoreScreenData("You won!", gameState.game, gameState.player1,  gameState.player2)
-                } else if (myTurn == "O") {
-                    //show winner
+                    viewModel.updateFinalScoreScreenData("You won", gameState.game, gameState.player1,  gameState.player2)
+                    updateScore(
+                        playerName = player,
+                        addedScore = 1,
+                        context = LocalContext.current,
+                        gameState = gameState,
+                        navController = navController,
+                        codeGameViewModel = viewModel
+                    )
+                }
+                else if (myTurn == "O") {
                     //lose
-                    updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
-                    viewModel.updateFinalScoreScreenData("You lose", gameState.game, gameState.player1,  gameState.player2)
+                    viewModel.updateFinalScoreScreenData("You lost", gameState.game, gameState.player1,  gameState.player2)
+                    updateScore(
+                        playerName = player,
+                        addedScore = -1,
+                        context = LocalContext.current,
+                        gameState = gameState,
+                        navController = navController,
+                        codeGameViewModel = viewModel
+                    )
                 }
                 // show score screen
-                navController.navigate(GameScreen.ShowGameFinalScore.title)
             } else if (gameState.game.player2Score == 2) {
                 if (myTurn == "O") {
-                    //show winner
                     //won
-                    updateScore(playerName = player, addedScore = 1, context = LocalContext.current)
-                    viewModel.updateFinalScoreScreenData("You won!", gameState.game, gameState.player1,  gameState.player2)
-                } else if (myTurn == "X") {
-                    //show winner
+                    viewModel.updateFinalScoreScreenData("You won", gameState.game, gameState.player1,  gameState.player2)
+                    updateScore(
+                        playerName = player,
+                        addedScore = 1,
+                        context = LocalContext.current,
+                        gameState = gameState,
+                        navController = navController,
+                        codeGameViewModel = viewModel
+                    )
+                }
+                else if (myTurn == "X") {
                     //lose
-                    updateScore(playerName = player, addedScore = -1, context = LocalContext.current)
-                    viewModel.updateFinalScoreScreenData("You lose", gameState.game, gameState.player1,  gameState.player2)
+                    viewModel.updateFinalScoreScreenData("You lost", gameState.game, gameState.player1,  gameState.player2)
+                    updateScore(
+                        playerName = player,
+                        addedScore = -1,
+                        context = LocalContext.current,
+                        gameState = gameState,
+                        navController = navController,
+                        codeGameViewModel = viewModel
+                    )
                 }
                 // show score screen
-                navController.navigate(GameScreen.ShowGameFinalScore.title)
             } else {
                 //new round
                 gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
@@ -476,8 +528,11 @@ fun OnlineButtonGrid(
             //if didn't update round
             if (!gameState.game.editedRounds) {
                 //update round
-                databaseReference.child(onlineGameId).child("editedRounds").setValue(true)
-                databaseReference.child(onlineGameId).child("rounds").setValue(gameState.game.rounds.plus(1))
+                if (findGame(gameId = onlineGameId, databaseReference =databaseReference) != OnlineGameUiState()) {
+                    databaseReference.child(onlineGameId).child("editedRounds").setValue(true)
+                    databaseReference.child(onlineGameId).child("rounds")
+                        .setValue(gameState.game.rounds.plus(1))
+                }
             }
             gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
             boxes = gameState.game.boxes
@@ -495,7 +550,9 @@ fun OnlineButtonGrid(
             }
         }
     } else if(wasGameStarted) {
-        databaseReference.child(onlineGameId).child("winner").setValue("")
+        if (findGame(gameId = onlineGameId, databaseReference =databaseReference) != OnlineGameUiState()) {
+            databaseReference.child(onlineGameId).child("winner").setValue("")
+        }
     }
 
 
@@ -539,9 +596,6 @@ fun OnlineButtonGrid(
 @Composable
 fun NextRoundDialog(gameState: OnlineGameRememberedValues, onZeroSecs: () -> Unit) {
 
-    val player1CurrentImage = GetXO(gameState.player1.currentImage)
-    val player2CurrentImage = GetXO(gameState.player1.currentImage)
-
     var secondsToNextRound by remember {
         mutableStateOf(3)
     }
@@ -577,78 +631,7 @@ fun NextRoundDialog(gameState: OnlineGameRememberedValues, onZeroSecs: () -> Uni
             )
             Spacer(modifier = Modifier.height((screenWidth/10).dp))
             //show players
-            Row(
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .background(Color.Transparent),
-                horizontalArrangement = Arrangement.Absolute.Left,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    Modifier.weight(2f),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .size(((screenWidth - 40) / 4).dp),
-                        shape = RoundedCornerShape(20),
-                    ) {
-                        Image(
-                            painter = painterResource(id = player1CurrentImage),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(20))
-                        )
-                    }
-                    Text(
-                        gameState.player1.name,
-                        fontSize = screenWidth.sp * 0.05,
-                        color = colors.onBackground
-                    )
-                }
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = colors.primary),
-                    modifier = Modifier
-                        .height(((screenWidth - 40) / 3 / 3).dp)
-                        .weight(1f)
-                ) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "${gameState.game.player1Score} : ${gameState.game.player2Score}",
-                            fontSize = screenWidth.sp * 0.04,
-                            color = colors.onPrimary
-                        )
-                    }
-                }
-                Column(
-                    Modifier.weight(2f),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .size(((screenWidth - 40) / 4).dp),
-                        shape = RoundedCornerShape(20),
-                    ) {
-                        Image(
-                            painter = painterResource(id = player2CurrentImage),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(20))
-                        )
-                    }
-                    Text(
-                        gameState.player2.name,
-                        fontSize = screenWidth.sp * 0.05,
-                        color = colors.onBackground
-
-                    )
-                }
-            }
-            //end players
+            ShowPlayersDialog(gameState = gameState)
             Spacer(modifier = Modifier.height((screenWidth/20).dp))
         }
     }
@@ -686,17 +669,19 @@ fun findGame(gameId: String, databaseReference: DatabaseReference, context: Cont
 }
 
 fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
-    databaseReference.child(onlineGameId).child("boxes").setValue(Boxes())
-    databaseReference.child(onlineGameId).child("winner").setValue("")
-    databaseReference.child(onlineGameId).child("times").setValue(0)
-    databaseReference.child(onlineGameId).child("foundWinner").setValue(false)
-    databaseReference.child(onlineGameId).child("editedRounds").setValue(false)
-    val playerTurn = if ((game.rounds % 2) == 0) {
-        "O"
-    } else if ((game.rounds % 2) == 1) {
-        "X"
-    } else null
-    databaseReference.child(onlineGameId).child("playerTurn").setValue(playerTurn)
+    if (game.id != "") {
+        databaseReference.child(onlineGameId).child("boxes").setValue(Boxes())
+        databaseReference.child(onlineGameId).child("winner").setValue("")
+        databaseReference.child(onlineGameId).child("times").setValue(0)
+        databaseReference.child(onlineGameId).child("foundWinner").setValue(false)
+        databaseReference.child(onlineGameId).child("editedRounds").setValue(false)
+        val playerTurn = if ((game.rounds % 2) == 0) {
+            "O"
+        } else if ((game.rounds % 2) == 1) {
+            "X"
+        } else null
+        databaseReference.child(onlineGameId).child("playerTurn").setValue(playerTurn)
+    }
 }
 
 @Composable
@@ -753,7 +738,14 @@ fun OnlineTicTacToe(
 }
 
 @Composable
-fun updateScore(playerName: String, context: Context, addedScore: Int) {
+fun updateScore(
+    gameState: OnlineGameRememberedValues,
+    navController: NavController,
+    codeGameViewModel: CodeGameViewModel,
+    playerName: String,
+    context: Context,
+    addedScore: Int
+) {
     var player by remember {
         mutableStateOf(MainPlayerUiState())
     }
@@ -763,248 +755,188 @@ fun updateScore(playerName: String, context: Context, addedScore: Int) {
     var levelUp by remember {
         mutableStateOf(false)
     }
-    var lockedPhotos by remember {
-        mutableStateOf<List<String>>(listOf())
-    }
-    var unlockedPhotos by remember {
-        mutableStateOf<List<String>>(listOf())
-    }
     var updatedPlayer by remember {
         mutableStateOf(MainPlayerUiState())
     }
     var newLevel by remember {
         mutableStateOf(0)
     }
-    var lockedX by remember {
-        mutableStateOf<List<String>>(listOf())
-    }
-    var lockedO by remember {
-        mutableStateOf<List<String>>(listOf())
-    }
-    var unlockedX by remember {
-        mutableStateOf<List<String>>(listOf())
-    }
-    var unlockedO by remember {
-        mutableStateOf<List<String>>(listOf())
-    }
-
     var failed by remember {
+        mutableStateOf(false)
+    }
+    var coins by remember {
+        mutableIntStateOf(0)
+    }
+    var showScore by remember {
         mutableStateOf(false)
     }
 
     //get database
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-    //get Players collection from database
-    db.collection("Players").get()
-        //on success
-        .addOnSuccessListener { queryDocumentSnapshots ->
-            //check if collection is empty
-            if (!queryDocumentSnapshots.isEmpty) {
-                val list = queryDocumentSnapshots.documents
-                Loop@ for (d in list) {
-                    val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
-                    //find player using database
-                    if (p?.email == playerName){
-                        player = p
-                        score = if (player.score + addedScore < 0) 0 else player.score + addedScore
+    if(!showScore) {
+        //get Players collection from database
+        db.collection("Players").get()
+            //on success
+            .addOnSuccessListener { queryDocumentSnapshots ->
+                //check if collection is empty
+                if (!queryDocumentSnapshots.isEmpty) {
+                    val list = queryDocumentSnapshots.documents
+                    Loop@ for (d in list) {
+                        val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
+                        //find player using database
+                        if (p?.email == playerName) {
+                            player = p
+                            score =
+                                if (player.score + addedScore < 0) 0 else player.score + addedScore
 
-                        if (addedScore == 1) {
-                            when (score) {
-                                25 -> if (player.level == 1) {
-                                    lockedPhotos = player.lockedImages.minus("xo_2")
-                                    unlockedPhotos = player.unlockedImages.plus("xo_2")
-                                    lockedX = player.lockedX.minus("x_2")
-                                    unlockedX = player.unlockedX.plus("x_2")
-                                    lockedO = player.lockedO.minus("o_2")
-                                    unlockedO = player.unlockedO.plus("o_2")
-                                    newLevel = 2
-                                    levelUp = true
-                                }
-                                50 -> if (player.level == 2) {
-                                    lockedPhotos = player.lockedImages.minus("xo_3")
-                                    unlockedPhotos = player.unlockedImages.plus("xo_3")
-                                    lockedX = player.lockedX.minus("x_3")
-                                    unlockedX = player.unlockedX.plus("x_3")
-                                    lockedO = player.lockedO.minus("o_3")
-                                    unlockedO = player.unlockedO.plus("o_3")
-                                    newLevel = 3
-                                    levelUp = true
-                                }
-                                100 -> if (player.level == 3) {
-                                    lockedPhotos = player.lockedImages.minus("xo_4")
-                                    unlockedPhotos = player.unlockedImages.plus("xo_4")
-                                    lockedX = player.lockedX.minus("x_4")
-                                    unlockedX = player.unlockedX.plus("x_4")
-                                    lockedO = player.lockedO.minus("o_4")
-                                    unlockedO = player.unlockedO.plus("o_4")
-                                    newLevel = 4
-                                    levelUp = true
-                                }
-                                150 -> if (player.level == 4) {
-                                    lockedPhotos = player.lockedImages.minus("xo_5_1") - "xo_5_2"
-                                    unlockedPhotos = player.unlockedImages.plus("xo_5_1") + "xo_5_2"
-                                    lockedX = player.lockedX.minus("x_5")
-                                    unlockedX = player.unlockedX.plus("x_5")
-                                    lockedO = player.lockedO.minus("o_5")
-                                    unlockedO = player.unlockedO.plus("o_5")
-                                    newLevel = 5
-                                    levelUp = true
-                                }
-                                200 -> if (player.level == 5) {
-                                    lockedPhotos = player.lockedImages.minus("xo_6")
-                                    unlockedPhotos = player.unlockedImages.plus("xo_6")
-                                    lockedX = player.lockedX.minus("x_6")
-                                    unlockedX = player.unlockedX.plus("x_6")
-                                    lockedO = player.lockedO.minus("o_6")
-                                    unlockedO = player.unlockedO.plus("o_6")
-                                    newLevel = 6
-                                    levelUp = true
-                                }
-                                300 -> if (player.level == 6) {
-                                    lockedPhotos = player.lockedImages.minus("xo_7")
-                                    unlockedPhotos = player.unlockedImages.plus("xo_7")
-                                    lockedX = player.lockedX.minus("x_7")
-                                    unlockedX = player.unlockedX.plus("x_7")
-                                    lockedO = player.lockedO.minus("o_7")
-                                    unlockedO = player.unlockedO.plus("o_7")
-                                    newLevel = 7
-                                    levelUp = true
-                                }
-                                400 -> if (player.level == 7) {
-                                    lockedPhotos = player.lockedImages.minus("xo_8")
-                                    unlockedPhotos = player.unlockedImages.plus("xo_8")
-                                    lockedX = player.lockedX.minus("x_8")
-                                    unlockedX = player.unlockedX.plus("x_8")
-                                    lockedO = player.lockedO.minus("o_8")
-                                    unlockedO = player.unlockedO.plus("o_8")
-                                    newLevel = 8
-                                    levelUp = true
-                                }
-                                500 -> if (player.level == 8) {
-                                    lockedPhotos = player.lockedImages.minus("xo_9")
-                                    unlockedPhotos = player.unlockedImages.plus("xo_9")
-                                    lockedX = player.lockedX.minus("x_9")
-                                    unlockedX = player.unlockedX.plus("x_9")
-                                    lockedO = player.lockedO.minus("o_9")
-                                    unlockedO = player.unlockedO.plus("o_9")
-                                    newLevel = 9
-                                    levelUp = true
-                                }
-                                600 -> if (player.level == 9) {
-                                    lockedPhotos = player.lockedImages.minus("xo_10_1") - "xo_10_2"
-                                    unlockedPhotos = player.unlockedImages.plus("xo_10_1") + "xo_10_2"
-                                    lockedX = player.lockedX.minus("x_10")
-                                    unlockedX = player.unlockedX.plus("x_10")
-                                    lockedO = player.lockedO.minus("o_10")
-                                    unlockedO = player.unlockedO.plus("o_10")
-                                    newLevel = 10
-                                    levelUp = true
-                                }
-                                700 -> if (player.level == 10) {
-                                    lockedPhotos = player.lockedImages.minus("xo_11")
-                                    unlockedPhotos = player.unlockedImages.plus("xo_11")
-                                    lockedX = player.lockedX.minus("x_11")
-                                    unlockedX = player.unlockedX.plus("x_11")
-                                    lockedO = player.lockedO.minus("o_11")
-                                    unlockedO = player.unlockedO.plus("o_11")
-                                    newLevel = 11
-                                    levelUp = true
-                                }
-                                800 -> if (player.level == 11) {
-                                    lockedPhotos = player.lockedImages.minus("xo_12")
-                                    unlockedPhotos = player.unlockedImages.plus("xo_12")
-                                    lockedX = player.lockedX.minus("x_12")
-                                    unlockedX = player.unlockedX.plus("x_12")
-                                    lockedO = player.lockedO.minus("o_12")
-                                    unlockedO = player.unlockedO.plus("o_12")
-                                    newLevel = 12
-                                    levelUp = true
-                                }
-                                900 -> if (player.level == 12) {
-                                    lockedPhotos = player.lockedImages.minus("xo_13")
-                                    unlockedPhotos = player.unlockedImages.plus("xo_13")
-                                    lockedX = player.lockedX.minus("x_13")
-                                    unlockedX = player.unlockedX.plus("x_13")
-                                    lockedO = player.lockedO.minus("o_13")
-                                    unlockedO = player.unlockedO.plus("o_13")
-                                    newLevel = 13
-                                    levelUp = true
-                                }
-                                1000 -> if (player.level == 13) {
-                                    lockedPhotos = player.lockedImages.minus("xo_14")
-                                    unlockedPhotos = player.unlockedImages.plus("xo_14")
-                                    lockedX = player.lockedX.minus("x_14")
-                                    unlockedX = player.unlockedX.plus("x_14")
-                                    lockedO = player.lockedO.minus("o_14")
-                                    unlockedO = player.unlockedO.plus("o_14")
-                                    newLevel = 14
-                                    levelUp = true
-                                }
-                                1200 -> if (player.level == 14) {
-                                    lockedPhotos = player.lockedImages.minus("xo_15_1") - "xo_15_2"
-                                    unlockedPhotos = player.unlockedImages.plus("xo_15_1") + "xo_15_2"
-                                    lockedX = player.lockedX.minus("x_15")
-                                    unlockedX = player.unlockedX.plus("x_15")
-                                    lockedO = player.lockedO.minus("o_15")
-                                    unlockedO = player.unlockedO.plus("o_15")
-                                    newLevel = 15
-                                    levelUp = true
-                                }
+                            if (addedScore == 1) {
+                                when (score) {
+                                    25 -> if (player.level == 1) {
+                                        newLevel = 2
+                                        levelUp = true
+                                    }
 
-                            }
-                            if (levelUp) {
-                                updatedPlayer = MainPlayerUiState(
-                                    name = player.name,
-                                    email = player.email,
+                                    50 -> if (player.level == 2) {
+                                        newLevel = 3
+                                        levelUp = true
+                                    }
+
+                                    100 -> if (player.level == 3) {
+                                        newLevel = 4
+                                        levelUp = true
+                                    }
+
+                                    150 -> if (player.level == 4) {
+                                        newLevel = 5
+                                        levelUp = true
+                                    }
+
+                                    200 -> if (player.level == 5) {
+                                        newLevel = 6
+                                        levelUp = true
+                                    }
+
+                                    300 -> if (player.level == 6) {
+                                        newLevel = 7
+                                        levelUp = true
+                                    }
+
+                                    400 -> if (player.level == 7) {
+                                        newLevel = 8
+                                        levelUp = true
+                                    }
+
+                                    500 -> if (player.level == 8) {
+                                        newLevel = 9
+                                        levelUp = true
+                                    }
+
+                                    600 -> if (player.level == 9) {
+                                        newLevel = 10
+                                        levelUp = true
+                                    }
+
+                                    700 -> if (player.level == 10) {
+                                        newLevel = 11
+                                        levelUp = true
+                                    }
+
+                                    800 -> if (player.level == 11) {
+                                        newLevel = 12
+                                        levelUp = true
+                                    }
+
+                                    900 -> if (player.level == 12) {
+                                        newLevel = 13
+                                        levelUp = true
+                                    }
+
+                                    1000 -> if (player.level == 13) {
+                                        newLevel = 14
+                                        levelUp = true
+                                    }
+
+                                    1200 -> if (player.level == 14) {
+                                        newLevel = 15
+                                        levelUp = true
+                                    }
+
+                                }
+                                if (levelUp) {
+                                    coins = ((10 + newLevel * 2)..(20 + newLevel * 2)).random()
+                                    updatedPlayer = player.copy(
+                                        score = score,
+                                        wins = player.wins + 1,
+                                        level = newLevel,
+                                        coins = player.coins + coins
+                                    )
+                                    showScore = true
+                                } else {
+                                    coins = ((5 + newLevel * 2)..(20 + newLevel * 2)).random()
+                                    updatedPlayer = player.copy(
+                                        score = score,
+                                        wins = player.wins + 1,
+                                        coins = player.coins + coins
+                                    )
+                                    showScore = true
+                                }
+                            } else if (addedScore == -1) {
+                                coins = 0
+                                updatedPlayer = player.copy(
                                     score = score,
-                                    currentImage = player.currentImage,
-                                    unlockedImages = unlockedPhotos,
-                                    lockedImages = lockedPhotos,
-                                    currentX = player.currentX,
-                                    currentO = player.currentO,
-                                    lockedX = lockedX,
-                                    lockedO = lockedO,
-                                    unlockedX = unlockedX,
-                                    unlockedO = unlockedO,
-                                    wins = player.wins + 1,
-                                    loses = player.loses,
-                                    level = newLevel
+                                    loses = player.loses + 1,
                                 )
-                            } else {
-                                updatedPlayer = player.copy(score = score, wins = player.wins + 1)
+                                showScore = true
                             }
-                        } else if (addedScore == -1) {
-                            updatedPlayer = player.copy(score = score, loses = player.loses + 1)
 
+                            db.collection("Players")
+                                .whereEqualTo("email", playerName)
+                                .get()
+                                .addOnSuccessListener {
+                                    for (document in it) {
+                                        db.collection("Players").document(document.id).set(
+                                            updatedPlayer,
+                                            SetOptions.merge()
+                                        )
+                                    }
+                                }
+                                .addOnFailureListener {
+                                    failed = true
+                                }
+                            break@Loop
                         }
 
-                        db.collection("Players")
-                            .whereEqualTo("email", playerName)
-                            .get()
-                            .addOnSuccessListener {
-                                for (document in it) {
-                                    db.collection("Players").document(document.id).set(updatedPlayer,
-                                        SetOptions.merge())
-                                }
-                            }
-                            .addOnFailureListener {
-                                failed = true
-                            }
-                        break@Loop
                     }
-
                 }
             }
-        }
-        //on failure
-        .addOnFailureListener {
-            failed = true
-        }
+            //on failure
+            .addOnFailureListener {
+                failed = true
+            }
+    }
 
     if (failed) {
-        updateScore(playerName = playerName, context = context, addedScore = addedScore)
+        updateScore(
+            gameState = gameState,
+            navController = navController,
+            codeGameViewModel = codeGameViewModel,
+            playerName = playerName,
+            context = context,
+            addedScore = addedScore
+        )
         failed = false
+    } else if(showScore) {
+        GameScoreDialog(
+            gameState = gameState,
+            navController = navController,
+            codeGameViewModel = codeGameViewModel,
+            context = context,
+            coins = coins,
+            levelUp = levelUp,
+            playerUiState = updatedPlayer,
+            won = addedScore == 1
+        )
     }
 }
 
@@ -1045,7 +977,7 @@ fun CheckExitOnlineGame(onQuitClick: () -> Unit, onCancelClick: () -> Unit, navC
                         }
                     } else {
                         //player quit
-                        CodeGameViewModel().playerQuit(MyTurn, databaseReference, onlineGameId)
+                        CodeGameViewModel().playerQuit(MyTurn, databaseReference, onlineGameId, 0, context)
                         context.stopService(
                             Intent(
                                 context,

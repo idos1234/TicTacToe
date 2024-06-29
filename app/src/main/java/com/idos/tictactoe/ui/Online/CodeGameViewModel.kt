@@ -1,8 +1,13 @@
 package com.idos.tictactoe.ui.Online
 
+import android.content.Context
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import kotlinx.coroutines.Dispatchers
@@ -62,17 +67,41 @@ class CodeGameViewModel: ViewModel() {
         }
     }
 
-    fun playerQuit(player: String, databaseReference: DatabaseReference, id: String, times: Int = 0) {
+    fun playerQuit(player: String, databaseReference: DatabaseReference, id: String, times: Int = 0, context: Context) {
         if (times < 50) {
 
+            //get Players collection from database
+            databaseReference.addValueEventListener(object : ValueEventListener {
+                //on success
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val list = snapshot.children
+                    val game = try {
+                        list.find {
+                            it.getValue(OnlineGameUiState::class.java)!!.id == id
+                        }?.getValue(OnlineGameUiState::class.java)!!
+                    } catch (e: Exception) {
+                         OnlineGameUiState()
+                    }
+                    if(game == OnlineGameUiState()) {
+                        return
+                    }
+                }
 
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(
+                        context,
+                        "Fail to get the data.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
             if (player == "X") {
                 if (!databaseReference.child(id).child("player1Quit").setValue(true).isSuccessful) {
-                    playerQuit(player, databaseReference, id, times + 1)
+                    playerQuit(player, databaseReference, id, times + 1, context)
                 }
             } else {
                 if (!databaseReference.child(id).child("player2Quit").setValue(true).isSuccessful) {
-                    playerQuit(player, databaseReference, id, times + 1)
+                    playerQuit(player, databaseReference, id, times + 1, context)
                 }
             }
         }

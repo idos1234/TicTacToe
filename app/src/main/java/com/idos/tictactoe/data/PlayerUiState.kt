@@ -10,6 +10,8 @@ data class MainPlayerUiState(
     var email: String = "",
     //player's score
     var score: Int = 0,
+    //coins
+    var coins: Int = 0,
     //player's image
     var currentImage: String = "xo_1",
     //images that the player got

@@ -74,8 +74,8 @@ fun SearchGameScreen(
     if(waitingTimeFlag) {
         waitingTimeFlag = false
 
-        Timer().schedule(60000) {
-            if(currentGame.player2.email == "" && navController.currentDestination?.route == GameScreen.Online.title) {
+        Timer().schedule(30000) {
+            if(currentGame.player2.email == "" && navController.currentDestination?.route == GameScreen.SearchGame.title) {
                 viewModel.removeGame(onlineGameId, databaseReference, 0){
                     navController.navigate(GameScreen.TimeUp.title)
                 }
@@ -101,7 +101,9 @@ fun SearchGameScreen(
                             boxes = game.boxes
                         )
                         onlineGameId = game.id
-                        databaseReference.child(game.id).child("player2").setValue(player)
+                        if (game.id != "") {
+                            databaseReference.child(game.id).child("player2").setValue(player)
+                        }
                         currentGame.game = updatedGame
                         myTurn = "O"
                         MyTurn = "O"

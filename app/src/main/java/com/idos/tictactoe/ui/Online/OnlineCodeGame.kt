@@ -421,7 +421,6 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
-    val size = (screenWidth/10)*3
 
     val colors = MaterialTheme.colorScheme
     val brush = Brush.verticalGradient(listOf(colors.background, colors.primary))

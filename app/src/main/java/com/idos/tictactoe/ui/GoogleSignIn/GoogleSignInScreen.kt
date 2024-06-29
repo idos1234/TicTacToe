@@ -58,7 +58,9 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
 
     //sign in button
     ScreenView(
-        onClick = { authResultLauncher.launch(signInRequestCode) },
+        onClick = {
+            authResultLauncher.launch(signInRequestCode)
+                  },
         isError = isError,
         context = context
     )

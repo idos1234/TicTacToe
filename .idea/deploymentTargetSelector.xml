@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DIALOG" />
-        <DropdownSelection timestamp="2024-06-14T07:06:07.040009500Z">
+        <DropdownSelection timestamp="2024-06-28T11:40:55.273594300Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CT10GEQWZ" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\sulim\.android\avd\Pixel_7a_API_34.avd" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -15,16 +15,25 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CT10GEQWZ" />
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\sulim\.android\avd\Pixel_8_Pro_API_33.avd" />
               </handle>
             </Target>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\sulim\.android\avd\Pixel_3a_XL_API_34.avd" />
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\sulim\.android\avd\Pixel_7a_API_34.avd" />
               </handle>
             </Target>
           </targets>
         </DialogSelection>
+      </SelectionState>
+      <SelectionState runConfigName="AnimatedCircularProgressIndicator">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="s">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="h">
+        <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
   </component>

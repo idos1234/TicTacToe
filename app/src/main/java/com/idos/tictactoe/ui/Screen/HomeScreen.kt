@@ -59,15 +59,8 @@ fun HomeScreen(
     onSinglePlayerClick: () -> Unit = {},
     onFriendlyBattleClick: () -> Unit,
     onOnlineClick: () -> Unit = {},
-    onBackClick: () -> Unit,
     context: Context
 ) {
-    BackHandler(
-        onBack = {
-            onBackClick()
-            exitProcess(0)
-        }
-    )
     var showTrainingGames by remember {
         mutableStateOf(false)
     }

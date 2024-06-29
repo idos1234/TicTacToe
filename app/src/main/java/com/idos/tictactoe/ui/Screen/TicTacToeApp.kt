@@ -3,11 +3,6 @@ package com.idos.tictactoe.ui.Screen
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -62,7 +57,6 @@ import androidx.navigation.navArgument
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.idos.tictactoe.data.GetXO
-import com.idos.tictactoe.data.dataStore.SharedPreferencesDataStore
 import com.idos.tictactoe.ui.GoogleSignIn.GoogleSignInScreen
 import com.idos.tictactoe.ui.GoogleSignIn.GoogleSignInViewModel
 import com.idos.tictactoe.ui.Online.CodeGameViewModel
@@ -74,9 +68,7 @@ import com.idos.tictactoe.ui.Online.codeGameScreen
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
 import com.idos.tictactoe.ui.theme.Shapes
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -94,18 +86,11 @@ enum class GameScreen(val title: String) {
     CodeGame("CodeGame"),
     OpenGameWithCode("OpenGameWithCode"),
     EnterGameWithCode("EnterGameWithCode"),
-    ShowGameFinalScore("ShowGameFinalScore"),
     GoogleSignIn("GoogleSignIn"),
     NewName("NewName"),
     TimeUp("TimeUp"),
     SearchGame("SearchGame")
 }
-
-data class sharedPreferences(
-    var lastTimeSeen: Long = 0,
-    var messageSent: Boolean = false,
-    var messagingSendingTime: Long = 0
-)
 
 /**
  * Provides Navigation graph for the application.
@@ -319,20 +304,12 @@ fun TicTacToeApp(
     val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
     val onlineGameValuesUiState by codeGameViewModel.onlineGameValuesUiState.collectAsState()
-    var sharedPreferencesUiState by mutableStateOf(sharedPreferences())
     val emailState = googleSignInViewModel.emailState
     val enableState by codeGameViewModel.enableState.collectAsState()
 
-    val coroutineScope = rememberCoroutineScope()
 
     var timesPlayed by remember {
         mutableIntStateOf(0)
-    }
-    var open by remember {
-        mutableStateOf(false)
-    }
-    var updateSharedPreferences by remember {
-        mutableStateOf(false)
     }
 
     //encrypted shared preferences
@@ -354,27 +331,6 @@ fun TicTacToeApp(
 
     val emailStr = encryptedSharedPreferences.getString("email", "")
     email.value = emailStr!!
-
-
-    //share preferences
-    val sharedPreferences = SharedPreferencesDataStore(context)
-
-    if (!updateSharedPreferences) {
-        sharedPreferencesUiState.messageSent = false
-        sharedPreferencesUiState.lastTimeSeen = (System.currentTimeMillis() / 1000)
-
-        sharedPreferences.setMessageSent(sharedPreferencesUiState.messageSent)
-        sharedPreferences.setLastTimeSeen(sharedPreferencesUiState.lastTimeSeen)
-
-        coroutineScope.launch {
-            sharedPreferences.getDetails().collect {
-                withContext(Dispatchers.IO) {
-                    sharedPreferencesUiState = it
-                }
-            }
-        }
-        updateSharedPreferences = true
-    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -434,11 +390,6 @@ fun TicTacToeApp(
                     onSinglePlayerClick = { navController.navigate(GameScreen.SinglePlayer.title) },
                     onFriendlyBattleClick = {navController.navigate(GameScreen.CodeGame.title)},
                     onOnlineClick = { navController.navigate(GameScreen.SearchGame.title) },
-                    onBackClick = {
-                        sharedPreferencesUiState.lastTimeSeen = (System.currentTimeMillis() / 1000)
-
-                        sharedPreferences.setLastTimeSeen(sharedPreferencesUiState.lastTimeSeen)
-                    },
                     context = LocalContext.current
                 )
             }
@@ -559,28 +510,6 @@ fun TicTacToeApp(
                     viewModel = codeGameViewModel,
                     navController = navController,
                     enableState = enableState
-                )
-            }
-
-            //show game final score
-            composable(
-                route = GameScreen.ShowGameFinalScore.title,
-                exitTransition = {
-                    slideOutVertically(animationSpec = tween(300)) + fadeOut(
-                        animationSpec = tween(
-                            300
-                        )
-                    )
-                },
-                enterTransition = {
-                    slideInVertically(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
-                }
-            ) {
-                BackHandler {}
-                ShowGameFinalScore(
-                    uiState = onlineGameValuesUiState,
-                    navController = navController,
-                    codeGameViewModel = codeGameViewModel
                 )
             }
 
