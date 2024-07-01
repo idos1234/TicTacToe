@@ -48,12 +48,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.idos.tictactoe.data.GetXO
@@ -445,22 +443,15 @@ fun TicTacToeApp(
 
             //online game screen
             composable(
-                route = "${GameScreen.Online.title}/{myTurn}",
-                arguments = listOf(
-                    navArgument("myTurn") {
-                        type = NavType.StringType
-                    }
-                )
+                route = GameScreen.Online.title
             ) {
                 BackHandler {}
-                val myTurn = it.arguments?.getString("myTurn")
                 OnlineTicTacToe(
                     player = email.value,
                     viewModel = codeGameViewModel,
                     navController = navController,
                     enableState = enableState,
                     currentGame = onlineGameValuesUiState,
-                    myTurn = myTurn
                 )
             }
 

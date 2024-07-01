@@ -63,9 +63,6 @@ fun SearchGameScreen(
     var times by remember {
         mutableStateOf(1)
     }
-    var myTurn by remember {
-        mutableStateOf<String?>(null)
-    }
 
     var waitingTimeFlag by remember {
         mutableStateOf(true)
@@ -105,10 +102,7 @@ fun SearchGameScreen(
                             databaseReference.child(game.id).child("player2").setValue(player)
                         }
                         currentGame.game = updatedGame
-                        myTurn = "O"
                         MyTurn = "O"
-                        wasGameStarted = true
-
                         break@Loop
                     }
                 }
@@ -125,7 +119,6 @@ fun SearchGameScreen(
                     onlineGameId = key
                     databaseReference.child(key).setValue(newGame)
                     currentGame.game = newGame
-                    myTurn = "X"
                     MyTurn = "X"
                 }
                 times++
@@ -134,9 +127,6 @@ fun SearchGameScreen(
                 val game = Game.getValue(OnlineGameUiState::class.java)
                 if (game!!.id == onlineGameId) {
                     currentGame.game = game
-                    if (currentGame.game.player2 != "") {
-                        wasGameStarted = true
-                    }
                 }
             }
         }
@@ -155,10 +145,11 @@ fun SearchGameScreen(
     currentGame.game = findGame(gameId = currentGame.game.id, databaseReference = databaseReference)
 
     if (currentGame.game.player2 != "") {
+        wasGameStarted = true
         currentGame.player1 = getPlayer(email = currentGame.game.player1, context = context)
         currentGame.player2 = getPlayer(email = currentGame.game.player2, context = context)
 
-        navController.navigate("${GameScreen.Online.title}/$myTurn")
+        navController.navigate(GameScreen.Online.title)
     }
 
     SearchGameUi()

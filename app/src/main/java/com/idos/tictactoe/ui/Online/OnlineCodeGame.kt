@@ -72,9 +72,6 @@ import com.idos.tictactoe.ui.Screen.GameScreen
 import com.idos.tictactoe.ui.Screen.getPlayer
 
 private var enteredGame = false
-private var gameStarted = false
-private var codeGameId: String = ""
-
 
 class CodeGameService : Service() {
     override fun onBind(intent: Intent?): IBinder? {
@@ -92,23 +89,13 @@ class CodeGameService : Service() {
         val firebaseDatabase = FirebaseDatabase.getInstance()
         val databaseReference = firebaseDatabase.getReference("GamesWithCode")
 
-        if(!gameStarted) {
-            CodeGameViewModel().removeGame(codeGameId, databaseReference, 0) {
-                stopService(
-                    Intent(
-                        baseContext,
-                        CodeGameService::class.java
-                    )
-                )
-            }
-        }
+        deleteGame(this, databaseReference)
     }
 }
 
 @Composable
 fun playersBar(
     modifier: Modifier,
-    gameId: String,
     databaseReference: DatabaseReference,
     context: Context = LocalContext.current,
     screenWidth: Int,
@@ -117,7 +104,7 @@ fun playersBar(
     var game by remember {
         mutableStateOf(OnlineGameUiState())
     }
-    game = findGame(gameId = gameId, databaseReference = databaseReference)
+    game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
 
     val player1 = getPlayer(email = game.player1, context = context)
     val player2 = getPlayer(email = game.player2, context = context)
@@ -209,16 +196,12 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
     var foundPlayer by remember {
         mutableStateOf(false)
     }
-    var myTurn by remember {
-        mutableStateOf<String?>(null)
-    }
     var removeGame by remember() {
         mutableStateOf(false)
     }
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
-    val size = (screenWidth/10)*3
 
     val colors = MaterialTheme.colorScheme
     val brush = Brush.verticalGradient(listOf(colors.background, colors.primary))
@@ -241,11 +224,10 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
                         winner = "",
                         boxes = com.idos.tictactoe.data.Boxes()
                     )
-                    codeGameId = key
+                    onlineGameId = key
                     databaseReference.child(key)
                         .setValue(newGame)
                     currentGame.game = newGame
-                    myTurn = "X"
                     //get Players collection from database
                     db.collection("Players").get()
                         //on success
@@ -276,11 +258,11 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
             }
             for (Game in snapshot.children) {
                 val game = Game.getValue(OnlineGameUiState::class.java)
-                if (game!!.id == codeGameId) {
+                if (game!!.id == onlineGameId) {
                     currentGame.game = game
                     if (currentGame.game.player2 != "") {
                         foundPlayer = true
-                        gameStarted = true
+                        wasGameStarted = true
                         //get Players collection from database
                         db.collection("Players").get()
                             //on success
@@ -328,15 +310,13 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
             .fillMaxSize()) {
         playersBar(
             modifier = Modifier.weight(2f),
-            gameId = codeGameId,
             databaseReference = databaseReference,
             screenWidth = screenWidth.value.toInt(),
             colors = colors
         )
         Spacer(modifier = Modifier.weight(1f))
         OnlineButtonGrid(
-            myTurn = myTurn,
-            gameStarted = foundPlayer,
+            myTurn = "X",
             player = player,
             databaseReference = databaseReference,
             viewModel = viewModel,
@@ -344,7 +324,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
             enableState = enableState,
             gameState = currentGame,
             modifier = Modifier.weight(6f),
-            codeGameId
+            dbName = "GamesWithCode"
         )
         Spacer(modifier = Modifier.weight(1f))
     }
@@ -374,7 +354,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
                             fontWeight = FontWeight.Normal
                         )
                         Text(
-                            text = codeGameId,
+                            text = onlineGameId,
                             fontSize = 25.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -396,7 +376,7 @@ fun OpenOnlineGameWithCode(context: Context, player: String, viewModel: CodeGame
     }
 
     if(removeGame) {
-        viewModel.removeGame(codeGameId, databaseReference, 0) {
+        viewModel.removeGame(onlineGameId, databaseReference, 0) {
             //clears code after quit game
             codeGameViewModel.clearCode()
             navController.navigate(GameScreen.CodeGame.title)
@@ -411,9 +391,6 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
     }
     var times by remember {
         mutableIntStateOf(1)
-    }
-    var myTurn by remember {
-        mutableStateOf<String?>(null)
     }
     var foundPlayer by remember {
         mutableStateOf(false)
@@ -446,7 +423,6 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
                         databaseReference.child(game.id).child("player2").setValue(player)
                         foundPlayer = true
                         currentGame.game = updatedGame
-                        myTurn = "O"
                         break
                     }
                 }
@@ -454,7 +430,7 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
             }
             for (Game in snapshot.children) {
                 val game = Game.getValue(OnlineGameUiState::class.java)
-                if (game!!.id == codeGameId) {
+                if (game!!.id == onlineGameId) {
                     currentGame.game = game
                     }
                 }
@@ -479,15 +455,13 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
             .fillMaxSize()) {
         playersBar(
             modifier = Modifier.weight(2f),
-            gameId = codeGameId,
             databaseReference = databaseReference,
             screenWidth = screenWidth.value.toInt(),
             colors = colors
         )
         Spacer(modifier = Modifier.weight(1f))
         OnlineButtonGrid(
-            myTurn = myTurn,
-            gameStarted = foundPlayer,
+            myTurn = "O",
             player = player,
             databaseReference = databaseReference,
             viewModel = viewModel,
@@ -495,7 +469,7 @@ fun EnterOnlineGameWithCode(context: Context, player: String, gameId: String, vi
             enableState = enableState,
             gameState = currentGame,
             modifier = Modifier.weight(6f),
-            codeGameId
+            dbName = "GamesWithCode"
         )
         Spacer(modifier = Modifier.weight(1f))
     }
@@ -697,9 +671,9 @@ fun CheckForGame(gameId: String, context: Context, onFindGame: () -> Unit, notFi
                     }
                 } else {
                     if(!enteredGame) {
-                        gameStarted = true
+                        wasGameStarted = true
                         enteredGame = true
-                        codeGameId = gameId
+                        onlineGameId = gameId
                         onFindGame()
                     }
                 }

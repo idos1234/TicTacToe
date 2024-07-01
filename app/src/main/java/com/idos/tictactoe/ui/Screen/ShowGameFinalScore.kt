@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -76,6 +77,81 @@ import com.idos.tictactoe.ui.Online.onlineGameId
 import com.idos.tictactoe.ui.Online.otherPlayerQuit
 import kotlinx.coroutines.delay
 
+@Composable
+fun GameScoreDialogFriendly(
+    gameState: OnlineGameRememberedValues,
+    navController: NavController,
+    codeGameViewModel: CodeGameViewModel,
+    context: Context,
+) {
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("GamesWithCode")
+    gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
+    if(gameState.game.player2Quit || gameState.game.player1Quit) {
+        otherPlayerQuit = true
+    }
+
+    val colors = MaterialTheme.colorScheme
+
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .wrapContentHeight()
+                .background(color = Color.Transparent),
+            colors = CardDefaults.cardColors(colors.background),
+            shape = RoundedCornerShape(12),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(vertical = (LocalConfiguration.current.screenHeightDp / 100).dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(horizontalArrangement = Arrangement.Absolute.Left) {
+                    Text(
+                        text = gameState.FinalScoreText,
+                        fontSize = LocalConfiguration.current.screenHeightDp.sp * 0.03,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onBackground
+                    )
+                    Text(
+                        text = "!",
+                        fontSize = LocalConfiguration.current.screenHeightDp.sp * 0.03,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onBackground
+                    )
+                }
+                ShowPlayersDialog(gameState = gameState)
+                Spacer(modifier = Modifier.height(LocalConfiguration.current.screenWidthDp.dp / 3))
+                Button(
+                    onClick = {
+                        deleteGame(context, databaseReference)
+
+                        //clears code after quit game
+                        codeGameViewModel.clearCode()
+                        gameState.game = OnlineGameUiState()
+                        navController.navigate(GameScreen.Start.title)
+                    },
+                    colors = ButtonDefaults.buttonColors(colors.primary),
+                    modifier = Modifier.fillMaxWidth(0.4f)
+                ) {
+                    Text(
+                        text = "Home",
+                        fontSize = LocalConfiguration.current.screenHeightDp.sp * 0.03,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onPrimary
+                    )
+                }
+            }
+        }
+    }
+}
+
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun GameScoreDialog(
@@ -114,7 +190,8 @@ fun GameScoreDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight(),
+                    .wrapContentHeight()
+                    .padding(vertical = (LocalConfiguration.current.screenHeightDp / 100).dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(horizontalArrangement = Arrangement.Absolute.Left) {
@@ -207,6 +284,9 @@ fun GameScoreDialog(
                         }
                     }
                 }
+                else {
+                    Spacer(modifier = Modifier.height(LocalConfiguration.current.screenWidthDp.dp / 15))
+                }
 
                 Button(
                     onClick = {
@@ -217,11 +297,12 @@ fun GameScoreDialog(
                         gameState.game = OnlineGameUiState()
                         navController.navigate(GameScreen.Start.title)
                     },
-                    colors = ButtonDefaults.buttonColors(colors.primary)
+                    colors = ButtonDefaults.buttonColors(colors.primary),
+                    modifier = Modifier.fillMaxWidth(0.4f)
                 ) {
                     Text(
                         text = "Home",
-                        fontSize = LocalConfiguration.current.screenHeightDp.sp * 0.02,
+                        fontSize = LocalConfiguration.current.screenHeightDp.sp * 0.03,
                         fontWeight = FontWeight.Bold,
                         color = colors.onPrimary
                     )
