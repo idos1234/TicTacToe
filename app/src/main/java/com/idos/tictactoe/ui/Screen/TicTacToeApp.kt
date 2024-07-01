@@ -73,8 +73,6 @@ import kotlin.concurrent.schedule
 
 //game screens
 enum class GameScreen(val title: String) {
-    SignUp("SignUp"),
-    LogIn("LogIn"),
     Start("Start"),
     TwoPlayers("TwoPlayers"),
     SinglePlayer("SinglePlayer"),
