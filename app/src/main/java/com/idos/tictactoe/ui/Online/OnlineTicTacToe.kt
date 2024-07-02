@@ -32,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,7 +66,6 @@ import com.idos.tictactoe.ui.Screen.GameScoreDialogFriendly
 import com.idos.tictactoe.ui.Screen.ShowPlayersDialog
 import com.idos.tictactoe.ui.Screen.getPlayer
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 var wasGameStarted = false
 var onlineGameId: String = ""
@@ -274,7 +272,8 @@ fun OnlineButtonGrid(
     enableState: Enable,
     gameState: OnlineGameRememberedValues,
     modifier: Modifier,
-    dbName: String
+    dbName: String,
+    context: Context = LocalContext.current
 ) {
     var foundWinner by remember {
         mutableStateOf(false)
@@ -288,9 +287,7 @@ fun OnlineButtonGrid(
     var boxes by remember {
         mutableStateOf(gameState.game.boxes)
     }
-
-    val scope = rememberCoroutineScope()
-
+    
     Column(
         modifier = modifier
             .background(Color.Transparent)
@@ -411,6 +408,11 @@ fun OnlineButtonGrid(
         }
     }
 
+    databaseReference.addValueEventListener(object : ValueEventListener {
+        override fun onDataChange(snapshot: DataSnapshot) {}
+        override fun onCancelled(error: DatabaseError) {}
+    })
+
     gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
     boxes = gameState.game.boxes
     //if can be a winner
@@ -453,10 +455,10 @@ fun OnlineButtonGrid(
                     viewModel.updateFinalScoreScreenData("You won", gameState.game, gameState.player1,  gameState.player2)
                     gameState.FinalScoreText = "You won"
                     if(dbName == "Games") {
-                        updateScore(
+                        UpdateScore(
                             playerName = player,
                             addedScore = 1,
-                            context = LocalContext.current,
+                            context = context,
                             gameState = gameState,
                             navController = navController,
                             codeGameViewModel = viewModel
@@ -466,7 +468,7 @@ fun OnlineButtonGrid(
                             gameState = gameState,
                             navController = navController,
                             codeGameViewModel = viewModel,
-                            context = LocalContext.current
+                            context = context
                         )
                     }
                 }
@@ -476,10 +478,10 @@ fun OnlineButtonGrid(
                     gameState.FinalScoreText = "You lost"
 
                     if (dbName == "Games") {
-                        updateScore(
+                        UpdateScore(
                             playerName = player,
                             addedScore = -1,
-                            context = LocalContext.current,
+                            context = context,
                             gameState = gameState,
                             navController = navController,
                             codeGameViewModel = viewModel
@@ -489,7 +491,7 @@ fun OnlineButtonGrid(
                             gameState = gameState,
                             navController = navController,
                             codeGameViewModel = viewModel,
-                            context = LocalContext.current
+                            context = context
                         )
                     }
                 }
@@ -500,10 +502,10 @@ fun OnlineButtonGrid(
                     viewModel.updateFinalScoreScreenData("You won", gameState.game, gameState.player1,  gameState.player2)
                     gameState.FinalScoreText = "You won"
                     if (dbName == "Games") {
-                        updateScore(
+                        UpdateScore(
                             playerName = player,
                             addedScore = 1,
-                            context = LocalContext.current,
+                            context = context,
                             gameState = gameState,
                             navController = navController,
                             codeGameViewModel = viewModel
@@ -513,7 +515,7 @@ fun OnlineButtonGrid(
                             gameState = gameState,
                             navController = navController,
                             codeGameViewModel = viewModel,
-                            context = LocalContext.current
+                            context = context
                         )
                     }
                 }
@@ -522,10 +524,10 @@ fun OnlineButtonGrid(
                     viewModel.updateFinalScoreScreenData("You lost", gameState.game, gameState.player1,  gameState.player2)
                     gameState.FinalScoreText = "You lost"
                     if (dbName == "Games") {
-                        updateScore(
+                        UpdateScore(
                             playerName = player,
                             addedScore = -1,
-                            context = LocalContext.current,
+                            context = context,
                             gameState = gameState,
                             navController = navController,
                             codeGameViewModel = viewModel
@@ -535,26 +537,11 @@ fun OnlineButtonGrid(
                             gameState = gameState,
                             navController = navController,
                             codeGameViewModel = viewModel,
-                            context = LocalContext.current
+                            context = context
                         )
                     }
                 }
                 // show score screen
-            } else {
-                //new round
-                gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
-                boxes = gameState.game.boxes
-                if (gameState.game.foundWinner && gameState.game.player1Score != 2 && gameState.game.player2Score != 2) {
-                    scope.launch {
-                        if (gameState.game.boxes != Boxes()) {
-                            ResetGame(
-                                game = gameState.game,
-                                databaseReference = databaseReference
-                            )
-                        }
-                        viewModel.changeEnable(true)
-                    }
-                }
             }
         }
         //tie
@@ -566,20 +553,6 @@ fun OnlineButtonGrid(
                     databaseReference.child(onlineGameId).child("editedRounds").setValue(true)
                     databaseReference.child(onlineGameId).child("rounds")
                         .setValue(gameState.game.rounds.plus(1))
-                }
-            }
-            gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
-            boxes = gameState.game.boxes
-            //reset round
-            if (gameState.game.player1Score != 2 && gameState.game.player2Score != 2) {
-                scope.launch {
-                    delay(3000)
-                    if(gameState.game.boxes != Boxes()) {
-                        ResetGame(
-                            game = gameState.game,
-                            databaseReference = databaseReference
-                        )
-                    }
                 }
             }
         }
@@ -597,11 +570,18 @@ fun OnlineButtonGrid(
     if (foundWinner && (gameState.game.player1Score != 2) && (gameState.game.player2Score != 2)) {
         startedCountDown = true
         gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
+        gameState.player1 = getPlayer(email = gameState.game.player1, context = context)
+        gameState.player2 = getPlayer(email = gameState.game.player2, context = context)
         NextRoundDialog(
             gameState = gameState,
             onZeroSecs = {
                 times = 0
                 startedCountDown = false
+                ResetGame(
+                    game = gameState.game,
+                    databaseReference = databaseReference
+                )
+                viewModel.changeEnable(true)
             }
         )
     }
@@ -612,11 +592,18 @@ fun OnlineButtonGrid(
     if ((times == 9) && (gameState.game.player1Score != 2) && (gameState.game.player2Score != 2)) {
         startedCountDown = true
         gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
+        gameState.player1 = getPlayer(email = gameState.game.player1, context = context)
+        gameState.player2 = getPlayer(email = gameState.game.player2, context = context)
         NextRoundDialog(
             gameState = gameState,
             onZeroSecs = {
                 times = 0
                 startedCountDown = false
+                ResetGame(
+                    game = gameState.game,
+                    databaseReference = databaseReference
+                )
+                viewModel.changeEnable(true)
             }
         )
     }
@@ -769,7 +756,7 @@ fun OnlineTicTacToe(
 }
 
 @Composable
-fun updateScore(
+fun UpdateScore(
     gameState: OnlineGameRememberedValues,
     navController: NavController,
     codeGameViewModel: CodeGameViewModel,
@@ -948,7 +935,7 @@ fun updateScore(
     }
 
     if (failed) {
-        updateScore(
+        UpdateScore(
             gameState = gameState,
             navController = navController,
             codeGameViewModel = codeGameViewModel,

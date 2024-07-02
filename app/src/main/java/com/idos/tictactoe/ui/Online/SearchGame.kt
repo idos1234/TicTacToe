@@ -144,11 +144,10 @@ fun SearchGameScreen(
 
     currentGame.game = findGame(gameId = currentGame.game.id, databaseReference = databaseReference)
 
-    if (currentGame.game.player2 != "") {
+    if (currentGame.game.player2 != "" && !wasGameStarted) {
         wasGameStarted = true
         currentGame.player1 = getPlayer(email = currentGame.game.player1, context = context)
         currentGame.player2 = getPlayer(email = currentGame.game.player2, context = context)
-
         navController.navigate(GameScreen.Online.title)
     }
 
