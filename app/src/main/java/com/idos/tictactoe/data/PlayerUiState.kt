@@ -1,5 +1,18 @@
 package com.idos.tictactoe.data
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.sp
 import com.idos.tictactoe.R
 
 //data class for every player in database
@@ -135,4 +148,33 @@ fun GetO(o: String): Int {
         "o_15"-> R.drawable.o_15
         else -> 0
     }
+}
+
+@Composable
+fun MainPlayerUiState.Draw(
+    modifier: Modifier,
+    screenWidth: Int,
+    shape: RoundedCornerShape,
+    border: BorderStroke
+) {
+    val colors = MaterialTheme.colorScheme
+    Card(
+        modifier = modifier,
+        shape = shape,
+        border = border
+    ) {
+        Image(
+            painter = painterResource(id = GetXO(currentImage)),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(shape)
+        )
+    }
+    Text(
+        text = name,
+        fontSize = screenWidth.sp * 0.05,
+        color = colors.onBackground
+    )
 }

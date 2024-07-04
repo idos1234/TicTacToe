@@ -24,19 +24,9 @@ class CodeGameViewModel: ViewModel() {
     private val _enableState = MutableStateFlow(Enable())
     val enableState: StateFlow<Enable> = _enableState.asStateFlow()
 
-    fun clearCode() {
-        _onlineGameValuesUiState.value.gameCode = ""
-    }
-
     fun changeEnable(isEnable: Boolean) {
         _enableState.update {
             it.copy(enable = isEnable)
-        }
-    }
-
-    fun updateGameCode(newGameCode: String) {
-        _onlineGameValuesUiState.update {
-            it.copy(gameCode = newGameCode)
         }
     }
 
@@ -109,7 +99,6 @@ class CodeGameViewModel: ViewModel() {
 }
 
 data class OnlineGameRememberedValues(
-    var gameCode: String = "",
     var FinalScoreText: String = "",
     var game: OnlineGameUiState = OnlineGameUiState(),
     var player1: MainPlayerUiState = MainPlayerUiState(),

@@ -10,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.with
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -46,7 +47,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -54,7 +54,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -66,10 +65,9 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.google.firebase.database.FirebaseDatabase
 import com.idos.tictactoe.R
-import com.idos.tictactoe.data.GetXO
+import com.idos.tictactoe.data.Draw
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
-import com.idos.tictactoe.ui.Online.CodeGameViewModel
 import com.idos.tictactoe.ui.Online.OnlineGameRememberedValues
 import com.idos.tictactoe.ui.Online.deleteGame
 import com.idos.tictactoe.ui.Online.findGame
@@ -81,7 +79,6 @@ import kotlinx.coroutines.delay
 fun GameScoreDialogFriendly(
     gameState: OnlineGameRememberedValues,
     navController: NavController,
-    codeGameViewModel: CodeGameViewModel,
     context: Context,
 ) {
     val firebaseDatabase = FirebaseDatabase.getInstance()
@@ -132,8 +129,6 @@ fun GameScoreDialogFriendly(
                     onClick = {
                         deleteGame(context, databaseReference)
 
-                        //clears code after quit game
-                        codeGameViewModel.clearCode()
                         gameState.game = OnlineGameUiState()
                         navController.navigate(GameScreen.Start.title)
                     },
@@ -157,7 +152,6 @@ fun GameScoreDialogFriendly(
 fun GameScoreDialog(
     gameState: OnlineGameRememberedValues,
     navController: NavController,
-    codeGameViewModel: CodeGameViewModel,
     context: Context,
     coins: Int,
     levelUp: Boolean,
@@ -292,8 +286,6 @@ fun GameScoreDialog(
                     onClick = {
                         deleteGame(context, databaseReference)
 
-                        //clears code after quit game
-                        codeGameViewModel.clearCode()
                         gameState.game = OnlineGameUiState()
                         navController.navigate(GameScreen.Start.title)
                     },
@@ -360,9 +352,6 @@ private fun AddedCoinsAnimation(
 fun ShowPlayersDialog(
     gameState: OnlineGameRememberedValues
 ) {
-    val player1CurrentImage = GetXO(gameState.player1.currentImage)
-    val player2CurrentImage = GetXO(gameState.player1.currentImage)
-
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
 
@@ -379,24 +368,12 @@ fun ShowPlayersDialog(
             Modifier.weight(2f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Card(
+            gameState.player1.Draw(
                 modifier = Modifier
                     .size(((screenWidth - 40) / 4).dp),
+                screenWidth = screenWidth,
                 shape = RoundedCornerShape(20),
-            ) {
-                Image(
-                    painter = painterResource(id = player1CurrentImage),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(20))
-                )
-            }
-            Text(
-                gameState.player1.name,
-                fontSize = screenWidth.sp * 0.05,
-                color = colors.onBackground
+                border = BorderStroke(2.dp, if (gameState.game.playerTurn == "X") colors.tertiary else { colors.background})
             )
         }
         Card(
@@ -417,25 +394,12 @@ fun ShowPlayersDialog(
             Modifier.weight(2f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Card(
+            gameState.player2.Draw(
                 modifier = Modifier
                     .size(((screenWidth - 40) / 4).dp),
+                screenWidth = screenWidth,
                 shape = RoundedCornerShape(20),
-            ) {
-                Image(
-                    painter = painterResource(id = player2CurrentImage),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(20))
-                )
-            }
-            Text(
-                gameState.player2.name,
-                fontSize = screenWidth.sp * 0.05,
-                color = colors.onBackground
-
+                border = BorderStroke(2.dp, if (gameState.game.playerTurn == "O") colors.tertiary else { colors.background})
             )
         }
     }

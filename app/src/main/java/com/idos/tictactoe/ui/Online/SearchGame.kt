@@ -148,7 +148,7 @@ fun SearchGameScreen(
         wasGameStarted = true
         currentGame.player1 = getPlayer(email = currentGame.game.player1, context = context)
         currentGame.player2 = getPlayer(email = currentGame.game.player2, context = context)
-        navController.navigate(GameScreen.Online.title)
+        navController.navigate("${GameScreen.Online.title}/Games")
     }
 
     SearchGameUi()

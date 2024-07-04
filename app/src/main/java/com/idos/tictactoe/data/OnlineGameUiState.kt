@@ -29,6 +29,8 @@ data class OnlineGameUiState(
     var player1Quit: Boolean = false,
     //if player 2 quit
     var player2Quit: Boolean = false,
+    //for friendly games
+    var wasGameStarted: Boolean = false
 )
 
 data class Boxes (

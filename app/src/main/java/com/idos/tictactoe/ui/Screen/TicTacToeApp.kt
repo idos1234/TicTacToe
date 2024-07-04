@@ -48,21 +48,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.ui.GoogleSignIn.GoogleSignInScreen
 import com.idos.tictactoe.ui.GoogleSignIn.GoogleSignInViewModel
 import com.idos.tictactoe.ui.Online.CodeGameViewModel
-import com.idos.tictactoe.ui.Online.EnterOnlineGameWithCode
+import com.idos.tictactoe.ui.Online.EnterGameOnline
 import com.idos.tictactoe.ui.Online.OnlineTicTacToe
-import com.idos.tictactoe.ui.Online.OpenOnlineGameWithCode
+import com.idos.tictactoe.ui.Online.OpenGameOnline
 import com.idos.tictactoe.ui.Online.SearchGameScreen
-import com.idos.tictactoe.ui.Online.codeGameScreen
+import com.idos.tictactoe.ui.Online.CodeGameScreen
 import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
 import com.idos.tictactoe.ui.theme.Shapes
@@ -380,7 +382,6 @@ fun TicTacToeApp(
         ) {
             //home screen
             composable(route = GameScreen.Start.title) {
-                backStackEntry?.arguments?.getString("gameId")
                 HomeScreen(
                     onTwoPlayersClick = { navController.navigate(GameScreen.TwoPlayers.title) },
                     onSinglePlayerClick = { navController.navigate(GameScreen.SinglePlayer.title) },
@@ -441,7 +442,12 @@ fun TicTacToeApp(
 
             //online game screen
             composable(
-                route = GameScreen.Online.title
+                route = "${GameScreen.Online.title}/{dbName}",
+                arguments = listOf(
+                    navArgument("dbName") {
+                        type = NavType.StringType
+                    }
+                )
             ) {
                 BackHandler {}
                 OnlineTicTacToe(
@@ -450,6 +456,7 @@ fun TicTacToeApp(
                     navController = navController,
                     enableState = enableState,
                     currentGame = onlineGameValuesUiState,
+                    dbName = it.arguments?.getString("dbName") ?: ""
                 )
             }
 
@@ -468,9 +475,7 @@ fun TicTacToeApp(
             //codeGame
             composable(route = GameScreen.CodeGame.title) {
                 BackHandler {}
-                codeGameScreen(
-                    codeGameViewModel = codeGameViewModel,
-                    codeGameUiState = onlineGameValuesUiState,
+                CodeGameScreen(
                     navController = navController,
                     context = LocalContext.current
                 )
@@ -479,26 +484,20 @@ fun TicTacToeApp(
             //open game with code
             composable(route = GameScreen.OpenGameWithCode.title) {
                 BackHandler {}
-                OpenOnlineGameWithCode(
+                OpenGameOnline(
                     context = LocalContext.current,
                     player = email.value,
-                    viewModel = codeGameViewModel,
                     navController = navController,
-                    enableState = enableState,
-                    codeGameViewModel = codeGameViewModel
                 )
             }
 
             //enter game with code
             composable(route = GameScreen.EnterGameWithCode.title) {
                 BackHandler {}
-                EnterOnlineGameWithCode(
+                EnterGameOnline(
                     context = LocalContext.current,
                     player = email.value,
-                    gameId = onlineGameValuesUiState.gameCode,
-                    viewModel = codeGameViewModel,
                     navController = navController,
-                    enableState = enableState
                 )
             }
 

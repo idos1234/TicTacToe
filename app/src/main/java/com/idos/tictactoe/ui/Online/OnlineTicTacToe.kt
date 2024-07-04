@@ -467,7 +467,6 @@ fun OnlineButtonGrid(
                         GameScoreDialogFriendly(
                             gameState = gameState,
                             navController = navController,
-                            codeGameViewModel = viewModel,
                             context = context
                         )
                     }
@@ -490,7 +489,6 @@ fun OnlineButtonGrid(
                         GameScoreDialogFriendly(
                             gameState = gameState,
                             navController = navController,
-                            codeGameViewModel = viewModel,
                             context = context
                         )
                     }
@@ -514,7 +512,6 @@ fun OnlineButtonGrid(
                         GameScoreDialogFriendly(
                             gameState = gameState,
                             navController = navController,
-                            codeGameViewModel = viewModel,
                             context = context
                         )
                     }
@@ -536,7 +533,6 @@ fun OnlineButtonGrid(
                         GameScoreDialogFriendly(
                             gameState = gameState,
                             navController = navController,
-                            codeGameViewModel = viewModel,
                             context = context
                         )
                     }
@@ -712,6 +708,7 @@ fun OnlineTicTacToe(
     navController: NavController,
     enableState: Enable,
     currentGame: OnlineGameRememberedValues,
+    dbName: String
 ) {
     currentGame.player1 = getPlayer(email = currentGame.game.player1, context = LocalContext.current)
     currentGame.player2 = getPlayer(email = currentGame.game.player2, context = LocalContext.current)
@@ -724,7 +721,7 @@ fun OnlineTicTacToe(
 
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
-    val databaseReference = firebaseDatabase.getReference("Games")
+    val databaseReference = firebaseDatabase.getReference(dbName)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -733,9 +730,10 @@ fun OnlineTicTacToe(
             .fillMaxSize()) {
         playersBar(
             modifier = Modifier.weight(2f),
-            databaseReference = databaseReference,
             screenWidth = screenWidth.value.toInt(),
-            colors = colors
+            colors = colors,
+            gameState = currentGame,
+            databaseReference = databaseReference
         )
         OnlineButtonGrid(
             myTurn = MyTurn,
@@ -749,7 +747,7 @@ fun OnlineTicTacToe(
                 .padding(10.dp)
                 .weight(3f)
                 .fillMaxSize(),
-            dbName = "Games"
+            dbName = dbName
         )
         Spacer(modifier = Modifier.weight(1f))
     }
@@ -948,7 +946,6 @@ fun UpdateScore(
         GameScoreDialog(
             gameState = gameState,
             navController = navController,
-            codeGameViewModel = codeGameViewModel,
             context = context,
             coins = coins,
             levelUp = levelUp,
