@@ -335,7 +335,7 @@ private fun ShowPlayersBar(
                 )
             }
             Text(
-                text = "Player 1",
+                text = player.name,
                 fontSize = screenWidth.sp * 0.05,
                 color = colors.onBackground
             )
