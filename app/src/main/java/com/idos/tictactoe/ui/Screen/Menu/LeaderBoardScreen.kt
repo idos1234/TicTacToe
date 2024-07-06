@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Screen
+package com.idos.tictactoe.ui.Screen.Menu
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -85,7 +85,7 @@ fun LeaderBoardScreen(
                     //first 10 players
                     playerlist.add(p)
                     i++
-                    if(i == 10) {
+                    if(i == 9) {
                         break
                     }
 
@@ -136,7 +136,7 @@ fun ShowTopPlayers(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom
     ) {
-        androidx.compose.material3.Text(
+        Text(
             text = "LeaderBoard",
             color = colors.onPrimary,
             fontWeight = FontWeight.Bold,
@@ -146,7 +146,7 @@ fun ShowTopPlayers(
 
         Spacer(modifier = Modifier.height(screenHeight.value.times(0.05).dp))
 
-        androidx.compose.material3.Card(
+        Card(
             modifier = Modifier
                 .fillMaxSize(0.8f),
             colors = CardDefaults.cardColors(containerColor = colors.primary)
@@ -160,7 +160,7 @@ fun ShowTopPlayers(
             ) {
                 Players.forEachIndexed { index, item ->
                     item {
-                        desplayPlayer(
+                        DesplayPlayer(
                             player = item!!,
                             modifier = Modifier
                                 .fillMaxWidth(0.9f)
@@ -189,13 +189,13 @@ fun ShowTopPlayers(
 
     //show player's information on player click
     if (showPlayer) {
-        showPlayerData(player = player, onCloseClicked = { showPlayer = false })
+        ShowPlayerData(player = player, onCloseClicked = { showPlayer = false })
     }
 }
 
 //show player's information
 @Composable
-fun showPlayerData(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
+fun ShowPlayerData(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
     val currentX = GetX(player.currentX)
     val currentO = GetO(player.currentO)
     val currentImage = GetXO(player.currentImage)
@@ -273,7 +273,7 @@ fun showPlayerData(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
 }
 
 @Composable
-fun desplayPlayer(
+fun DesplayPlayer(
     player: MainPlayerUiState,
     modifier: Modifier, index: Int,
     colorScheme: ColorScheme, screenHeight: Dp,
@@ -287,7 +287,7 @@ fun desplayPlayer(
         colorScheme.onPrimary
     }
 
-    androidx.compose.material3.Card(
+    Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = color),
         shape = RoundedCornerShape(20.dp)
@@ -306,13 +306,13 @@ fun desplayPlayer(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Absolute.Left
                 ) {
-                    androidx.compose.material3.Text(
+                    Text(
                         "$index",
                         fontSize = screenHeight.value.sp * 0.02,
                         fontWeight = FontWeight.Light,
                         color = Color.Black
                     )
-                    androidx.compose.material3.Text(
+                    Text(
                         ".",
                         fontSize = screenHeight.value.sp * 0.02,
                         fontWeight = FontWeight.Light,

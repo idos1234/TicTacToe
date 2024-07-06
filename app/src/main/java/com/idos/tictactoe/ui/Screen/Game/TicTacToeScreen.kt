@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Screen
+package com.idos.tictactoe.ui.Screen.Game
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -51,6 +51,8 @@ import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.UiState
 import com.idos.tictactoe.ui.CheckWinner
+import com.idos.tictactoe.ui.Screen.GameScreen
+import com.idos.tictactoe.ui.Screen.Menu.getPlayer
 import com.idos.tictactoe.ui.theme.Secondery
 
 /**
@@ -129,7 +131,7 @@ fun ButtonGrid(
                 }
             }
 
-             showWinner(
+             ShowWinner(
                  winner = "Winner is: ${uiState.winner}!",
                  text = "Congratulations for winning",
                  onPlayAgain = { onPlayAgain() },
@@ -138,7 +140,7 @@ fun ButtonGrid(
         }
         //show tie
         else if (uiState.times == 9){
-            showWinner(
+            ShowWinner(
                 winner = "Draw!",
                 text = "Try to win next time",
                 onPlayAgain = { onPlayAgain() },
@@ -291,7 +293,7 @@ fun ButtonGrid(
  */
 
 @Composable
-fun showWinner(winner: String, text: String, onPlayAgain: () -> Unit, navController: NavController) {
+fun ShowWinner(winner: String, text: String, onPlayAgain: () -> Unit, navController: NavController) {
 
     AlertDialog(
         containerColor = Secondery,

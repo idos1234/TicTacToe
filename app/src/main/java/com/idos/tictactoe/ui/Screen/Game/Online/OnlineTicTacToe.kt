@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Online
+package com.idos.tictactoe.ui.Screen.Game.Online
 
 import android.annotation.SuppressLint
 import android.app.Service
@@ -61,10 +61,7 @@ import com.idos.tictactoe.data.GetO
 import com.idos.tictactoe.data.GetX
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
-import com.idos.tictactoe.ui.Screen.GameScoreDialog
-import com.idos.tictactoe.ui.Screen.GameScoreDialogFriendly
-import com.idos.tictactoe.ui.Screen.ShowPlayersDialog
-import com.idos.tictactoe.ui.Screen.getPlayer
+import com.idos.tictactoe.ui.Screen.Menu.getPlayer
 import kotlinx.coroutines.delay
 
 var wasGameStarted = false
@@ -728,7 +725,7 @@ fun OnlineTicTacToe(
         modifier = Modifier
             .background(brush)
             .fillMaxSize()) {
-        playersBar(
+        PlayersBar(
             modifier = Modifier.weight(2f),
             screenWidth = screenWidth.value.toInt(),
             colors = colors,

@@ -2,8 +2,8 @@ package com.idos.tictactoe.ui
 
 import androidx.compose.runtime.Composable
 import com.idos.tictactoe.data.UiState
-import com.idos.tictactoe.ui.Screen.TicTacToeScreen
-import com.idos.tictactoe.ui.Screen.TicTacToeSinglePlayerScreen
+import com.idos.tictactoe.ui.Screen.Game.TicTacToeScreen
+import com.idos.tictactoe.ui.Screen.Game.TicTacToeSinglePlayerScreen
 
 /**
  * Check the winner for the [TicTacToeScreen] and the [TicTacToeSinglePlayerScreen]

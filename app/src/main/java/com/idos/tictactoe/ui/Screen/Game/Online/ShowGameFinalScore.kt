@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Screen
+package com.idos.tictactoe.ui.Screen.Game.Online
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -68,11 +68,9 @@ import com.idos.tictactoe.R
 import com.idos.tictactoe.data.Draw
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
-import com.idos.tictactoe.ui.Online.OnlineGameRememberedValues
-import com.idos.tictactoe.ui.Online.deleteGame
-import com.idos.tictactoe.ui.Online.findGame
-import com.idos.tictactoe.ui.Online.onlineGameId
-import com.idos.tictactoe.ui.Online.otherPlayerQuit
+import com.idos.tictactoe.ui.Screen.GameScreen
+import com.idos.tictactoe.ui.Screen.Menu.getNextLevelScore
+import com.idos.tictactoe.ui.Screen.Menu.getPrevLevelScore
 import kotlinx.coroutines.delay
 
 @Composable

@@ -41,10 +41,10 @@
         </activity>
 
         <service
-            android:name=".ui.Online.CodeGameService"
+            android:name=".ui.Screen.Game.Online.CodeGameService"
             android:stopWithTask="false"/>
         <service
-            android:name=".ui.Online.OnlineGameService"
+            android:name=".ui.Screen.Game.Online.OnlineGameService"
             android:stopWithTask="false"/>
 
     </application>

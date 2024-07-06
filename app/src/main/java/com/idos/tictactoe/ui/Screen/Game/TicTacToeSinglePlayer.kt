@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Screen
+package com.idos.tictactoe.ui.Screen.Game
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -48,6 +48,7 @@ import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.UiState
 import com.idos.tictactoe.ui.CheckWinner
+import com.idos.tictactoe.ui.Screen.Menu.getPlayer
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -132,7 +133,7 @@ fun SinglePlayerButtonGrid(
                 if (!uiState.isScoreUpdated) {
                     viewModel.updateScore(1)
                 }
-                showWinner(
+                ShowWinner(
                     winner = "You won!",
                     text = "Congratulations for winning",
                     onPlayAgain = { onPlayAgain() },
@@ -143,7 +144,7 @@ fun SinglePlayerButtonGrid(
                 if (!uiState.isScoreUpdated) {
                     viewModel.updateScore(2)
                 }
-                showWinner(
+                ShowWinner(
                     winner = "You lost!",
                     text = "Try to win next time",
                     onPlayAgain = { onPlayAgain() },
@@ -153,7 +154,7 @@ fun SinglePlayerButtonGrid(
         }
         //show tie
         else if (uiState.times >= 9){
-            showWinner(
+            ShowWinner(
                 winner = "Draw!",
                 text = "Try to win next time",
                 onPlayAgain = { onPlayAgain() },

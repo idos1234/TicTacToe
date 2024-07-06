@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Online
+package com.idos.tictactoe.ui.Screen.Game.Online
 
 import android.content.Context
 import android.widget.Toast
@@ -41,7 +41,7 @@ import com.idos.tictactoe.R
 import com.idos.tictactoe.data.Boxes
 import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.Screen.GameScreen
-import com.idos.tictactoe.ui.Screen.getPlayer
+import com.idos.tictactoe.ui.Screen.Menu.getPlayer
 import java.util.Timer
 import kotlin.concurrent.schedule
 import kotlin.math.cos

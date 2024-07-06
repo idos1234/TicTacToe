@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Online
+package com.idos.tictactoe.ui.Screen.Game.Online
 
 import android.app.Service
 import android.content.Context
@@ -72,7 +72,7 @@ import com.idos.tictactoe.data.Draw
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.Screen.GameScreen
-import com.idos.tictactoe.ui.Screen.getPlayer
+import com.idos.tictactoe.ui.Screen.Menu.getPlayer
 
 private var enteredGame = false
 
@@ -97,7 +97,7 @@ class CodeGameService : Service() {
 }
 
 @Composable
-fun playersBar(
+fun PlayersBar(
     modifier: Modifier,
     screenWidth: Int,
     colors: ColorScheme,

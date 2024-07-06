@@ -1,8 +1,7 @@
-package com.idos.tictactoe.ui.Screen
+package com.idos.tictactoe.ui.Screen.Menu
 
 import android.content.Context
 import android.content.Intent
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,9 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.idos.tictactoe.ui.Online.OnlineGameService
+import com.idos.tictactoe.ui.Screen.Game.Online.OnlineGameService
 import com.idos.tictactoe.ui.theme.Shapes
-import kotlin.system.exitProcess
 
 /**
  * [HomeScreen] Show the home screen

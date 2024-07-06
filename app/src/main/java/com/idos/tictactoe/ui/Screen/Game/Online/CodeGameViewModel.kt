@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Online
+package com.idos.tictactoe.ui.Screen.Game.Online
 
 import android.content.Context
 import android.widget.Toast

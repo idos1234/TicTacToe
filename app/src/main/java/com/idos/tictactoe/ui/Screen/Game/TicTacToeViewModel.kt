@@ -1,4 +1,4 @@
-package com.idos.tictactoe.ui.Screen
+package com.idos.tictactoe.ui.Screen.Game
 
 import androidx.lifecycle.ViewModel
 import com.idos.tictactoe.data.UiState
