@@ -38,6 +38,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -349,6 +350,7 @@ private fun ShowPlayersBar(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     text = "${uiState.player1Score} : ${uiState.player2Score}",
+                    textAlign = TextAlign.Left,
                     fontSize = screenWidth.sp * 0.04,
                     color = colors.onPrimary
                 )

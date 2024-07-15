@@ -69,6 +69,227 @@ import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
 
 @Composable
+private fun PlayerCard(
+    modifier: Modifier,
+    profile: MainPlayerUiState,
+    currentImage: String,
+    currentX: String,
+    currentO: String
+) {
+    val colors = MaterialTheme.colorScheme
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(colors.primary),
+        elevation = CardDefaults.cardElevation(20.dp),
+        shape = RoundedCornerShape(40.dp),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Absolute.Left,
+            modifier = Modifier.padding((LocalConfiguration.current.screenWidthDp*12/412).dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .size((LocalConfiguration.current.screenWidthDp*150/412).dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                //image
+                Image(
+                    painter = painterResource(id = GetXO(currentImage)),
+                    contentDescription = "Player's image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize(0.7f)
+                        .weight(2f)
+                        .clip(RoundedCornerShape(20))
+                )
+                //x and o
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Absolute.Left,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(0.7f)
+                        .padding(5.dp)
+                ) {
+                    //x
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 2.5.dp),
+                        shape = RoundedCornerShape(20),
+                        elevation = CardDefaults.cardElevation(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = colors.onPrimary)
+                    ) {
+                        Image(
+                            painter = painterResource(id = GetX(currentX)),
+                            contentDescription = "Player's X",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    //o
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 2.5.dp),
+                        shape = RoundedCornerShape(20),
+                        elevation = CardDefaults.cardElevation(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = colors.onPrimary)
+                    ) {
+                        Image(
+                            painter = painterResource(id = GetO(currentO)),
+                            contentDescription = "Player's O",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
+            ) {
+                //name
+                Text(
+                    text = profile.name,
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.onBackground
+                )
+
+                Box(modifier = Modifier.padding(top = 16.dp)) {
+                    //wins
+                    Column {
+                        Text(
+                            text = "Wins: ${profile.wins}",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.onBackground
+                        )
+                        //loses
+                        Text(
+                            text = "Loses: ${profile.loses}",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.onBackground
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LevelBar(
+    modifier: Modifier,
+    profile: MainPlayerUiState,
+    scoreToNextLevel: Int,
+    scoreFromCurrentLevel: Int
+) {
+    val progress:Float = if(profile.level != 15) {
+        (profile.score-scoreFromCurrentLevel)/(scoreToNextLevel-scoreFromCurrentLevel).toFloat()
+    } else {
+        1f
+    }
+
+    val colors = MaterialTheme.colorScheme
+
+    Box(modifier = modifier) {
+        Column(Modifier.fillMaxWidth()) {
+            //progress line
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                CustomLinearProgressIndicator(
+                    progress = progress,
+                    progressColor = colors.secondary,
+                    backgroundColor = Color.DarkGray,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height((LocalConfiguration.current.screenHeightDp * 20 / 915).dp),
+                    clipShape = RoundedCornerShape(50)
+                )
+                var text by remember {
+                    mutableStateOf("")
+                }
+                var size by remember {
+                    mutableStateOf(0.sp)
+                }
+                var color by remember {
+                    mutableStateOf(colors.primary)
+                }
+                if (profile.level == 15) {
+                    text = "Max"
+                    size = 15.sp
+                } else {
+                    text = "Level: ${profile.level}"
+                    size = 10.sp
+                }
+
+                if (progress > 0.5f) {
+                    color = colors.onSecondary
+                } else {
+                    color = Color.White
+                }
+                Text(
+                    text = text,
+                    color = color,
+                    fontSize = size,
+                    fontWeight = FontWeight.ExtraBold
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Absolute.Left,
+            ) {
+                //stars from this level
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.95f)
+                        .weight(1f),
+                    contentAlignment = AbsoluteAlignment.CenterLeft
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Absolute.Left
+                    ) {
+                        Text(
+                            text = scoreFromCurrentLevel.toString(),
+                            fontSize = 20.sp,
+                            color = colors.secondary,
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Star",
+                            tint = Color.Yellow
+                        )
+                    }
+                }
+                //stars to next level
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.95f)
+                        .weight(1f),
+                    contentAlignment = AbsoluteAlignment.CenterRight
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Absolute.Left
+                    ) {
+                        Text(
+                            text = scoreToNextLevel.toString(),
+                            fontSize = 20.sp,
+                            color = colors.secondary,
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Star",
+                            tint = Color.Yellow
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun ProfileScreen(player: String, context: Context) {
     var profile by remember {
         mutableStateOf(MainPlayerUiState())
@@ -86,215 +307,32 @@ fun ProfileScreen(player: String, context: Context) {
 
     val scoreFromCurrentLevel = getPrevLevelScore(profile.level)
     val scoreToNextLevel = getNextLevelScore(profile.level)
-    val progress:Float = if(profile.level != 15) {
-        (profile.score-scoreFromCurrentLevel)/(scoreToNextLevel-scoreFromCurrentLevel).toFloat()
-    } else {
-        1f
-    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxSize()
             .background(brush)
     ) {
-        Card(
+        //player's card(name, score, wins, loses, skins)
+        PlayerCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Transparent)
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(colors.primary),
-            elevation = CardDefaults.cardElevation(20.dp),
-            shape = RoundedCornerShape(40.dp),
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Absolute.Left,
-                modifier = Modifier.padding(12.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .size(150.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    //image
-                    Image(
-                        painter = painterResource(id = GetXO(currentImage)),
-                        contentDescription = "Player's image",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize(0.7f)
-                            .weight(2f)
-                            .clip(RoundedCornerShape(20))
-                    )
-                    //x and o
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Absolute.Left,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxSize(0.7f)
-                            .padding(5.dp)
-                    ) {
-                        //x
-                        Card(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 2.5.dp),
-                            shape = RoundedCornerShape(20),
-                            elevation = CardDefaults.cardElevation(8.dp),
-                            colors = CardDefaults.cardColors(containerColor = colors.onPrimary)
-                        ) {
-                            Image(
-                                painter = painterResource(id = GetX(currentX)),
-                                contentDescription = "Player's X",
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                        //o
-                        Card(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 2.5.dp),
-                            shape = RoundedCornerShape(20),
-                            elevation = CardDefaults.cardElevation(8.dp),
-                            colors = CardDefaults.cardColors(containerColor = colors.onPrimary)
-                        ) {
-                            Image(
-                                painter = painterResource(id = GetO(currentO)),
-                                contentDescription = "Player's O",
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                    }
-                }
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    //name
-                    Text(
-                        text = profile.name,
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.onBackground
-                    )
+                .padding((LocalConfiguration.current.screenWidthDp * 16 / 412).dp),
+            profile = profile,
+            currentImage = currentImage,
+            currentX = currentX,
+            currentO = currentO
+        )
 
-                    Box(modifier = Modifier.padding(top = 16.dp)) {
-                        //wins
-                        Column {
-                            Text(
-                                text = "Wins: ${profile.wins}",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = colors.onBackground
-                            )
-                            //loses
-                            Text(
-                                text = "Loses: ${profile.loses}",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = colors.onBackground
-                            )
-                        }
-                    }
-                }
-            }
-        }
 
         //progress to the next rank
-        Box(modifier = Modifier.fillMaxWidth(0.9f)) {
-            Column(Modifier.fillMaxWidth()) {
-                //progress line
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-                    CustomLinearProgressIndicator(
-                        progress = progress,
-                        progressColor = colors.secondary,
-                        backgroundColor = Color.DarkGray,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(15.dp),
-                        clipShape = RoundedCornerShape(20.dp)
-                    )
-                    var text by remember {
-                        mutableStateOf("")
-                    }
-                    var size by remember {
-                        mutableStateOf(0.sp)
-                    }
-                    var color by remember {
-                        mutableStateOf(colors.primary)
-                    }
-                    if (profile.level == 15) {
-                        text = "Max"
-                        size = 15.sp
-                    } else {
-                        text = "Level: ${profile.level}"
-                        size = 10.sp
-                    }
-
-                    if (progress > 0.5f) {
-                        color = colors.onSecondary
-                    } else {
-                        color = Color.White
-                    }
-                    Text(
-                        text = text,
-                        color = color,
-                        fontSize = size,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Absolute.Left,
-                ) {
-                    //stars from this level
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.95f)
-                            .weight(1f),
-                        contentAlignment = AbsoluteAlignment.CenterLeft
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.Absolute.Left
-                        ) {
-                            Text(
-                                text = scoreFromCurrentLevel.toString(),
-                                fontSize = 20.sp,
-                                color = colors.secondary,
-                            )
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Star",
-                                tint = Color.Yellow
-                            )
-                        }
-                    }
-                    //stars to next level
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.95f)
-                            .weight(1f),
-                        contentAlignment = AbsoluteAlignment.CenterRight
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.Absolute.Left
-                        ) {
-                            Text(
-                                text = scoreToNextLevel.toString(),
-                                fontSize = 20.sp,
-                                color = colors.secondary,
-                            )
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Star",
-                                tint = Color.Yellow
-                            )
-                        }
-                    }
-                }
-            }
-        }
+        LevelBar(
+            modifier = Modifier.fillMaxWidth(0.9f),
+            profile = profile,
+            scoreToNextLevel = scoreToNextLevel,
+            scoreFromCurrentLevel = scoreFromCurrentLevel
+        )
 
         var expand by remember {
             mutableStateOf(false)
@@ -305,12 +343,16 @@ fun ProfileScreen(player: String, context: Context) {
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.animateContentSize(
-                animationSpec = tween(
-                    durationMillis = 300,
-                    easing = LinearOutSlowInEasing
+            modifier = Modifier
+                .animateContentSize(
+                    animationSpec = tween(
+                        durationMillis = 500,
+                        easing = LinearOutSlowInEasing
+                    )
                 )
-            )
+                .fillMaxWidth(0.7f)
+                .height((LocalConfiguration.current.screenHeightDp * 680 / 915).dp)
+                .padding(vertical = (LocalConfiguration.current.screenHeightDp * 12 / 915).dp)
         ) {
             if (expand) {
                 var image by remember {
@@ -326,60 +368,62 @@ fun ProfileScreen(player: String, context: Context) {
                     mutableStateOf(1)
                 }
 
-                Row(
-                    Modifier
-                        .fillMaxWidth(0.7f)
-                        .background(colors.background)
-                        .padding(5.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Card(
-                        modifier = Modifier
-                            .size((LocalConfiguration.current.screenWidthDp * 0.6 / 4).dp)
-                            .clickable(onClick = { option = 1 }),
-                        shape = RoundedCornerShape(20),
-                        elevation = CardDefaults.cardElevation(8.dp)
+                Box(modifier = Modifier.fillMaxWidth().background(colors.background), contentAlignment = Alignment.Center) {
+                    Row(
+                        Modifier
+                            .fillMaxWidth(0.9f)
+                            .background(colors.background),
+                        horizontalArrangement = Arrangement.Absolute.Left,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Image(
-                            painter = painterResource(id = GetXO(image)),
-                            contentDescription = "Player's Image",
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                    Spacer(modifier = Modifier.width((LocalConfiguration.current.screenWidthDp * 0.6 / 8).dp))
-                    Card(
-                        modifier = Modifier
-                            .size((LocalConfiguration.current.screenWidthDp * 0.6 / 4).dp)
-                            .clickable(onClick = { option = 2 }),
-                        shape = RoundedCornerShape(20),
-                        elevation = CardDefaults.cardElevation(8.dp),
-                        colors = CardDefaults.cardColors(containerColor = colors.onPrimary)
-                    ) {
-                        Image(
-                            painter = painterResource(id = GetX(x)),
-                            contentDescription = "Player's X",
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                    Spacer(modifier = Modifier.width((LocalConfiguration.current.screenWidthDp * 0.6 / 8).dp))
-                    Card(
-                        modifier = Modifier
-                            .size((LocalConfiguration.current.screenWidthDp * 0.6 / 4).dp)
-                            .clickable(onClick = { option = 3 }),
-                        shape = RoundedCornerShape(20),
-                        elevation = CardDefaults.cardElevation(8.dp),
-                        colors = CardDefaults.cardColors(containerColor = colors.onPrimary)
-                    ) {
-                        Image(
-                            painter = painterResource(id = GetO(o)),
-                            contentDescription = "Player's O",
-                            modifier = Modifier.fillMaxSize()
-                        )
+                        Card(
+                            modifier = Modifier
+                                .size((LocalConfiguration.current.screenWidthDp * 0.7 * 0.9 / 4).dp)
+                                .clickable(onClick = { option = 1 }),
+                            shape = RoundedCornerShape(20),
+                            elevation = CardDefaults.cardElevation(8.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = GetXO(image)),
+                                contentDescription = "Player's Image",
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        Spacer(modifier = Modifier.width((LocalConfiguration.current.screenWidthDp * 0.7 * 0.9 / 8).dp))
+                        Card(
+                            modifier = Modifier
+                                .size((LocalConfiguration.current.screenWidthDp * 0.7 * 0.9 / 4).dp)
+                                .clickable(onClick = { option = 2 }),
+                            shape = RoundedCornerShape(20),
+                            elevation = CardDefaults.cardElevation(8.dp),
+                            colors = CardDefaults.cardColors(containerColor = colors.onPrimary)
+                        ) {
+                            Image(
+                                painter = painterResource(id = GetX(x)),
+                                contentDescription = "Player's X",
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        Spacer(modifier = Modifier.width((LocalConfiguration.current.screenWidthDp * 0.7 * 0.9 / 8).dp))
+                        Card(
+                            modifier = Modifier
+                                .size((LocalConfiguration.current.screenWidthDp * 0.7 * 0.9 / 4).dp)
+                                .clickable(onClick = { option = 3 }),
+                            shape = RoundedCornerShape(20),
+                            elevation = CardDefaults.cardElevation(8.dp),
+                            colors = CardDefaults.cardColors(containerColor = colors.onPrimary)
+                        ) {
+                            Image(
+                                painter = painterResource(id = GetO(o)),
+                                contentDescription = "Player's O",
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     }
                 }
 
                 Card(
-                    modifier = Modifier.fillMaxWidth(0.7f),
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RectangleShape,
                     colors = CardDefaults.cardColors(colors.onPrimary)
                 ) {
@@ -407,11 +451,13 @@ fun ProfileScreen(player: String, context: Context) {
             }
             //arrow button
             Card(
-                modifier = Modifier.fillMaxWidth(0.7f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height((LocalConfiguration.current.screenHeightDp * 30 / 915).dp),
                 shape = RoundedCornerShape(20),
                 colors = CardDefaults.cardColors(colors.secondary)
             ) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     IconButton(
                         onClick = { expand = !expand },
                         modifier = Modifier.rotate(rotationState),
@@ -507,16 +553,18 @@ fun ShowPlayersImages(
 
         if (image != player.currentImage) {
             Card(
-                modifier = Modifier.fillMaxWidth(0.2f),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20),
                 colors = CardDefaults.cardColors(Color.Green)
             ) {
-                IconButton(onClick = {changeImage = true}) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = Icons.Default.Check.name,
-                        tint = Color.Black
-                    )
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    IconButton(onClick = { changeImage = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = Icons.Default.Check.name,
+                            tint = Color.Black
+                        )
+                    }
                 }
             }
         }
@@ -605,16 +653,18 @@ fun ShowPlayerX(
 
         if (image != player.currentX) {
             Card(
-                modifier = Modifier.fillMaxWidth(0.2f),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20),
                 colors = CardDefaults.cardColors(Color.Green)
             ) {
-                IconButton(onClick = {changeImage = true}) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = Icons.Default.Check.name,
-                        tint = Color.Black
-                    )
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    IconButton(onClick = { changeImage = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = Icons.Default.Check.name,
+                            tint = Color.Black
+                        )
+                    }
                 }
             }
         }
@@ -736,16 +786,18 @@ fun ShowPlayerO(
 
         if (image != player.currentO) {
             Card(
-                modifier = Modifier.fillMaxWidth(0.2f),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20),
                 colors = CardDefaults.cardColors(Color.Green)
             ) {
-                IconButton(onClick = {changeImage = true}) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = Icons.Default.Check.name,
-                        tint = Color.Black
-                    )
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    IconButton(onClick = { changeImage = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = Icons.Default.Check.name,
+                            tint = Color.Black
+                        )
+                    }
                 }
             }
         }

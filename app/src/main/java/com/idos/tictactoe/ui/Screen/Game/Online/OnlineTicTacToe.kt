@@ -10,6 +10,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,8 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -189,6 +190,22 @@ fun OnlineGameButton(
     modifier: Modifier,
     myTurn: String?
 ) {
+    databaseReference.addValueEventListener(object : ValueEventListener {
+        //on success
+        override fun onDataChange(snapshot: DataSnapshot) {
+            //find game
+            try {
+                gameState.game = snapshot.children.find {
+                    it.getValue(OnlineGameUiState::class.java)!!.id == onlineGameId
+                }?.getValue(OnlineGameUiState::class.java)!!
+            } catch (e: Exception) {
+                gameState.game = OnlineGameUiState()
+            }
+        }
+
+        override fun onCancelled(error: DatabaseError) {}
+    })
+
     var player1 by remember {
         mutableStateOf(MainPlayerUiState())
     }
@@ -406,12 +423,22 @@ fun OnlineButtonGrid(
     }
 
     databaseReference.addValueEventListener(object : ValueEventListener {
-        override fun onDataChange(snapshot: DataSnapshot) {}
+        //on success
+        override fun onDataChange(snapshot: DataSnapshot) {
+            //find game
+            try {
+                gameState.game = snapshot.children.find {
+                    it.getValue(OnlineGameUiState::class.java)!!.id == onlineGameId
+                }?.getValue(OnlineGameUiState::class.java)!!
+            } catch (e: Exception) {
+                gameState.game = OnlineGameUiState()
+            }
+            boxes = gameState.game.boxes
+        }
+
         override fun onCancelled(error: DatabaseError) {}
     })
 
-    gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
-    boxes = gameState.game.boxes
     //if can be a winner
     if(gameState.game.times >= 5 && wasGameStarted) {
         if (findGame(gameId = onlineGameId, databaseReference = databaseReference) != OnlineGameUiState()) {
@@ -772,7 +799,7 @@ fun UpdateScore(
         mutableStateOf(MainPlayerUiState())
     }
     var newLevel by remember {
-        mutableStateOf(0)
+        mutableStateOf(player.level)
     }
     var failed by remember {
         mutableStateOf(false)
@@ -953,28 +980,66 @@ fun UpdateScore(
 }
 
 @Composable
-fun CheckExitOnlineGame(onQuitClick: () -> Unit, onCancelClick: () -> Unit, navController: NavController, context: Context = LocalContext.current) {
+fun CheckExitGame(
+    onQuitClick: () -> Unit,
+    onCancelClick: () -> Unit,
+) {
 
-    val firebaseDatabase = FirebaseDatabase.getInstance()
-    val databaseReference = firebaseDatabase.getReference("Games")
-
-    AlertDialog(
-        onDismissRequest = {},
-        title = {},
-        text = { Text(text = "Are you sure you want to quit the game") },
-        dismissButton = {
-            Button(onClick = {
-                onQuitClick()
-                deleteGame(context, databaseReference)
-                navController.navigateUp()
-            }) {
-                Text(text = "Quit")
+    Dialog(
+        onDismissRequest = onCancelClick,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth(0.8f)
+                .padding(((LocalConfiguration.current.screenWidthDp * 16 / 412).dp))
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Absolute.Left
+            ) {
+                Text(
+                    text = "Are you sure you want to quit the game",
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    text = "?",
+                    color = MaterialTheme.colorScheme.onBackground
+                )
             }
-        },
-        confirmButton = {
-            Button(onClick = onCancelClick) {
-                Text(text = "Cancel")
+            Spacer(modifier = Modifier.height((LocalConfiguration.current.screenWidthDp * 30 / 412).dp))
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Absolute.Left
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
+                Button(
+                    onClick = onCancelClick,
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier.weight(4f)
+                ) {
+                    Text(
+                        text = "Cancel",
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                Spacer(modifier = Modifier.weight(2f))
+                Button(
+                    onClick = {
+                    onQuitClick()
+                    onCancelClick()
+                    },
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier.weight(4f)
+                ) {
+                    Text(
+                        text = "Quit",
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
             }
         }
-    )
+    }
 }

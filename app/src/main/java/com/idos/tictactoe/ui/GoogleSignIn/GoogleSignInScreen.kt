@@ -6,8 +6,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.firestore.FirebaseFirestore
+import com.idos.tictactoe.WorkManager.SetNewDelay
 import com.idos.tictactoe.ui.Screen.GameScreen
 import com.idos.tictactoe.ui.Screen.toSHA256
 
@@ -37,6 +38,9 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
         mutableStateOf(false)
     }
     var searchedPlayer by remember {
+        mutableStateOf(false)
+    }
+    var setDelay by remember {
         mutableStateOf(false)
     }
 
@@ -96,6 +100,14 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
         if (isPlayerExisted) {
             //log in
             changeEmail(user?.email!!.toSHA256())
+            if(!setDelay) {
+                SetNewDelay(
+                    hour = 1,
+                    min = 0,
+                    context = context
+                )
+                setDelay = true
+            }
             onClick()
         } else if (!isPlayerExisted && searchedPlayer) {
             //sign up

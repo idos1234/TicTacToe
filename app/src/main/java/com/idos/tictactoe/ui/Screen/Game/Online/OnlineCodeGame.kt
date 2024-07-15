@@ -131,6 +131,7 @@ fun PlayersBar(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     text = "${gameState.game.player1Score} : ${gameState.game.player2Score}",
+                    textAlign = TextAlign.Left,
                     fontSize = screenWidth.sp * 0.04,
                     color = colors.onPrimary
                 )
@@ -218,7 +219,6 @@ fun EnterGameOnline(
         navController = navController,
         onLeaveGame = {
             databaseReference.child(onlineGameId).child("player2").setValue("")
-            MyTurn = ""
             navController.popBackStack()
         }
     )
@@ -318,7 +318,6 @@ fun OpenGameOnline(
                 context,
                 databaseReference
             )
-            MyTurn = ""
             navController.popBackStack()
         }
     )
@@ -346,12 +345,12 @@ private fun CodeGameWaitingRoomScreen(
         //on success
         override fun onDataChange(snapshot: DataSnapshot) {
             //find game
-            gameState.game = try {
-                snapshot.children.find {
+            try {
+                gameState.game = snapshot.children.find {
                     it.getValue(OnlineGameUiState::class.java)!!.id == onlineGameId
                 }?.getValue(OnlineGameUiState::class.java)!!
             } catch (e: Exception) {
-                OnlineGameUiState()
+                gameState.game = OnlineGameUiState()
             }
             if(gameState.game.wasGameStarted && !chengedScreen) {
                 chengedScreen = true
@@ -394,12 +393,34 @@ private fun CodeGameWaitingRoomScreen(
     ) {
         Spacer(modifier = Modifier.fillMaxHeight(0.1f))
         //game code
-        Text(
-            text = "Code: ${gameState.game.id}",
-            fontSize = screenHeight.sp * 0.05,
-            color = colors.onBackground,
-            textAlign = TextAlign.Center
-        )
+        Row(
+            modifier = Modifier,
+            horizontalArrangement = Arrangement.Absolute.Left,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Code",
+                fontSize = screenHeight.sp * 0.05,
+                color = colors.onBackground,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = ": ",
+                fontSize = screenHeight.sp * 0.05,
+                color = colors.onBackground,
+                textAlign = TextAlign.Center
+            )
+            if(onlineGameId != "") {
+                Text(
+                    text = " $onlineGameId",
+                    fontSize = screenHeight.sp * 0.05,
+                    color = colors.onBackground,
+                    textAlign = TextAlign.Center
+                )
+            } else {
+                DotsFlashing(size = screenWidth / 30)
+            }
+        }
 
         Spacer(modifier = Modifier.fillMaxHeight(0.1f))
 

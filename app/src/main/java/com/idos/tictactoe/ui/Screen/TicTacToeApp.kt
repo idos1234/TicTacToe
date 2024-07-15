@@ -11,19 +11,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -39,16 +41,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -57,30 +61,36 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.idos.tictactoe.R
 import com.idos.tictactoe.data.GetXO
+import com.idos.tictactoe.data.MainPlayerUiState
+import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.GoogleSignIn.GoogleSignInScreen
 import com.idos.tictactoe.ui.GoogleSignIn.GoogleSignInViewModel
-import com.idos.tictactoe.ui.Screen.Game.TicTacToeScreen
-import com.idos.tictactoe.ui.Screen.Game.TicTacToeSinglePlayerScreen
-import com.idos.tictactoe.ui.Screen.Game.TicTacToeViewModel
-import com.idos.tictactoe.ui.Screen.Menu.HomeScreen
-import com.idos.tictactoe.ui.Screen.Menu.LeaderBoardScreen
-import com.idos.tictactoe.ui.Screen.Menu.ProfileScreen
-import com.idos.tictactoe.ui.Screen.Menu.getPlayer
+import com.idos.tictactoe.ui.Screen.Game.Online.CheckExitGame
 import com.idos.tictactoe.ui.Screen.Game.Online.CodeGameScreen
 import com.idos.tictactoe.ui.Screen.Game.Online.CodeGameViewModel
 import com.idos.tictactoe.ui.Screen.Game.Online.EnterGameOnline
 import com.idos.tictactoe.ui.Screen.Game.Online.OnlineTicTacToe
 import com.idos.tictactoe.ui.Screen.Game.Online.OpenGameOnline
 import com.idos.tictactoe.ui.Screen.Game.Online.SearchGameScreen
+import com.idos.tictactoe.ui.Screen.Game.Online.deleteGame
+import com.idos.tictactoe.ui.Screen.Game.TicTacToeScreen
+import com.idos.tictactoe.ui.Screen.Game.TicTacToeSinglePlayerScreen
+import com.idos.tictactoe.ui.Screen.Game.TicTacToeViewModel
+import com.idos.tictactoe.ui.Screen.Menu.CustomLinearProgressIndicator
+import com.idos.tictactoe.ui.Screen.Menu.HomeScreen
+import com.idos.tictactoe.ui.Screen.Menu.LeaderBoardScreen
+import com.idos.tictactoe.ui.Screen.Menu.ProfileScreen
+import com.idos.tictactoe.ui.Screen.Menu.getPlayer
+import com.idos.tictactoe.ui.screens.Shop.SetNewDeals
 import com.idos.tictactoe.ui.screens.Shop.ShopScreen
-import com.idos.tictactoe.ui.theme.BackGround
 import com.idos.tictactoe.ui.theme.Secondery
 import com.idos.tictactoe.ui.theme.Shapes
 import java.util.Timer
@@ -136,41 +146,11 @@ fun CheckLogOut(
     )
 }
 
-@Composable
-fun HomeScreenMenu(navController: NavHostController, modifier: Modifier, onChangeScreen: () -> Unit = {}, email: String, onLogOutClick: () -> Unit) {
-
-    Box(modifier = Modifier
-        .background(Secondery)
-        .fillMaxWidth()) {
-        Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = null,
-            modifier = modifier.padding(16.dp)
-        )
-    }
-
-    Column(modifier = Modifier.background(Secondery)) {
-        TopHomeScreenMenu(
-            modifier = Modifier.weight(1f),
-            context = LocalContext.current,
-            email = email,
-            navController = navController,
-            onChangeScreen = onChangeScreen
-        )
-        ButtonHomeScreenMenu(
-            modifier = Modifier.weight(5f),
-            navController = navController,
-            onChangeScreen = onChangeScreen,
-            onLogOutClick = onLogOutClick
-        )
-    }
-}
-
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun TopHomeScreenMenu(modifier: Modifier, context: Context, email: String, navController: NavHostController, onChangeScreen: () -> Unit) {
     var player by remember {
-        mutableStateOf(com.idos.tictactoe.data.MainPlayerUiState())
+        mutableStateOf(MainPlayerUiState())
     }
 
     //get Players collection from database
@@ -273,26 +253,112 @@ fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, o
 }
 
 @Composable
-fun TopAppBar(onClick: () -> Unit, icon: ImageVector?, isBar: Boolean = true) {
-    if (isBar) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(45.dp)
-                .background(BackGround), verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                imageVector = icon!!,
-                contentDescription = null,
+fun TopAppBar(
+    navController: NavController,
+    profile: MainPlayerUiState
+) {
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp
+    val colors = MaterialTheme.colorScheme
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(colors.background)
+            .padding(top = (screenHeight * 5 / 915).dp),
+        horizontalArrangement = Arrangement.Absolute.Left,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Spacer(modifier = Modifier.weight(1f))
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.weight(2f)) {
+            CustomLinearProgressIndicator(
+                progress = 0.7f,
+                progressColor = colors.secondary,
+                backgroundColor = Color.DarkGray,
+                clipShape = CircleShape,
                 modifier = Modifier
-                    .weight(1f)
-                    .size(30.dp)
-                    .clickable(
-                        onClick = onClick
-                    )
+                    .fillMaxWidth()
+                    .height((screenHeight * 20 / 915).dp)
+
             )
-            Spacer(modifier = Modifier.weight(3f))
+            Text(
+                text = "Level: ${profile.level}",
+                color = Color.White,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         }
+        Spacer(modifier = Modifier.weight(1f))
+        Box(
+            modifier = Modifier
+                .weight(2f)
+                .clip(RoundedCornerShape(50)),
+            contentAlignment = AbsoluteAlignment.CenterLeft
+        ) {
+            Box(
+                modifier = Modifier
+                    .height((screenHeight * 20 / 915).dp),
+                contentAlignment = AbsoluteAlignment.CenterRight
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxSize(),
+                    colors = CardDefaults.cardColors(colors.secondary),
+                    shape = RoundedCornerShape(20)
+                ) {
+                    Text(
+                        text = profile.coins.toString(),
+                        textAlign = TextAlign.Center,
+                        color = colors.onSecondary,
+                        fontSize = 15.sp,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                Card(
+                    modifier = Modifier
+                        .size((screenHeight * 20 / 915).dp),
+                    shape = CircleShape,
+                    colors = CardDefaults.cardColors(Color.Green.copy(alpha = 0.6f)),
+                    onClick = { navController.navigate(GameScreen.Store.title) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add",
+                        tint = Color.White,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+            }
+            Image(
+                painter = painterResource(id = R.drawable.coin),
+                contentDescription = "coin",
+                Modifier
+                    .size((screenHeight * 20 / 915).dp)
+            )
+        }
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+fun BackTopBar(
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Absolute.Left,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "back",
+            tint = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier
+                .size((LocalConfiguration.current.screenWidthDp * 50 / 412).dp)
+                .clickable(onClick = onClick)
+        )
     }
 }
 
@@ -386,11 +452,8 @@ fun TicTacToeApp(
     //nav controller
     val context = LocalContext.current
     val navController = rememberNavController()
-    val backStackEntry by navController.currentBackStackEntryAsState()
 
     // viewModel and uiState
-    val scaffoldState = rememberScaffoldState()
-    val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
     val onlineGameValuesUiState by codeGameViewModel.onlineGameValuesUiState.collectAsState()
     val emailState = googleSignInViewModel.emailState
@@ -450,11 +513,30 @@ fun TicTacToeApp(
     var bottomAppBar: @Composable () -> Unit by remember {
         mutableStateOf(defaultBottomBar)
     }
+    var profile by remember {
+        mutableStateOf(MainPlayerUiState())
+    }
+    profile = getPlayer(email = email.value, context = context)
+    val defaultTopAppBar: @Composable () -> Unit = {
+        TopAppBar(
+            navController = navController,
+            profile = profile
+        )
+    }
+    var topAppBar: @Composable () -> Unit by remember {
+        mutableStateOf(defaultTopAppBar)
+    }
+    var backClick by remember {
+        mutableStateOf( false )
+    }
+    var onClick by remember {
+        mutableStateOf({})
+    }
 
 
     Scaffold(
-        bottomBar = bottomAppBar
-
+        bottomBar = bottomAppBar,
+        topBar = topAppBar
     ) {
         val startDestination = if (email.value == "") {
             GameScreen.GoogleSignIn.title
@@ -469,6 +551,7 @@ fun TicTacToeApp(
             //home screen
             composable(route = GameScreen.Start.title) {
                 bottomAppBar = defaultBottomBar
+                topAppBar = defaultTopAppBar
 
                 leadBoardColor = colors.onPrimary
                 homeColor = colors.secondary
@@ -487,6 +570,8 @@ fun TicTacToeApp(
             //game screen
             composable(route = GameScreen.TwoPlayers.title) {
                 bottomAppBar = {}
+                topAppBar = { BackTopBar(onClick = {backClick = true}) }
+                onClick = { navController.popBackStack() }
 
                 BackHandler {}
                 TicTacToeScreen(
@@ -511,6 +596,8 @@ fun TicTacToeApp(
             //single player game screen
             composable(route = GameScreen.SinglePlayer.title) {
                 bottomAppBar = {}
+                topAppBar = { BackTopBar(onClick = {backClick = true}) }
+                onClick = { navController.popBackStack() }
 
                 BackHandler {}
                 TicTacToeSinglePlayerScreen(
@@ -547,6 +634,15 @@ fun TicTacToeApp(
                 )
             ) {
                 bottomAppBar = {}
+                topAppBar = { BackTopBar(onClick = {backClick = true}) }
+                onClick = {
+                    deleteGame(
+                        context = context,
+                        databaseReference = FirebaseDatabase.getInstance().getReference(it.arguments?.getString("dbName") ?: "")
+                    )
+                    onlineGameValuesUiState.game = OnlineGameUiState()
+                    navController.navigate(GameScreen.Start.title)
+                }
 
                 BackHandler {}
                 OnlineTicTacToe(
@@ -562,6 +658,7 @@ fun TicTacToeApp(
             //leaderboard screen
             composable(route = GameScreen.LeaderBoard.title) {
                 bottomAppBar = defaultBottomBar
+                topAppBar = defaultTopAppBar
 
                 leadBoardColor = colors.secondary
                 homeColor = colors.onPrimary
@@ -575,6 +672,7 @@ fun TicTacToeApp(
             //profile screen
             composable(route = GameScreen.ProfileScreen.title) {
                 bottomAppBar = defaultBottomBar
+                topAppBar = defaultTopAppBar
 
                 leadBoardColor = colors.onPrimary
                 homeColor = colors.onPrimary
@@ -588,6 +686,7 @@ fun TicTacToeApp(
             //codeGame
             composable(route = GameScreen.CodeGame.title) {
                 bottomAppBar = {}
+                topAppBar = { BackTopBar(onClick = {navController.popBackStack()}) }
 
                 BackHandler {}
                 CodeGameScreen(
@@ -599,6 +698,8 @@ fun TicTacToeApp(
             //open game with code
             composable(route = GameScreen.OpenGameWithCode.title) {
                 bottomAppBar = {}
+                topAppBar = {}
+
 
                 BackHandler {}
                 OpenGameOnline(
@@ -611,6 +712,7 @@ fun TicTacToeApp(
             //enter game with code
             composable(route = GameScreen.EnterGameWithCode.title) {
                 bottomAppBar = {}
+                topAppBar = {}
 
                 BackHandler {}
                 EnterGameOnline(
@@ -623,6 +725,7 @@ fun TicTacToeApp(
             // google sign in
             composable(GameScreen.GoogleSignIn.title) {
                 bottomAppBar = {}
+                topAppBar = {}
 
                 BackHandler {}
                 GoogleSignInScreen(
@@ -644,6 +747,8 @@ fun TicTacToeApp(
                         )
 
                         encryptedSharedPreferences.edit().putString("email", email.value).apply()
+
+                        SetNewDeals(context, email.value)
                     }
                 )
             }
@@ -653,6 +758,7 @@ fun TicTacToeApp(
                 route = GameScreen.NewName.title
             ) {
                 bottomAppBar = {}
+                topAppBar = {}
 
                 BackHandler {}
                 ChooseName(
@@ -675,12 +781,15 @@ fun TicTacToeApp(
                         )
 
                         encryptedSharedPreferences.edit().putString("email", email.value).apply()
+
+                        SetNewDeals(context, email.value)
                     }
                 )
             }
             
             composable(GameScreen.TimeUp.title) {
                 bottomAppBar = {}
+                topAppBar = {}
 
                 BackHandler {}
                 TimeUp(navController = navController)
@@ -688,6 +797,7 @@ fun TicTacToeApp(
             
             composable(GameScreen.SearchGame.title) {
                 bottomAppBar = {}
+                topAppBar = {}
 
                 BackHandler {}
                 SearchGameScreen(
@@ -701,18 +811,46 @@ fun TicTacToeApp(
 
             composable(GameScreen.Store.title) {
                 bottomAppBar = defaultBottomBar
+                topAppBar = defaultTopAppBar
 
+                BackHandler {}
                 leadBoardColor = colors.onPrimary
                 homeColor = colors.onPrimary
                 profileColor = colors.onPrimary
                 storeColor = colors.secondary
 
-                ShopScreen()
+                ShopScreen(
+                    playerName = email.value,
+                    onBuy = {
+                        //database
+                        val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+                        //get Players collection from database
+                        db.collection("Players").get()
+                            //on success
+                            .addOnSuccessListener { queryDocumentSnapshots ->
+                                //check if collection is empty
+                                if (!queryDocumentSnapshots.isEmpty) {
+                                    val list = queryDocumentSnapshots.documents
+                                    try {
+                                        profile = list.find {
+                                            it.toObject(MainPlayerUiState::class.java)!!.email == email.value
+                                        }?.toObject(MainPlayerUiState::class.java)!!
+                                    } catch (_: Exception) {}
+                                }
+                            }
+                    }
+                )
             }
 
         }
+        if(backClick) {
+            CheckExitGame(
+                onQuitClick = onClick,
+                onCancelClick = { backClick = false }
+            )
+        }
     }
-
 }
 
 fun resetGame(

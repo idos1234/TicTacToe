@@ -366,6 +366,7 @@ private fun ShowPlayersBar(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     text = "${uiState.player1Score} : ${uiState.player2Score}",
+                    textAlign = TextAlign.Left,
                     fontSize = screenWidth.sp * 0.04,
                     color = colors.onPrimary
                 )

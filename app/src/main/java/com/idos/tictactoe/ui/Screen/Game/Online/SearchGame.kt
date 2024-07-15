@@ -12,11 +12,18 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,8 +37,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -67,12 +77,15 @@ fun SearchGameScreen(
     var waitingTimeFlag by remember {
         mutableStateOf(true)
     }
+    var foundPlayer by remember {
+        mutableStateOf(false)
+    }
 
     if(waitingTimeFlag) {
         waitingTimeFlag = false
 
         Timer().schedule(30000) {
-            if(currentGame.player2.email == "" && navController.currentDestination?.route == GameScreen.SearchGame.title) {
+            if(currentGame.game.player2 == "" && navController.currentDestination?.route == GameScreen.SearchGame.title) {
                 viewModel.removeGame(onlineGameId, databaseReference, 0){
                     navController.navigate(GameScreen.TimeUp.title)
                 }
@@ -123,11 +136,17 @@ fun SearchGameScreen(
                 }
                 times++
             }
-            for (Game in snapshot.children) {
-                val game = Game.getValue(OnlineGameUiState::class.java)
-                if (game!!.id == onlineGameId) {
-                    currentGame.game = game
-                }
+            //find game
+            try {
+                currentGame.game = snapshot.children.find {
+                    it.getValue(OnlineGameUiState::class.java)!!.id == onlineGameId
+                }?.getValue(OnlineGameUiState::class.java)!!
+            } catch (e: Exception) {
+                currentGame.game = OnlineGameUiState()
+            }
+
+            if(currentGame.game.player2 != "") {
+                foundPlayer = true
             }
         }
 
@@ -142,20 +161,21 @@ fun SearchGameScreen(
     }
     )
 
-    currentGame.game = findGame(gameId = currentGame.game.id, databaseReference = databaseReference)
-
-    if (currentGame.game.player2 != "" && !wasGameStarted) {
+    if (foundPlayer && !wasGameStarted) {
         wasGameStarted = true
         currentGame.player1 = getPlayer(email = currentGame.game.player1, context = context)
         currentGame.player2 = getPlayer(email = currentGame.game.player2, context = context)
         navController.navigate("${GameScreen.Online.title}/Games")
     }
 
-    SearchGameUi()
+    SearchGameUi(navController)
 }
 
 @Composable
-private fun SearchGameUi() {
+private fun SearchGameUi(
+    navController: NavHostController,
+    context: Context = LocalContext.current
+) {
     val configuration = LocalConfiguration.current
 
     val screenWidth = configuration.screenWidthDp.dp
@@ -177,78 +197,110 @@ private fun SearchGameUi() {
         ), label = ""
     )
 
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(brush = brush), contentAlignment = Alignment.Center) {
-
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .align(Alignment.Center),
-            horizontalArrangement = Arrangement.Absolute.Left
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.cloud),
-                contentDescription = "Search",
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize(0.12f),
-                tint = colors.primary
-            )
-            Icon(
-                painter = painterResource(id = R.drawable.cloud),
-                contentDescription = "Search",
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize(0.15f),
-                tint = colors.primary
-            )
-            Icon(
-                painter = painterResource(id = R.drawable.cloud),
-                contentDescription = "Search",
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize(0.1f),
-                tint = colors.primary
-            )
-        }
-
-        Canvas(
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Transparent)
+                .background(brush = brush), contentAlignment = Alignment.Center
         ) {
-            val centerX = size.width / 2
-            val centerY = size.height / 2
-            val radius = size.width / 4
-            val amplitude = size.width / 8
 
-            val angle = Math.toRadians(rotation.toDouble())
-            val x = centerX + (radius * cos(angle)).toFloat()
-            val y = centerY + (amplitude * sin(angle * 2)).toFloat()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center),
+                horizontalArrangement = Arrangement.Absolute.Left
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.cloud),
+                    contentDescription = "Search",
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(0.12f),
+                    tint = colors.primary
+                )
+                Icon(
+                    painter = painterResource(id = R.drawable.cloud),
+                    contentDescription = "Search",
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(0.15f),
+                    tint = colors.primary
+                )
+                Icon(
+                    painter = painterResource(id = R.drawable.cloud),
+                    contentDescription = "Search",
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(0.1f),
+                    tint = colors.primary
+                )
+            }
 
-            val iconSize = (screenWidth.value / 2).dp
-            val strokeWidth = 10f
-            val glassSize = iconSize.value / 2
+            Canvas(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Transparent)
+            ) {
+                val centerX = size.width / 2
+                val centerY = size.height / 2
+                val radius = size.width / 4
+                val amplitude = size.width / 8
 
-            drawCircle(
-                color = colors.onPrimary,
-                radius = glassSize,
-                center = Offset(x, y),
-                style = Stroke(width = strokeWidth)
-            )
-            drawCircle(
-                color = colors.onPrimary,
-                radius = glassSize,
-                center = Offset(x, y),
-                colorFilter = ColorFilter.tint(Color.White.copy(0.5f))
-            )
+                val angle = Math.toRadians(rotation.toDouble())
+                val x = centerX + (radius * cos(angle)).toFloat()
+                val y = centerY + (amplitude * sin(angle * 2)).toFloat()
 
-            drawLine(
-                color = colors.onPrimary,
-                start = Offset(x + glassSize / 2, y + glassSize / 2),
-                end = Offset(x + glassSize * 1.5f, y + glassSize * 1.5f),
-                strokeWidth = strokeWidth
-            )
+                val iconSize = (screenWidth.value / 2).dp
+                val strokeWidth = 10f
+                val glassSize = iconSize.value / 2
+
+                drawCircle(
+                    color = colors.onPrimary,
+                    radius = glassSize,
+                    center = Offset(x, y),
+                    style = Stroke(width = strokeWidth)
+                )
+                drawCircle(
+                    color = colors.onPrimary,
+                    radius = glassSize,
+                    center = Offset(x, y),
+                    colorFilter = ColorFilter.tint(Color.White.copy(0.5f))
+                )
+
+                drawLine(
+                    color = colors.onPrimary,
+                    start = Offset(x + glassSize / 2, y + glassSize / 2),
+                    end = Offset(x + glassSize * 1.5f, y + glassSize * 1.5f),
+                    strokeWidth = strokeWidth
+                )
+            }
+        }
+        Column {
+            Button(
+                onClick = {
+                    deleteGame(
+                        context,
+                        FirebaseDatabase.getInstance().getReference("Games")
+                    )
+                    navController.popBackStack()
+                },
+                modifier = Modifier
+                    .wrapContentSize()
+                    .fillMaxWidth(0.3f),
+
+                colors = ButtonDefaults.buttonColors(containerColor = colors.error)
+            ) {
+                Text(
+                    text = "Leave",
+                    fontSize = LocalConfiguration.current.screenHeightDp.sp * 0.03,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colors.onError
+                )
+            }
+            Spacer(modifier = Modifier.fillMaxHeight(0.2f))
         }
     }
 }

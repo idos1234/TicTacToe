@@ -37,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,7 +66,7 @@ fun LeaderBoardScreen(
     yourPlayer: String
 ) {
     var i by remember {
-        mutableIntStateOf(0)
+        mutableIntStateOf(1)
     }
     //players list in database
     var playerlist = mutableStateListOf<MainPlayerUiState?>()
@@ -79,20 +80,23 @@ fun LeaderBoardScreen(
             //check if collection is empty
             if (!queryDocumentSnapshots.isEmpty) {
                 val list = queryDocumentSnapshots.documents
+
+                //sort players list by players' score
+                list.sortByDescending {
+                    it.toObject(MainPlayerUiState::class.java)?.score
+                }
+
+                //take first 10 players
                 for (d in list) {
                     //add every player to player list
                     val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
                     //first 10 players
                     playerlist.add(p)
                     i++
-                    if(i == 9) {
+                    if(i == 10) {
                         break
                     }
 
-                }
-                //sort players list by players' score
-                playerlist.sortByDescending  {
-                    it?.score
                 }
             }
         }
@@ -299,7 +303,7 @@ fun DesplayPlayer(
         ) {
             Box(
                 modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.CenterStart
+                contentAlignment = AbsoluteAlignment.CenterLeft
             ) {
                 Row(
                     modifier = Modifier.fillMaxSize(),
@@ -339,7 +343,7 @@ fun DesplayPlayer(
             }
             Box(
                 modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.CenterEnd
+                contentAlignment = AbsoluteAlignment.CenterRight
             ) {
                 Text(
                     player.score.toString(),
