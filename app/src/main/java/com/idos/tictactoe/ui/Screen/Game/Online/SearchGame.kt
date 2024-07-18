@@ -1,7 +1,6 @@
 package com.idos.tictactoe.ui.Screen.Game.Online
 
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -62,7 +61,6 @@ fun SearchGameScreen(
     navController: NavHostController,
     player: String,
     currentGame: OnlineGameRememberedValues,
-    context: Context,
     viewModel: CodeGameViewModel,
     ) {
 
@@ -152,19 +150,14 @@ fun SearchGameScreen(
 
         //on failure
         override fun onCancelled(error: DatabaseError) {
-            Toast.makeText(
-                context,
-                "Fail to get the data.",
-                Toast.LENGTH_SHORT
-            ).show()
         }
     }
     )
 
     if (foundPlayer && !wasGameStarted) {
         wasGameStarted = true
-        currentGame.player1 = getPlayer(email = currentGame.game.player1, context = context)
-        currentGame.player2 = getPlayer(email = currentGame.game.player2, context = context)
+        currentGame.player1 = getPlayer(email = currentGame.game.player1)
+        currentGame.player2 = getPlayer(email = currentGame.game.player2)
         navController.navigate("${GameScreen.Online.title}/Games")
     }
 

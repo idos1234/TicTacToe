@@ -39,8 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.database.FirebaseDatabase
 import com.idos.tictactoe.WorkManager.SetNewDelay
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.ui.GoogleSignIn.GoogleEmail
@@ -71,7 +70,7 @@ fun ChooseName(
     context: Context,
     emailState: GoogleEmail,
     changeEmail: (String) -> Unit,
-    onClick: () -> Unit
+    onClick: @Composable () -> Unit
 ) {
 
     var done by remember {
@@ -113,46 +112,36 @@ fun ChooseName(
             ).show()
         } else
         //if name is bigger than 8 chars
-            if (emailState.name!!.length > 8) {
+            if (emailState.name!!.length > 10) {
                 Toast.makeText(
                     context,
-                    "Maximum chars: 8",
+                    "Maximum chars: 10",
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
-                // sign up
-                val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-                val dbPlayers: CollectionReference = db.collection("Players")
+                //get database
+                val firebaseDatabase = FirebaseDatabase.getInstance()
+                val databaseReference = firebaseDatabase.getReference("Players")
 
+                val key: String = databaseReference.push().key!!
                 val player = MainPlayerUiState(
                     name = emailState.name!!,
                     email = emailState.email2!!.toSHA256(),
                     score = 0,
+                    key = key
                 )
-
-                dbPlayers.add(player)
-                    //on success
-                    .addOnSuccessListener {
-                        changeEmail(emailState.email2!!.toSHA256())
-                        done = false
-                        if(!setDelay) {
-                            SetNewDelay(
-                                hour = 11,
-                                min = 0,
-                                context = context
-                            )
-                            setDelay = true
-                        }
-                        onClick()
-                    }
-                    //on failure
-                    .addOnFailureListener { e ->
-                        Toast.makeText(
-                            context,
-                            "Fail! Try again \n$e",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                databaseReference.child(key).setValue(player)
+                changeEmail(emailState.email2!!.toSHA256())
+                done = false
+                if(!setDelay) {
+                    SetNewDelay(
+                        hour = 11,
+                        min = 0,
+                        context = context
+                    )
+                    setDelay = true
+                }
+                onClick()
             }
     }
 }

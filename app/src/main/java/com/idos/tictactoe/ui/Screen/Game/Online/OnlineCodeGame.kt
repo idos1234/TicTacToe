@@ -67,7 +67,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.firestore.FirebaseFirestore
 import com.idos.tictactoe.data.Draw
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
@@ -210,8 +209,8 @@ fun EnterGameOnline(
         }
     })
 
-    currentGame.player1 = getPlayer(email = currentGame.game.player1, context = context)
-    currentGame.player2 = getPlayer(email = player, context = context)
+    currentGame.player1 = getPlayer(email = currentGame.game.player1)
+    currentGame.player2 = getPlayer(email = player)
 
     CodeGameWaitingRoomScreen(
         gameState = currentGame,
@@ -237,13 +236,13 @@ fun OpenGameOnline(
     var times by remember {
         mutableIntStateOf(1)
     }
-    currentGame.player1 = getPlayer(email = player, context = context)
-    currentGame.player2 = getPlayer(email = currentGame.game.player2, context = context)
+    currentGame.player1 = getPlayer(email = player)
+    currentGame.player2 = getPlayer(email = currentGame.game.player2)
 
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("GamesWithCode")
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val db: DatabaseReference = firebaseDatabase.getReference("Players")
 
     databaseReference.addValueEventListener(object : ValueEventListener {
         //on success
@@ -276,29 +275,22 @@ fun OpenGameOnline(
             }
 
             //get Players collection from database
-            db.collection("Players").get()
+            db.addValueEventListener(object : ValueEventListener {
                 //on success
-                .addOnSuccessListener { queryDocumentSnapshots ->
-                    //check if collection is empty
-                    if (!queryDocumentSnapshots.isEmpty) {
-                         try {
-                             currentGame.player2 = queryDocumentSnapshots.documents.find {
-                                it.toObject(MainPlayerUiState::class.java)!!.email == currentGame.game.player2
-                            }?.toObject(MainPlayerUiState::class.java)!!
-                        } catch (e: Exception) {
-                             currentGame.player2 = MainPlayerUiState()
-                        }
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val list = snapshot.children
+                    try {
+                        currentGame.player2 = list.find {
+                            it.getValue(MainPlayerUiState::class.java)!!.email == currentGame.game.player2
+                        }?.getValue(MainPlayerUiState::class.java)!!
+                    } catch (e: Exception) {
+                        currentGame.player2 = MainPlayerUiState()
                     }
-                }
-                //on failure
-                .addOnFailureListener {
-                    Toast.makeText(
-                        context,
-                        "Fail to get the data.",
-                        Toast.LENGTH_SHORT
-                    ).show()
+
                 }
 
+                override fun onCancelled(error: DatabaseError) {}
+            })
         }
 
         override fun onCancelled(error: DatabaseError) {
@@ -339,7 +331,7 @@ private fun CodeGameWaitingRoomScreen(
 
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("GamesWithCode")
-    val db = FirebaseFirestore.getInstance()
+    val db = firebaseDatabase.getReference("Players")
 
     databaseReference.addValueEventListener(object : ValueEventListener {
         //on success
@@ -359,23 +351,25 @@ private fun CodeGameWaitingRoomScreen(
             }
 
             //get Players collection from database
-            db.collection("Players").get()
+            db.addValueEventListener(object : ValueEventListener {
                 //on success
-                .addOnSuccessListener { queryDocumentSnapshots ->
-                    //check if collection is empty
-                    if (!queryDocumentSnapshots.isEmpty) {
-                        try {
-                            gameState.player2 = queryDocumentSnapshots.documents.find {
-                                it.toObject(MainPlayerUiState::class.java)!!.email == gameState.game.player2
-                            }?.toObject(MainPlayerUiState::class.java)!!
-                        } catch (e: Exception) {
-                            gameState.player2 = MainPlayerUiState()
-                        }
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val list = snapshot.children
+                    try {
+                        gameState.player2 = list.find {
+                            it.getValue(MainPlayerUiState::class.java)!!.email == gameState.game.player2
+                        }?.getValue(MainPlayerUiState::class.java)!!
+
+                        foundPlayer = true
+                    } catch (e: Exception) {
+                        gameState.player2 = MainPlayerUiState()
+                        foundPlayer = false
                     }
-                    foundPlayer = gameState.player2 != MainPlayerUiState()
+
                 }
-                //on failure
-                .addOnFailureListener {}
+
+                override fun onCancelled(error: DatabaseError) {}
+            })
         }
         override fun onCancelled(error: DatabaseError) {}
     })
@@ -784,11 +778,6 @@ fun CheckForGame(context: Context, onFindGame: () -> Unit, notFindGame: () -> Un
             }
         }
         override fun onCancelled(error: DatabaseError) {
-            Toast.makeText(
-                context,
-                "Fail to get the data.",
-                Toast.LENGTH_SHORT
-            ).show()
         }
     })
 }

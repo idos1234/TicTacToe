@@ -17,6 +17,8 @@ import com.idos.tictactoe.R
 
 //data class for every player in database
 data class MainPlayerUiState(
+    //database key
+    var key: String = "",
     //player's name
     var name: String = "",
     //player's email

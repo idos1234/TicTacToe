@@ -5,7 +5,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -54,8 +53,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import com.idos.tictactoe.R
 import com.idos.tictactoe.data.Boxes
 import com.idos.tictactoe.data.GetO
@@ -185,7 +182,6 @@ fun OnlineGameButton(
     setBox: (String) -> Unit,
     box: String,
     enableState: Enable,
-    context: Context = LocalContext.current,
     databaseReference: DatabaseReference,
     modifier: Modifier,
     myTurn: String?
@@ -205,17 +201,6 @@ fun OnlineGameButton(
 
         override fun onCancelled(error: DatabaseError) {}
     })
-
-    var player1 by remember {
-        mutableStateOf(MainPlayerUiState())
-    }
-    var player2 by remember {
-        mutableStateOf(MainPlayerUiState())
-    }
-
-    //get Players collection from database
-    player1 = getPlayer(email = player1.email, context = context)
-    player2 = getPlayer(email = player2.email, context = context)
 
     val colors = MaterialTheme.colorScheme
 
@@ -245,8 +230,8 @@ fun OnlineGameButton(
         Image(
             painter = painterResource(
                 id = when (box) {
-                    "X" -> GetX(player1.currentX)
-                    "O" -> GetO(player2.currentO)
+                    "X" -> GetX(gameState.player1.currentX)
+                    "O" -> GetO(gameState.player2.currentO)
                     else -> {
                         R.drawable.o_1
                     }
@@ -590,8 +575,8 @@ fun OnlineButtonGrid(
     if (foundWinner && (gameState.game.player1Score != 2) && (gameState.game.player2Score != 2)) {
         startedCountDown = true
         gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
-        gameState.player1 = getPlayer(email = gameState.game.player1, context = context)
-        gameState.player2 = getPlayer(email = gameState.game.player2, context = context)
+        gameState.player1 = getPlayer(email = gameState.game.player1)
+        gameState.player2 = getPlayer(email = gameState.game.player2)
         NextRoundDialog(
             gameState = gameState,
             onZeroSecs = {
@@ -612,8 +597,8 @@ fun OnlineButtonGrid(
     if ((times == 9) && (gameState.game.player1Score != 2) && (gameState.game.player2Score != 2)) {
         startedCountDown = true
         gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
-        gameState.player1 = getPlayer(email = gameState.game.player1, context = context)
-        gameState.player2 = getPlayer(email = gameState.game.player2, context = context)
+        gameState.player1 = getPlayer(email = gameState.game.player1)
+        gameState.player2 = getPlayer(email = gameState.game.player2)
         NextRoundDialog(
             gameState = gameState,
             onZeroSecs = {
@@ -679,7 +664,7 @@ fun NextRoundDialog(gameState: OnlineGameRememberedValues, onZeroSecs: () -> Uni
 }
 
 @Composable
-fun findGame(gameId: String, databaseReference: DatabaseReference, context: Context = LocalContext.current): OnlineGameUiState {
+fun findGame(gameId: String, databaseReference: DatabaseReference): OnlineGameUiState {
     var game by remember {
         mutableStateOf(OnlineGameUiState())
     }
@@ -699,11 +684,6 @@ fun findGame(gameId: String, databaseReference: DatabaseReference, context: Cont
         }
 
         override fun onCancelled(error: DatabaseError) {
-            Toast.makeText(
-                context,
-                "Fail to get the data.",
-                Toast.LENGTH_SHORT
-            ).show()
         }
     })
     return game
@@ -734,8 +714,8 @@ fun OnlineTicTacToe(
     currentGame: OnlineGameRememberedValues,
     dbName: String
 ) {
-    currentGame.player1 = getPlayer(email = currentGame.game.player1, context = LocalContext.current)
-    currentGame.player2 = getPlayer(email = currentGame.game.player2, context = LocalContext.current)
+    currentGame.player1 = getPlayer(email = currentGame.game.player1)
+    currentGame.player2 = getPlayer(email = currentGame.game.player2)
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
@@ -810,150 +790,136 @@ fun UpdateScore(
     var showScore by remember {
         mutableStateOf(false)
     }
+    var updateScore by remember {
+        mutableStateOf(false)
+    }
 
     //get database
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("Players")
 
     if(!showScore) {
+
         //get Players collection from database
-        db.collection("Players").get()
+        databaseReference.addValueEventListener(object : ValueEventListener {
             //on success
-            .addOnSuccessListener { queryDocumentSnapshots ->
-                //check if collection is empty
-                if (!queryDocumentSnapshots.isEmpty) {
-                    val list = queryDocumentSnapshots.documents
-                    Loop@ for (d in list) {
-                        val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
-                        //find player using database
-                        if (p?.email == playerName) {
-                            player = p
-                            score =
-                                if (player.score + addedScore < 0) 0 else player.score + addedScore
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val list = snapshot.children
+                try {
+                    player = list.find {
+                        it.getValue(MainPlayerUiState::class.java)!!.email == playerName
+                    }?.getValue(MainPlayerUiState::class.java)!!
 
-                            if (addedScore == 1) {
-                                when (score) {
-                                    25 -> if (player.level == 1) {
-                                        newLevel = 2
-                                        levelUp = true
-                                    }
-
-                                    50 -> if (player.level == 2) {
-                                        newLevel = 3
-                                        levelUp = true
-                                    }
-
-                                    100 -> if (player.level == 3) {
-                                        newLevel = 4
-                                        levelUp = true
-                                    }
-
-                                    150 -> if (player.level == 4) {
-                                        newLevel = 5
-                                        levelUp = true
-                                    }
-
-                                    200 -> if (player.level == 5) {
-                                        newLevel = 6
-                                        levelUp = true
-                                    }
-
-                                    300 -> if (player.level == 6) {
-                                        newLevel = 7
-                                        levelUp = true
-                                    }
-
-                                    400 -> if (player.level == 7) {
-                                        newLevel = 8
-                                        levelUp = true
-                                    }
-
-                                    500 -> if (player.level == 8) {
-                                        newLevel = 9
-                                        levelUp = true
-                                    }
-
-                                    600 -> if (player.level == 9) {
-                                        newLevel = 10
-                                        levelUp = true
-                                    }
-
-                                    700 -> if (player.level == 10) {
-                                        newLevel = 11
-                                        levelUp = true
-                                    }
-
-                                    800 -> if (player.level == 11) {
-                                        newLevel = 12
-                                        levelUp = true
-                                    }
-
-                                    900 -> if (player.level == 12) {
-                                        newLevel = 13
-                                        levelUp = true
-                                    }
-
-                                    1000 -> if (player.level == 13) {
-                                        newLevel = 14
-                                        levelUp = true
-                                    }
-
-                                    1200 -> if (player.level == 14) {
-                                        newLevel = 15
-                                        levelUp = true
-                                    }
-
-                                }
-                                if (levelUp) {
-                                    coins = ((10 + newLevel * 2)..(20 + newLevel * 2)).random()
-                                    updatedPlayer = player.copy(
-                                        score = score,
-                                        wins = player.wins + 1,
-                                        level = newLevel,
-                                        coins = player.coins + coins
-                                    )
-                                    showScore = true
-                                } else {
-                                    coins = ((5 + newLevel * 2)..(20 + newLevel * 2)).random()
-                                    updatedPlayer = player.copy(
-                                        score = score,
-                                        wins = player.wins + 1,
-                                        coins = player.coins + coins
-                                    )
-                                    showScore = true
-                                }
-                            } else if (addedScore == -1) {
-                                coins = 0
-                                updatedPlayer = player.copy(
-                                    score = score,
-                                    loses = player.loses + 1,
-                                )
-                                showScore = true
+                    score =
+                        if (player.score + addedScore < 0) 0 else player.score + addedScore
+                    if (addedScore == 1) {
+                        when (score) {
+                            25 -> if (player.level == 1) {
+                                newLevel = 2
+                                levelUp = true
                             }
 
-                            db.collection("Players")
-                                .whereEqualTo("email", playerName)
-                                .get()
-                                .addOnSuccessListener {
-                                    for (document in it) {
-                                        db.collection("Players").document(document.id).set(
-                                            updatedPlayer,
-                                            SetOptions.merge()
-                                        )
-                                    }
-                                }
-                                .addOnFailureListener {
-                                    failed = true
-                                }
-                            break@Loop
-                        }
+                            50 -> if (player.level == 2) {
+                                newLevel = 3
+                                levelUp = true
+                            }
 
+                            100 -> if (player.level == 3) {
+                                newLevel = 4
+                                levelUp = true
+                            }
+
+                            150 -> if (player.level == 4) {
+                                newLevel = 5
+                                levelUp = true
+                            }
+
+                            200 -> if (player.level == 5) {
+                                newLevel = 6
+                                levelUp = true
+                            }
+
+                            300 -> if (player.level == 6) {
+                                newLevel = 7
+                                levelUp = true
+                            }
+
+                            400 -> if (player.level == 7) {
+                                newLevel = 8
+                                levelUp = true
+                            }
+
+                            500 -> if (player.level == 8) {
+                                newLevel = 9
+                                levelUp = true
+                            }
+
+                            600 -> if (player.level == 9) {
+                                newLevel = 10
+                                levelUp = true
+                            }
+
+                            700 -> if (player.level == 10) {
+                                newLevel = 11
+                                levelUp = true
+                            }
+
+                            800 -> if (player.level == 11) {
+                                newLevel = 12
+                                levelUp = true
+                            }
+
+                            900 -> if (player.level == 12) {
+                                newLevel = 13
+                                levelUp = true
+                            }
+
+                            1000 -> if (player.level == 13) {
+                                newLevel = 14
+                                levelUp = true
+                            }
+
+                            1200 -> if (player.level == 14) {
+                                newLevel = 15
+                                levelUp = true
+                            }
+
+                        }
+                        if (levelUp) {
+                            coins = ((10 + newLevel * 2)..(20 + newLevel * 2)).random()
+                            updatedPlayer = player.copy(
+                                score = score,
+                                wins = player.wins + 1,
+                                level = newLevel,
+                                coins = player.coins + coins
+                            )
+                            showScore = true
+                        } else {
+                            coins = ((5 + newLevel * 2)..(20 + newLevel * 2)).random()
+                            updatedPlayer = player.copy(
+                                score = score,
+                                wins = player.wins + 1,
+                                coins = player.coins + coins
+                            )
+                            showScore = true
+                        }
+                    } else if (addedScore == -1) {
+                        coins = 0
+                        updatedPlayer = player.copy(
+                            score = score,
+                            loses = player.loses + 1,
+                        )
+                        showScore = true
                     }
-                }
+                    if(!updateScore) {
+                        updateScore = true
+                        databaseReference.child(player.key).setValue(updatedPlayer)
+                    }
+                } catch (_: Exception) {}
             }
-            //on failure
-            .addOnFailureListener {
-                failed = true
-            }
+
+            override fun onCancelled(error: DatabaseError) { }
+        })
     }
 
     if (failed) {

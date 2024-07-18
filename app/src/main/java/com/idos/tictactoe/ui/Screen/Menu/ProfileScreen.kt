@@ -1,6 +1,5 @@
 package com.idos.tictactoe.ui.Screen.Menu
 
-import android.content.Context
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -61,8 +60,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.idos.tictactoe.data.GetO
 import com.idos.tictactoe.data.GetX
 import com.idos.tictactoe.data.GetXO
@@ -266,7 +267,8 @@ private fun LevelBar(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.95f)
-                        .weight(1f),
+                        .weight(1f)
+                        .clip(RoundedCornerShape(20)),
                     contentAlignment = AbsoluteAlignment.CenterRight
                 ) {
                     Row(
@@ -290,16 +292,34 @@ private fun LevelBar(
 }
 
 @Composable
-fun ProfileScreen(player: String, context: Context) {
+fun ProfileScreen(player: String) {
     var profile by remember {
         mutableStateOf(MainPlayerUiState())
     }
 
+    //get database
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("Players")
+    //get Players collection from database
+    databaseReference.addValueEventListener(object : ValueEventListener {
+        //on success
+        override fun onDataChange(snapshot: DataSnapshot) {
+            val list = snapshot.children
+            profile = try {
+                list.find {
+                    it.getValue(MainPlayerUiState::class.java)!!.email == player
+                }?.getValue(MainPlayerUiState::class.java)!!
+            } catch (e: Exception) {
+                MainPlayerUiState()
+            }
+
+        }
+
+        override fun onCancelled(error: DatabaseError) {}
+    })
+
     val colors = MaterialTheme.colorScheme
     val brush = Brush.verticalGradient(listOf(colors.background, colors.primary))
-
-    //get Players collection from database
-    profile = getPlayer(player, context)
 
     val currentX = profile.currentX
     val currentO = profile.currentO
@@ -368,7 +388,9 @@ fun ProfileScreen(player: String, context: Context) {
                     mutableStateOf(1)
                 }
 
-                Box(modifier = Modifier.fillMaxWidth().background(colors.background), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(colors.background), contentAlignment = Alignment.Center) {
                     Row(
                         Modifier
                             .fillMaxWidth(0.9f)
@@ -432,19 +454,16 @@ fun ProfileScreen(player: String, context: Context) {
                             player = profile,
                             image = image,
                             onChangingImage = {image = it},
-                            changeProfile = {profile = getPlayer(email = player, context = context)}
                         )
                         2 -> ShowPlayerX(
                             player = profile,
                             image = x,
                             onChangingImage = {x = it},
-                            changeProfile = {profile = getPlayer(email = player, context = context)}
                         )
                         3 -> ShowPlayerO(
                             player = profile,
                             image = o,
                             onChangingImage = {o = it},
-                            changeProfile = {profile = getPlayer(email = player, context = context)}
                         )
                     }
                 }
@@ -479,7 +498,6 @@ fun ShowPlayersImages(
     player: MainPlayerUiState,
     image: String,
     onChangingImage: (String) -> Unit,
-    changeProfile: @Composable () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
 
@@ -504,13 +522,12 @@ fun ShowPlayersImages(
                             .wrapContentHeight()
                             .border(
                                 BorderStroke(
-                                    if (photo == image) 2.dp else 0.dp,
-                                    colors.onBackground
+                                    if (photo == image) { 2.dp } else { 0.dp },
+                                    if (photo == image) { colors.onPrimary } else { colors.primary }
                                 ),
                                 shape = RoundedCornerShape(0)
                             )
                             .clickable(onClick = {
-                                changeImage = true
                                 onChangingImage(photo)
                             })
 
@@ -572,7 +589,6 @@ fun ShowPlayersImages(
 
     if (changeImage) {
         ChangeImage(image = image, player = player)
-        changeProfile()
         changeImage = false
     }
 }
@@ -581,7 +597,6 @@ fun ShowPlayerX(
     player: MainPlayerUiState,
     image: String,
     onChangingImage: (String) -> Unit,
-    changeProfile: @Composable () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
 
@@ -605,13 +620,12 @@ fun ShowPlayerX(
                             .wrapContentHeight()
                             .border(
                                 BorderStroke(
-                                    if (X == image) 2.dp else 0.dp,
-                                    colors.onBackground
+                                    if (X == image) { 2.dp } else { 0.dp },
+                                    if (X == image) { colors.onPrimary } else { colors.primary }
                                 ),
                                 shape = RoundedCornerShape(0)
                             )
                             .clickable(onClick = {
-                                changeImage = true
                                 onChangingImage(X)
                             })
 
@@ -671,40 +685,17 @@ fun ShowPlayerX(
     }
 
     if (changeImage) {
-        val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+        //get database
+        val firebaseDatabase = FirebaseDatabase.getInstance()
+        val databaseReference = firebaseDatabase.getReference("Players")
 
-        val updatedPlayer = MainPlayerUiState(
-            name = player.name,
-            email = player.email,
-            score = player.score,
-            currentImage = player.currentImage,
-            lockedImages = player.lockedImages,
-            unlockedImages = player.unlockedImages,
-            wins = player.wins,
-            loses = player.loses,
-            level = player.level,
-            lockedX = player.lockedX,
-            unlockedX = player.unlockedX,
-            lockedO = player.lockedO,
-            unlockedO = player.unlockedO,
-            currentO = player.currentO,
+        val updatedPlayer = player.copy(
             currentX = image
         )
 
 
-        db.collection("Players")
-            .whereEqualTo("name", player.name)
-            .get()
-            .addOnSuccessListener {
-                for (document in it) {
-                    db.collection("Players").document(document.id).set(
-                        updatedPlayer,
-                        SetOptions.merge()
-                    )
-                }
-            }
+        databaseReference.child(player.key).setValue(updatedPlayer)
 
-        changeProfile()
         changeImage = false
     }
 }
@@ -714,7 +705,6 @@ fun ShowPlayerO(
     player: MainPlayerUiState,
     image: String,
     onChangingImage: (String) -> Unit,
-    changeProfile: @Composable () -> Unit
 ) {
     val  colors = MaterialTheme.colorScheme
 
@@ -738,13 +728,12 @@ fun ShowPlayerO(
                             .wrapContentHeight()
                             .border(
                                 BorderStroke(
-                                    if (O == image) 2.dp else 0.dp,
-                                    colors.onBackground
+                                    if (O == image) { 2.dp } else { 0.dp },
+                                    if (O == image) { colors.onPrimary } else { colors.primary }
                                 ),
                                 shape = RoundedCornerShape(0)
                             )
                             .clickable(onClick = {
-                                changeImage = true
                                 onChangingImage(O)
                             })
 
@@ -804,40 +793,17 @@ fun ShowPlayerO(
     }
 
     if (changeImage) {
-        val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+        //get database
+        val firebaseDatabase = FirebaseDatabase.getInstance()
+        val databaseReference = firebaseDatabase.getReference("Players")
 
-        val updatedPlayer = MainPlayerUiState(
-            name = player.name,
-            email = player.email,
-            score = player.score,
-            currentImage = player.currentImage,
-            lockedImages = player.lockedImages,
-            unlockedImages = player.unlockedImages,
-            wins = player.wins,
-            loses = player.loses,
-            level = player.level,
-            lockedO = player.lockedO,
-            unlockedO = player.unlockedO,
-            lockedX = player.lockedX,
-            unlockedX = player.unlockedX,
-            currentX = player.currentX,
+        val updatedPlayer = player.copy(
             currentO = image
         )
 
 
-        db.collection("Players")
-            .whereEqualTo("name", player.name)
-            .get()
-            .addOnSuccessListener {
-                for (document in it) {
-                    db.collection("Players").document(document.id).set(
-                        updatedPlayer,
-                        SetOptions.merge()
-                    )
-                }
-            }
+        databaseReference.child(player.key).setValue(updatedPlayer)
 
-        changeProfile()
         changeImage = false
     }
 }
@@ -877,21 +843,15 @@ fun PlayerGraph(
 
 @Composable
 fun ChangeImage(image: String, player: MainPlayerUiState) {
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    //get database
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("Players")
 
-    val updatedPlayer = player.copy(currentImage = image)
+    val updatedPlayer = player.copy(
+        currentImage = image
+    )
 
-    db.collection("Players")
-        .whereEqualTo("name", player.name)
-        .get()
-        .addOnSuccessListener {
-            for (document in it) {
-                db.collection("Players").document(document.id).set(
-                    updatedPlayer,
-                    SetOptions.merge()
-                )
-            }
-        }
+    databaseReference.child(player.key).setValue(updatedPlayer)
 }
 
 @Composable

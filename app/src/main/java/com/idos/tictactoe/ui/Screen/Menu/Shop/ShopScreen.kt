@@ -60,8 +60,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.idos.tictactoe.R
 import com.idos.tictactoe.data.Images
 import com.idos.tictactoe.data.MainPlayerUiState
@@ -81,11 +83,12 @@ var thirdDeal = mutableStateOf(Skin(0, "", 0, "") {})
 var fourthDeal = mutableStateOf(Skin(0, "", 0, "") {})
 var fifthDeal = mutableStateOf(Skin(0, "", 0, "") {})
 var sixthDeal = mutableStateOf(Skin(0, "", 0, "") {})
-var text = mutableStateOf("")
 
 var collectedDeals = mutableListOf(0, 0, 0, 0, 0, 0)
 
-private var playerEmail: String = ""
+var refresh = mutableStateOf(false)
+
+var playerEmail: String = ""
 
 
 fun getDeal(key: String): Skin {
@@ -104,7 +107,7 @@ fun getDeal(key: String): Skin {
                     it.tag == key
                 }!!
             } catch (e: Exception) {
-                Skin(0, "", 0, "") {}
+                Skin(0, "", 0, "", null)
             }
         }
     }
@@ -127,37 +130,49 @@ fun GetDealsFromSharedPreferences(context: Context) {
     collectedDeals[3] = preferencesManager.getData("list-4", "0").toInt()
     collectedDeals[4] = preferencesManager.getData("list-5", "0").toInt()
     collectedDeals[5] = preferencesManager.getData("list-6", "0").toInt()
-
-
 }
 
 fun SetNewDeals(context: Context, email: String = playerEmail) {
     val preferencesManager = ShopPreferences(context)
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val times = mutableStateOf(1)
 
+
+    //get database
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("Players")
     //get Players collection from database
-    db.collection("Players").get()
+    databaseReference.addValueEventListener(object : ValueEventListener {
         //on success
-        .addOnSuccessListener { queryDocumentSnapshots ->
-            //check if collection is empty
-            if (!queryDocumentSnapshots.isEmpty) {
-                val list = queryDocumentSnapshots.documents
-                try {
-                    val player = list.find {
-                        it.toObject(MainPlayerUiState::class.java)!!.email == email
-                    }?.toObject(MainPlayerUiState::class.java)!!
-
-                    preferencesManager.saveData("1", DealOptions(0..1, player = player).random())
-                    preferencesManager.saveData("2", DealOptions(2..3, player = player).random())
-                    preferencesManager.saveData("3", DealOptions(4..5, player = player).random())
-                    preferencesManager.saveData("4", DealOptions(6..7, player = player).random())
-                    preferencesManager.saveData("5", DealOptions(9..11, player = player).random())
-                    preferencesManager.saveData("6", DealOptions(12..13, player = player).random())
+        override fun onDataChange(snapshot: DataSnapshot) {
+            if (times.value == 1) {
+                val list = snapshot.children
+                val player = try {
+                    list.find {
+                        it.getValue(MainPlayerUiState::class.java)!!.email == email
+                    }?.getValue(MainPlayerUiState::class.java)!!
                 } catch (_: Exception) {
+                    MainPlayerUiState()
                 }
+
+                preferencesManager.saveData("1", (DealOptions(0..1, player = player).random()))
+                preferencesManager.saveData("2", DealOptions(2..3, player = player).random())
+                preferencesManager.saveData("3", DealOptions(4..5, player = player).random())
+                preferencesManager.saveData("4", DealOptions(6..7, player = player).random())
+                preferencesManager.saveData("5", DealOptions(8..10, player = player).random())
+                preferencesManager.saveData("6", DealOptions(11..13, player = player).random())
+                for(i in 0..5) {
+                    collectedDeals[i] = 0
+                }
+                SetCollectedDeals(context)
+
+                refresh.value = true
+
+                times.value = 2
             }
         }
-    SetCollectedDeals(context)
+
+        override fun onCancelled(error: DatabaseError) {}
+    })
 }
 
 fun SetCollectedDeals(context: Context) {
@@ -173,7 +188,7 @@ fun SetCollectedDeals(context: Context) {
 
 
 @Composable
-fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Context = LocalContext.current) {
+fun ShopScreen(playerName: String, context: Context = LocalContext.current) {
     playerEmail = playerName
 
     val colors = MaterialTheme.colorScheme
@@ -182,16 +197,24 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
     val screenHeight = configuration.screenHeightDp
     val screenWidth = configuration.screenWidthDp
 
-    val player = getPlayer(email = playerName, context = context)
+    val player = getPlayer(email = playerName)
 
     //today in 11 AM
     val timeToMatch = Calendar.getInstance()
-    timeToMatch[Calendar.HOUR_OF_DAY] = 11
-    timeToMatch[Calendar.MINUTE] = 0
-    //current Time
-    val currentTime = Calendar.getInstance()
+    timeToMatch.set(android.icu.util.Calendar.HOUR_OF_DAY, 11)
+    timeToMatch.set(android.icu.util.Calendar.MINUTE, 0)
+    timeToMatch.set(android.icu.util.Calendar.SECOND, 0)
+    timeToMatch.set(android.icu.util.Calendar.MILLISECOND, 0)
 
-    GetDealsFromSharedPreferences(context)
+    var currentTime by remember {
+        mutableStateOf(Calendar.getInstance())
+    }
+
+    if(refresh.value) {
+        refresh.value = false
+        GetDealsFromSharedPreferences(context)
+        currentTime = Calendar.getInstance()
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -216,17 +239,17 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
             )
         }
         item {
-            if(currentTime >= timeToMatch) {
-                text.value = "tomorrow"
+            val text = if(currentTime >= timeToMatch) {
+                "tomorrow"
             } else {
-                text.value = "today"
+                "today"
             }
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = AbsoluteAlignment.CenterLeft
             ) {
                 Text(
-                    text = "Next deals: ${text.value} in 11",
+                    text = "Next deals: $text in 11",
                     fontSize = (screenHeight*0.015).sp,
                     fontWeight = FontWeight.Light,
                     color = colors.onBackground,
@@ -257,8 +280,7 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
                             colors = colors,
                             screenWidth = screenWidth,
                             screenHeight = screenHeight,
-                            dealNumber = 1,
-                            onBuy = onBuy
+                            dealNumber = 1
                         )
                     } else {
                         ShowDeal(
@@ -267,8 +289,7 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
                             colors = colors,
                             screenWidth = screenWidth,
                             screenHeight = screenHeight,
-                            dealNumber = 1,
-                            onBuy = onBuy
+                            dealNumber = 1
                         )
                     }
                     if(player.level >= 2) {
@@ -279,8 +300,7 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
                                 colors = colors,
                                 screenWidth = screenWidth,
                                 screenHeight = screenHeight,
-                                dealNumber = 2,
-                                onBuy = onBuy
+                                dealNumber = 2
                             )
                         } else {
                             ShowDeal(
@@ -289,8 +309,7 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
                                 colors = colors,
                                 screenWidth = screenWidth,
                                 screenHeight = screenHeight,
-                                dealNumber = 2,
-                                onBuy = onBuy
+                                dealNumber = 2
                             )
                         }
                     } else {
@@ -309,8 +328,7 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
                                 colors = colors,
                                 screenWidth = screenWidth,
                                 screenHeight = screenHeight,
-                                dealNumber = 3,
-                                onBuy = onBuy
+                                dealNumber = 3
                             )
                         } else {
                             ShowDeal(
@@ -319,8 +337,7 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
                                 colors = colors,
                                 screenWidth = screenWidth,
                                 screenHeight = screenHeight,
-                                dealNumber = 3,
-                                onBuy = onBuy
+                                dealNumber = 3
                             )
                         }
                     } else {
@@ -347,8 +364,7 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
                                 colors = colors,
                                 screenWidth = screenWidth,
                                 screenHeight = screenHeight,
-                                dealNumber = 4,
-                                onBuy = onBuy
+                                dealNumber = 4
                             )
                         } else {
                             ShowDeal(
@@ -357,8 +373,7 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
                                 colors = colors,
                                 screenWidth = screenWidth,
                                 screenHeight = screenHeight,
-                                dealNumber = 4,
-                                onBuy = onBuy
+                                dealNumber = 4
                             )
                         }
                     } else {
@@ -377,8 +392,7 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
                                 colors = colors,
                                 screenWidth = screenWidth,
                                 screenHeight = screenHeight,
-                                dealNumber = 5,
-                                onBuy = onBuy
+                                dealNumber = 5
                             )
                         } else {
                             ShowDeal(
@@ -387,8 +401,7 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
                                 colors = colors,
                                 screenWidth = screenWidth,
                                 screenHeight = screenHeight,
-                                dealNumber = 5,
-                                onBuy = onBuy
+                                dealNumber = 5
                             )
                         }
                     } else {
@@ -407,8 +420,7 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
                                 colors = colors,
                                 screenWidth = screenWidth,
                                 screenHeight = screenHeight,
-                                dealNumber = 6,
-                                onBuy = onBuy
+                                dealNumber = 6
                             )
                         } else {
                             ShowDeal(
@@ -417,8 +429,7 @@ fun ShopScreen(playerName: String, onBuy: @Composable () -> Unit, context: Conte
                                 colors = colors,
                                 screenWidth = screenWidth,
                                 screenHeight = screenHeight,
-                                dealNumber = 6,
-                                onBuy = onBuy
+                                dealNumber = 6
                             )
                         }
                     } else {
@@ -630,9 +641,7 @@ fun ShowDeal(
     colors: ColorScheme,
     screenWidth: Int,
     screenHeight: Int,
-    dealNumber: Int,
-    onBuy: @Composable () -> Unit
-
+    dealNumber: Int
 ) {
     var rotation by remember {
         mutableFloatStateOf(0f)
@@ -745,7 +754,6 @@ fun ShowDeal(
                 collectedDeals[dealNumber-1] = 1
                 SetCollectedDeals(LocalContext.current)
                 skin.onClick!!(player.email)
-                onBuy()
             }
         )
     }
@@ -758,8 +766,7 @@ fun ShowCoinsDeal(
     colors: ColorScheme,
     screenWidth: Int,
     screenHeight: Int,
-    dealNumber: Int,
-    onBuy: @Composable () -> Unit
+    dealNumber: Int
 ) {
     var getCoins by remember {
         mutableStateOf(false)
@@ -811,24 +818,15 @@ fun ShowCoinsDeal(
         SetCollectedDeals(LocalContext.current)
         getCoins = false
 
-        val db = FirebaseFirestore.getInstance().collection("Players")
+        //get database
+        val firebaseDatabase = FirebaseDatabase.getInstance()
+        val databaseReference = firebaseDatabase.getReference("Players")
 
         val updatedPlayer = player.copy(
             coins = player.coins + coins
         )
 
-        db.whereEqualTo("email", player.email)
-            .get()
-            .addOnSuccessListener {
-                for (document in it) {
-                    db.document(document.id).set(
-                        updatedPlayer,
-                        SetOptions.merge()
-                    )
-                }
-            }
-
-        onBuy()
+        databaseReference.child(player.key).setValue(updatedPlayer)
     }
 }
 

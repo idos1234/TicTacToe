@@ -65,7 +65,7 @@ fun SinglePlayerGameButton(box: String, onClick: () -> Unit = {}, viewModel: Tic
     }
 
     //get Players collection from database
-    player = getPlayer(playerName, context)
+    player = getPlayer(playerName)
 
 
     val colors = MaterialTheme.colorScheme
@@ -396,7 +396,7 @@ fun TicTacToeSinglePlayerScreen(
     playerName: String,
     navController: NavController
 ) {
-    val player = getPlayer(email = playerName, context = LocalContext.current)
+    val player = getPlayer(email = playerName)
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val colors = MaterialTheme.colorScheme

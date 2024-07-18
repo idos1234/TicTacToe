@@ -19,13 +19,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.database.FirebaseDatabase
 import com.idos.tictactoe.WorkManager.SetNewDelay
+import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.ui.Screen.GameScreen
+import com.idos.tictactoe.ui.Screen.Menu.getPlayer
 import com.idos.tictactoe.ui.Screen.toSHA256
 
 @Composable
-fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavController, changeEmail: (String) -> Unit, onClick: () -> Unit) {
+fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavController, changeEmail: (String) -> Unit, onClick: @Composable () -> Unit) {
     var text by remember {
         mutableStateOf<String?>(null)
     }
@@ -73,36 +75,26 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
         var isPlayerExisted by remember {
             mutableStateOf(false)
         }
-        val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
+        //get database
+        val firebaseDatabase = FirebaseDatabase.getInstance()
+        val databaseReference = firebaseDatabase.getReference("Players")
         //get Players collection from database
-        db.collection("Players").get()
-            //on success
-            .addOnSuccessListener { queryDocumentSnapshots ->
-                //check if collection is empty
-                if (!queryDocumentSnapshots.isEmpty) {
-                    val list = queryDocumentSnapshots.documents
-                    for (d in list) {
-                        val p: com.idos.tictactoe.data.MainPlayerUiState? = d.toObject(
-                            com.idos.tictactoe.data.MainPlayerUiState::class.java
-                        )
-                        //check if email already used
-                        if (p?.email == user!!.email?.toSHA256()) {
-                            isPlayerExisted = true
-                        }
-                    }
-                }
-                searchedPlayer = true
+        if(getPlayer(email = user?.email!!.toSHA256()) == MainPlayerUiState()) {
+            isPlayerExisted = false
+            searchedPlayer = true
+        } else {
+            isPlayerExisted = true
+            searchedPlayer = true
+        }
 
-            }
-
-            //if user is existed
+        //if user is existed
         if (isPlayerExisted) {
             //log in
             changeEmail(user?.email!!.toSHA256())
             if(!setDelay) {
                 SetNewDelay(
-                    hour = 1,
+                    hour = 11,
                     min = 0,
                     context = context
                 )

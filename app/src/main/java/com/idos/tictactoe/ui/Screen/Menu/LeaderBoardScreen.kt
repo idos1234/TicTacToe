@@ -2,7 +2,6 @@ package com.idos.tictactoe.ui.Screen.Menu
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,7 +50,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.idos.tictactoe.data.GetO
 import com.idos.tictactoe.data.GetX
 import com.idos.tictactoe.data.GetXO
@@ -69,48 +71,40 @@ fun LeaderBoardScreen(
         mutableIntStateOf(1)
     }
     //players list in database
-    var playerlist = mutableStateListOf<MainPlayerUiState?>()
-    //database
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    val playerList = mutableStateListOf<MainPlayerUiState?>()
+    //get database
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("Players")
 
     //get Players collection from database
-    db.collection("Players").get()
+    databaseReference.addValueEventListener(object : ValueEventListener {
         //on success
-        .addOnSuccessListener { queryDocumentSnapshots ->
-            //check if collection is empty
-            if (!queryDocumentSnapshots.isEmpty) {
-                val list = queryDocumentSnapshots.documents
-
-                //sort players list by players' score
-                list.sortByDescending {
-                    it.toObject(MainPlayerUiState::class.java)?.score
-                }
-
-                //take first 10 players
-                for (d in list) {
-                    //add every player to player list
-                    val p: MainPlayerUiState? = d.toObject(MainPlayerUiState::class.java)
-                    //first 10 players
-                    playerlist.add(p)
-                    i++
-                    if(i == 10) {
-                        break
-                    }
-
-                }
+        override fun onDataChange(snapshot: DataSnapshot) {
+            val list = snapshot.children
+            //sort players list by players' score
+            val sortedList = list.sortedByDescending {
+                it.getValue(MainPlayerUiState::class.java)?.score
             }
-        }
-        //on failure
-        .addOnFailureListener {
-            Toast.makeText(
-                context,
-                "Fail to get the data.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    
 
-    ShowTopPlayers(Players = playerlist, yourPlayer = yourPlayer)
+            //take first 10 players
+            for (d in sortedList) {
+                //add every player to player list
+                val p: MainPlayerUiState? = d.getValue(MainPlayerUiState::class.java)
+                //first 10 players
+                playerList.add(p)
+                i++
+                if(i == 10) {
+                    break
+                }
+
+            }
+
+        }
+
+        override fun onCancelled(error: DatabaseError) {}
+    })
+
+    ShowTopPlayers(Players = playerList, yourPlayer = yourPlayer)
 }
 
 @Composable
@@ -164,7 +158,7 @@ fun ShowTopPlayers(
             ) {
                 Players.forEachIndexed { index, item ->
                     item {
-                        DesplayPlayer(
+                        DisplayPlayer(
                             player = item!!,
                             modifier = Modifier
                                 .fillMaxWidth(0.9f)
@@ -277,7 +271,7 @@ fun ShowPlayerData(player: MainPlayerUiState, onCloseClicked: () -> Unit) {
 }
 
 @Composable
-fun DesplayPlayer(
+fun DisplayPlayer(
     player: MainPlayerUiState,
     modifier: Modifier, index: Int,
     colorScheme: ColorScheme, screenHeight: Dp,
@@ -358,38 +352,31 @@ fun DesplayPlayer(
 }
 
 @Composable
-fun getPlayer(email: String, context: Context): MainPlayerUiState {
+fun getPlayer(email: String): MainPlayerUiState {
     var player by remember {
         mutableStateOf(MainPlayerUiState())
     }
 
-    //database
-    val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-
+    //get database
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("Players")
     //get Players collection from database
-    db.collection("Players").get()
+    databaseReference.addValueEventListener(object : ValueEventListener {
         //on success
-        .addOnSuccessListener { queryDocumentSnapshots ->
-            //check if collection is empty
-            if (!queryDocumentSnapshots.isEmpty) {
-                val list = queryDocumentSnapshots.documents
-                try {
-                    player = list.find {
-                        it.toObject(MainPlayerUiState::class.java)!!.email == email
-                    }?.toObject(MainPlayerUiState::class.java)!!
-                } catch (e: Exception) {
-                    player = MainPlayerUiState()
-                }
-            }
+        override fun onDataChange(snapshot: DataSnapshot) {
+            val list = snapshot.children
+            player = try {
+                list.find {
+                    it.getValue(MainPlayerUiState::class.java)!!.email == email
+                }?.getValue(MainPlayerUiState::class.java)!!
+            } catch (_: Exception) { MainPlayerUiState() }
+
         }
-        //on failure
-        .addOnFailureListener {
-            Toast.makeText(
-                context,
-                "Fail to get the data.",
-                Toast.LENGTH_SHORT
-            ).show()
+
+        override fun onCancelled(error: DatabaseError) {
+
         }
+    })
 
     return player
 }

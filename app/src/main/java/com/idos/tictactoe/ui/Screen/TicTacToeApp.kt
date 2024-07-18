@@ -1,14 +1,12 @@
 package com.idos.tictactoe.ui.Screen
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,23 +14,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -47,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -57,7 +50,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -65,10 +57,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.database.ValueEventListener
 import com.idos.tictactoe.R
-import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.GoogleSignIn.GoogleSignInScreen
@@ -88,11 +81,10 @@ import com.idos.tictactoe.ui.Screen.Menu.CustomLinearProgressIndicator
 import com.idos.tictactoe.ui.Screen.Menu.HomeScreen
 import com.idos.tictactoe.ui.Screen.Menu.LeaderBoardScreen
 import com.idos.tictactoe.ui.Screen.Menu.ProfileScreen
-import com.idos.tictactoe.ui.Screen.Menu.getPlayer
 import com.idos.tictactoe.ui.screens.Shop.SetNewDeals
 import com.idos.tictactoe.ui.screens.Shop.ShopScreen
+import com.idos.tictactoe.ui.screens.Shop.refresh
 import com.idos.tictactoe.ui.theme.Secondery
-import com.idos.tictactoe.ui.theme.Shapes
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -146,117 +138,39 @@ fun CheckLogOut(
     )
 }
 
-@SuppressLint("UnrememberedMutableState")
 @Composable
-fun TopHomeScreenMenu(modifier: Modifier, context: Context, email: String, navController: NavHostController, onChangeScreen: () -> Unit) {
+fun TopAppBar(
+    navController: NavController,
+    playerEmail: String
+) {
     var player by remember {
         mutableStateOf(MainPlayerUiState())
     }
 
+    //get database
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("Players")
     //get Players collection from database
-    player = getPlayer(email, context)
-
-    val currentImage = GetXO(player.currentImage)
-
-    Box(modifier = modifier
-        .clickable(
-            onClick = {
-                navController.navigate(GameScreen.ProfileScreen.title)
-                onChangeScreen()
-            }
-        )
-        .fillMaxWidth()
-        .padding(10.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Card(
-                shape = RoundedCornerShape(125.dp),
-                elevation = CardDefaults.cardElevation(10.dp),
-                modifier = Modifier
-                    .size(90.dp)
-            ) {
-                Image(painter = painterResource(id = currentImage), contentDescription = null, contentScale = ContentScale.Crop)
-                }
-
-            Spacer(modifier = Modifier.width(15.dp))
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "Welcome ${player.name}",
-                    fontSize = 25.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "Score: ${player.score}",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.W500
-                )
+    databaseReference.addValueEventListener(object : ValueEventListener {
+        //on success
+        override fun onDataChange(snapshot: DataSnapshot) {
+            val list = snapshot.children
+            player = try {
+                list.find {
+                    it.getValue(MainPlayerUiState::class.java)!!.email == playerEmail
+                }?.getValue(MainPlayerUiState::class.java)!!
+            } catch (e: Exception) {
+                MainPlayerUiState()
             }
 
         }
-    }
-}
 
-@Composable
-fun ButtonHomeScreenMenu(modifier: Modifier, navController: NavHostController, onChangeScreen: () -> Unit = {}, onLogOutClick: () -> Unit) {
-    var checkLogOut by remember {
-        mutableStateOf(false)
-    }
-    Spacer(modifier = Modifier.height(30.dp))
+        override fun onCancelled(error: DatabaseError) {}
+    })
 
-    Column(modifier = modifier) {
 
-        Button(onClick = {
-            navController.navigate(GameScreen.Start.title)
-            onChangeScreen()},
-            modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Home")
-        }
-        Button(onClick = {
-            navController.navigate(GameScreen.LeaderBoard.title)
-            onChangeScreen()},
-            modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Leader Board")
-        }
-        Button(onClick = {
-            navController.navigate(GameScreen.CodeGame.title)
-            onChangeScreen()},
-            modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Play with code")
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        OutlinedButton(
-            onClick = {checkLogOut = true},
-            shape = Shapes.large,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 25.dp, end = 25.dp, bottom = 10.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Log out")
-                Spacer(modifier = Modifier.width(10.dp))
-                Icon(imageVector = Icons.AutoMirrored.Filled.Logout, contentDescription = "Log out icon")
-            }
 
-        }
-    }
 
-    if (checkLogOut) {
-        CheckLogOut(
-            onCancelClick = {checkLogOut = false},
-            onLogOut = {
-                onLogOutClick()
-                checkLogOut = false
-                onChangeScreen()
-            }
-        )
-    }
-}
-
-@Composable
-fun TopAppBar(
-    navController: NavController,
-    profile: MainPlayerUiState
-) {
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp
     val colors = MaterialTheme.colorScheme
@@ -282,7 +196,7 @@ fun TopAppBar(
 
             )
             Text(
-                text = "Level: ${profile.level}",
+                text = "Level: ${player.level}",
                 color = Color.White,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold
@@ -306,7 +220,7 @@ fun TopAppBar(
                     shape = RoundedCornerShape(20)
                 ) {
                     Text(
-                        text = profile.coins.toString(),
+                        text = player.coins.toString(),
                         textAlign = TextAlign.Center,
                         color = colors.onSecondary,
                         fontSize = 15.sp,
@@ -318,7 +232,10 @@ fun TopAppBar(
                         .size((screenHeight * 20 / 915).dp),
                     shape = CircleShape,
                     colors = CardDefaults.cardColors(Color.Green.copy(alpha = 0.6f)),
-                    onClick = { navController.navigate(GameScreen.Store.title) }
+                    onClick = {
+                        refresh.value = true
+                        navController.navigate(GameScreen.Store.title)
+                    }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -376,6 +293,7 @@ fun BottomAppBar(
             .background(MaterialTheme.colorScheme.primary)
             .clickable(
                 onClick = {
+                    refresh.value = true
                     navController.navigate(GameScreen.Store.title)
                 }
             ),
@@ -513,14 +431,10 @@ fun TicTacToeApp(
     var bottomAppBar: @Composable () -> Unit by remember {
         mutableStateOf(defaultBottomBar)
     }
-    var profile by remember {
-        mutableStateOf(MainPlayerUiState())
-    }
-    profile = getPlayer(email = email.value, context = context)
     val defaultTopAppBar: @Composable () -> Unit = {
         TopAppBar(
             navController = navController,
-            profile = profile
+            playerEmail = email.value
         )
     }
     var topAppBar: @Composable () -> Unit by remember {
@@ -680,7 +594,7 @@ fun TicTacToeApp(
                 storeColor = colors.onPrimary
 
                 BackHandler {}
-                ProfileScreen(player = email.value, context = LocalContext.current)
+                ProfileScreen(player = email.value)
             }
 
             //codeGame
@@ -804,7 +718,6 @@ fun TicTacToeApp(
                     navController = navController,
                     player = email.value,
                     currentGame = onlineGameValuesUiState,
-                    context = context,
                     viewModel = codeGameViewModel
                 )
             }
@@ -820,26 +733,7 @@ fun TicTacToeApp(
                 storeColor = colors.secondary
 
                 ShopScreen(
-                    playerName = email.value,
-                    onBuy = {
-                        //database
-                        val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-
-                        //get Players collection from database
-                        db.collection("Players").get()
-                            //on success
-                            .addOnSuccessListener { queryDocumentSnapshots ->
-                                //check if collection is empty
-                                if (!queryDocumentSnapshots.isEmpty) {
-                                    val list = queryDocumentSnapshots.documents
-                                    try {
-                                        profile = list.find {
-                                            it.toObject(MainPlayerUiState::class.java)!!.email == email.value
-                                        }?.toObject(MainPlayerUiState::class.java)!!
-                                    } catch (_: Exception) {}
-                                }
-                            }
-                    }
+                    playerName = email.value
                 )
             }
 
