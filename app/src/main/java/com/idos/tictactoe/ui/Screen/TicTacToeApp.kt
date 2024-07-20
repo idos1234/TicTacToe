@@ -22,13 +22,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -84,7 +82,6 @@ import com.idos.tictactoe.ui.Screen.Menu.ProfileScreen
 import com.idos.tictactoe.ui.screens.Shop.SetNewDeals
 import com.idos.tictactoe.ui.screens.Shop.ShopScreen
 import com.idos.tictactoe.ui.screens.Shop.refresh
-import com.idos.tictactoe.ui.theme.Secondery
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -105,37 +102,6 @@ enum class GameScreen(val title: String) {
     TimeUp("TimeUp"),
     SearchGame("SearchGame"),
     Store("Store")
-}
-
-/**
- * Provides Navigation graph for the application.
- */
-
-@Composable
-fun CheckLogOut(
-    onCancelClick: () -> Unit,
-    onLogOut: () -> Unit
-) {
-
-    AlertDialog(
-        title = { Text(text = "Are you sure you want to log out?")},
-        containerColor = Secondery,
-        onDismissRequest = {},
-        dismissButton = {
-            TextButton(
-                onClick = { onCancelClick() }
-            ) {
-                Text("Cancel")
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = onLogOut
-            ) {
-                Text("Log out")
-            }
-        }
-    )
 }
 
 @Composable
@@ -580,7 +546,7 @@ fun TicTacToeApp(
                 storeColor = colors.onPrimary
 
                 BackHandler {}
-                LeaderBoardScreen(context = LocalContext.current, yourPlayer = email.value)
+                LeaderBoardScreen(yourPlayer = email.value)
             }
 
             //profile screen
