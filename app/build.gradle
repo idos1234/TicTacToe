@@ -5,6 +5,8 @@ plugins {
     id 'com.google.devtools.ksp' version "1.8.0-1.0.9"
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    //Performance Monitoring
+    id("com.google.firebase.firebase-perf")
 }
 
 android {
@@ -60,13 +62,15 @@ apply plugin: 'com.android.application'
 dependencies {
 
     // FireBase Dependency
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     //data base
     implementation 'com.google.firebase:firebase-database-ktx:21.0.0'
     implementation 'com.google.firebase:firebase-firestore-ktx:25.0.0'
     //crashlytics
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
-    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+    //Performance
+    implementation("com.google.firebase:firebase-perf")
     // preferences DataStore
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
     implementation "androidx.security:security-crypto-ktx:1.1.0-alpha06"

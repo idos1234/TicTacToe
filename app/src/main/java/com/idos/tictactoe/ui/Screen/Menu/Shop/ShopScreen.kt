@@ -223,9 +223,6 @@ fun ShopScreen(playerName: String, context: Context = LocalContext.current) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
-            Spacer(modifier = Modifier.height((screenHeight/10).dp))
-        }
-        item {
             Text(
                 text = "Daily Deals",
                 fontSize = (screenHeight*0.05).sp,
@@ -526,7 +523,7 @@ fun ShopScreen(playerName: String, context: Context = LocalContext.current) {
             }
         }
         item {
-            Spacer(modifier = Modifier.fillMaxHeight(0.1f))
+            Spacer(modifier = Modifier.height((screenHeight/10).dp))
         }
     }
 }
@@ -702,14 +699,14 @@ fun ShowDeal(
                 fontWeight = FontWeight.Bold,
                 fontSize = screenHeight.sp*0.01,
             )
-            val color = if(player.coins >= skin.price) {
+            val textColor = if(player.coins >= skin.price) {
                 colors.onPrimary
             } else {
                 colors.error
             }
             Text(
                 text = skin.price.toString(),
-                color = color,
+                color = textColor,
                 textAlign = TextAlign.Right,
                 fontWeight = FontWeight.Bold,
                 fontSize = screenHeight.sp*0.025,

@@ -19,11 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.google.android.gms.common.api.ApiException
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.idos.tictactoe.WorkManager.SetNewDelay
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.ui.Screen.GameScreen
-import com.idos.tictactoe.ui.Screen.Menu.getPlayer
 import com.idos.tictactoe.ui.Screen.toSHA256
 
 @Composable
@@ -80,13 +82,24 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
         val firebaseDatabase = FirebaseDatabase.getInstance()
         val databaseReference = firebaseDatabase.getReference("Players")
         //get Players collection from database
-        if(getPlayer(email = user?.email!!.toSHA256()) == MainPlayerUiState()) {
-            isPlayerExisted = false
-            searchedPlayer = true
-        } else {
-            isPlayerExisted = true
-            searchedPlayer = true
-        }
+        databaseReference.addValueEventListener(object : ValueEventListener {
+            //on success
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val list = snapshot.children
+                 try {
+                     list.find {
+                         it.getValue(MainPlayerUiState::class.java)!!.email == user?.email!!.toSHA256()
+                     }?.getValue(MainPlayerUiState::class.java)!!
+                     isPlayerExisted = true
+                     searchedPlayer = true
+                } catch (_: Exception) {
+                     isPlayerExisted = false
+                     searchedPlayer = true
+                }
+
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
 
         //if user is existed
         if (isPlayerExisted) {

@@ -70,7 +70,7 @@ import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
 
 @Composable
-private fun PlayerCard(
+fun PlayerCard(
     modifier: Modifier,
     profile: MainPlayerUiState,
     currentImage: String,
@@ -570,7 +570,9 @@ fun ShowPlayersImages(
 
         if (image != player.currentImage) {
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .height((LocalConfiguration.current.screenHeightDp * 30 / 915).dp)
+                    .fillMaxWidth(),
                 shape = RoundedCornerShape(20),
                 colors = CardDefaults.cardColors(Color.Green)
             ) {
@@ -667,7 +669,9 @@ fun ShowPlayerX(
 
         if (image != player.currentX) {
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .height((LocalConfiguration.current.screenHeightDp * 30 / 915).dp)
+                    .fillMaxWidth(),
                 shape = RoundedCornerShape(20),
                 colors = CardDefaults.cardColors(Color.Green)
             ) {
@@ -775,7 +779,9 @@ fun ShowPlayerO(
 
         if (image != player.currentO) {
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .height((LocalConfiguration.current.screenHeightDp * 30 / 915).dp)
+                    .fillMaxWidth(),
                 shape = RoundedCornerShape(20),
                 colors = CardDefaults.cardColors(Color.Green)
             ) {
@@ -805,39 +811,6 @@ fun ShowPlayerO(
         databaseReference.child(player.key).setValue(updatedPlayer)
 
         changeImage = false
-    }
-}
-
-@Composable
-fun PlayerGraph(
-    profile: MainPlayerUiState,
-    winsColor: Color,
-    losesColor: Color,
-    modifier: Modifier,
-    ) {
-    Row(
-        modifier = modifier.background(Color.White)
-    ) {
-        if (profile.wins > 0) {
-            Card(
-                modifier = Modifier
-                    .weight(weight = profile.wins.toFloat()),
-                colors = CardDefaults.cardColors(winsColor),
-                shape = RoundedCornerShape(0)
-            ) {
-                Text(text = "")
-            }
-        }
-        if (profile.loses > 0) {
-            Card(
-                modifier = Modifier
-                    .weight(weight = profile.loses.toFloat()),
-                colors = CardDefaults.cardColors(losesColor),
-                shape = RoundedCornerShape(0)
-            ) {
-                Text(text = "")
-            }
-        }
     }
 }
 
