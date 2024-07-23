@@ -130,6 +130,7 @@ fun ChooseName(
     }
 
     if(done) {
+        done = false
         //if label is empty
         if (viewModel.emailState.name!! == "") {
             Toast.makeText(
