@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -246,7 +247,7 @@ fun ShopScreen(playerName: String, context: Context = LocalContext.current) {
                 contentAlignment = AbsoluteAlignment.CenterLeft
             ) {
                 Text(
-                    text = "Next deals: $text in 11",
+                    text = "Next deals: $text at 11",
                     fontSize = (screenHeight*0.015).sp,
                     fontWeight = FontWeight.Light,
                     color = colors.onBackground,
@@ -653,14 +654,9 @@ fun ShowDeal(
         mutableStateOf(false)
     }
 
-    val color = if(collectedDeals[dealNumber-1] == 0) {
-        colors.primary
-    } else {
-        Color.Green.copy(alpha = 0.6f)
-    }
     Card(
         shape = RoundedCornerShape(10),
-        colors = CardDefaults.cardColors(color),
+        colors = CardDefaults.cardColors(colors.primary),
         modifier = Modifier
             .padding(5.dp)
             .width((screenWidth / 3 - 15).dp)
@@ -699,23 +695,50 @@ fun ShowDeal(
                 fontWeight = FontWeight.Bold,
                 fontSize = screenHeight.sp*0.01,
             )
-            val textColor = if(player.coins >= skin.price) {
-                colors.onPrimary
+            if(collectedDeals[dealNumber-1] == 0) {
+                val textColor = if (player.coins >= skin.price) {
+                    colors.onPrimary
+                } else {
+                    colors.error
+                }
+                Text(
+                    text = skin.price.toString(),
+                    color = textColor,
+                    textAlign = TextAlign.Right,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = screenHeight.sp * 0.025,
+                )
+                Image(
+                    painter = painterResource(id = R.drawable.coin),
+                    modifier = Modifier.size((screenHeight * 15 / 915).dp),
+                    contentDescription = null
+                )
             } else {
-                colors.error
+                Row(
+                    horizontalArrangement = Arrangement.Absolute.Left
+                ) {
+                    Text(
+                        text = "Collected",
+                        color = colors.onPrimary,
+                        textAlign = TextAlign.Right,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = screenHeight.sp * 0.015,
+                    )
+                    Text(
+                        text = "!",
+                        color = colors.onPrimary,
+                        textAlign = TextAlign.Right,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = screenHeight.sp * 0.015,
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    modifier = Modifier.size((screenHeight * 15 / 915).dp),
+                    tint = Color.Green,
+                    contentDescription = null
+                )
             }
-            Text(
-                text = skin.price.toString(),
-                color = textColor,
-                textAlign = TextAlign.Right,
-                fontWeight = FontWeight.Bold,
-                fontSize = screenHeight.sp*0.025,
-            )
-            Image(
-                painter = painterResource(id = R.drawable.coin),
-                modifier = Modifier.size((screenHeight*15/915).dp),
-                contentDescription = null
-            )
         }
     }
 

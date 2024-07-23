@@ -360,7 +360,7 @@ fun TicTacToeApp(
 
     val encryptedSharedPreferences = EncryptedSharedPreferences.create(
         context,
-        "preferences",
+        "MyPref",
         masterKey,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
@@ -621,7 +621,7 @@ fun TicTacToeApp(
 
                         val encryptedSharedPreferences = EncryptedSharedPreferences.create(
                             context,
-                            "preferences",
+                            "MyPref",
                             masterKey,
                             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
@@ -655,7 +655,7 @@ fun TicTacToeApp(
 
                         val encryptedSharedPreferences = EncryptedSharedPreferences.create(
                             context,
-                            "preferences",
+                            "MyPref",
                             masterKey,
                             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
