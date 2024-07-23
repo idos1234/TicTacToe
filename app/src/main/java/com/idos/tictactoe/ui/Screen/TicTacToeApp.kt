@@ -159,7 +159,7 @@ fun TopAppBar(
                 clipShape = CircleShape,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height((screenHeight * 20 / 915).dp)
+                    .height((screenHeight * 25 / 915).dp)
 
             )
             Text(
@@ -177,9 +177,10 @@ fun TopAppBar(
             contentAlignment = AbsoluteAlignment.CenterLeft
         ) {
             Box(
+                contentAlignment = AbsoluteAlignment.CenterRight,
                 modifier = Modifier
-                    .height((screenHeight * 20 / 915).dp),
-                contentAlignment = AbsoluteAlignment.CenterRight
+                    .fillMaxWidth()
+                    .height((screenHeight * 25 / 915).dp)
             ) {
                 Card(
                     modifier = Modifier.fillMaxSize(),
@@ -196,7 +197,7 @@ fun TopAppBar(
                 }
                 Card(
                     modifier = Modifier
-                        .size((screenHeight * 20 / 915).dp),
+                        .size((screenHeight * 25 / 915).dp),
                     shape = CircleShape,
                     colors = CardDefaults.cardColors(Color.Green.copy(alpha = 0.6f)),
                     onClick = {
@@ -217,7 +218,7 @@ fun TopAppBar(
                 painter = painterResource(id = R.drawable.coin),
                 contentDescription = "coin",
                 Modifier
-                    .size((screenHeight * 20 / 915).dp)
+                    .size((screenHeight * 25 / 915).dp)
             )
         }
         Spacer(modifier = Modifier.weight(1f))
