@@ -138,7 +138,7 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
         } else if (!isPlayerExisted && searchedPlayer) {
             //sign up
             viewModel.updateEmail(viewModel.emailState.copy(email2 = user!!.email))
-            navController.navigate(GameScreen.NewName.name)
+            navController.navigate(GameScreen.NewName.title)
         }
     }
 }

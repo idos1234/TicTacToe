@@ -135,7 +135,7 @@ fun SinglePlayerButtonGrid(
                     viewModel.updateScore(1)
                 }
                 ShowWinner(
-                    winner = "You won!",
+                    winner = "You won",
                     text = "Congratulations for winning",
                     onPlayAgain = { onPlayAgain() },
                     navController = navController
@@ -146,7 +146,7 @@ fun SinglePlayerButtonGrid(
                     viewModel.updateScore(2)
                 }
                 ShowWinner(
-                    winner = "You lost!",
+                    winner = "You lost",
                     text = "Try to win next time",
                     onPlayAgain = { onPlayAgain() },
                     navController = navController
@@ -156,7 +156,7 @@ fun SinglePlayerButtonGrid(
         //show tie
         else if (uiState.times >= 9){
             ShowWinner(
-                winner = "Draw!",
+                winner = "Draw",
                 text = "Try to win next time",
                 onPlayAgain = { onPlayAgain() },
                 navController = navController)

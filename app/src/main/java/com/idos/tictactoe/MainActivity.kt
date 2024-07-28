@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
@@ -20,6 +21,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
 
         appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
         checkForUpdates()
@@ -44,8 +46,15 @@ class MainActivity : ComponentActivity() {
                 // If the update is canceled,
                 // you can request to start the update again.
                 checkForUpdates()
-            } else if(requestCode != RESULT_OK) {
-                checkForUpdates()
+            } else if(requestCode == RESULT_OK) {
+                Toast.makeText(
+                    applicationContext,
+                    "Restarting...",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                finish()
+                startActivity(getIntent())
             }
         }
     }

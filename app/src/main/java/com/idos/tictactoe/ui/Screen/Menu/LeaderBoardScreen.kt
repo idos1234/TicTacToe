@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -152,7 +153,7 @@ fun ShowTopPlayers(
                             modifier = Modifier
                                 .fillMaxWidth(0.9f)
                                 .background(Color.Transparent)
-                                .height(screenHeight.value.times(0.05).dp)
+                                .wrapContentHeight()
                                 .padding(5.dp)
                                 .clickable(
                                     onClick = {

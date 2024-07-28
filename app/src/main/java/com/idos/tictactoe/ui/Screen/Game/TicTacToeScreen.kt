@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ColorScheme
@@ -43,6 +42,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.idos.tictactoe.R
 import com.idos.tictactoe.data.GetO
@@ -53,7 +54,6 @@ import com.idos.tictactoe.data.UiState
 import com.idos.tictactoe.ui.CheckWinner
 import com.idos.tictactoe.ui.Screen.GameScreen
 import com.idos.tictactoe.ui.Screen.Menu.getPlayer
-import com.idos.tictactoe.ui.theme.Secondery
 
 /**
  * Show a single button in the two players game grid
@@ -132,7 +132,7 @@ fun ButtonGrid(
             }
 
              ShowWinner(
-                 winner = "Winner is: ${uiState.winner}!",
+                 winner = "Winner is: ${uiState.winner}",
                  text = "Congratulations for winning",
                  onPlayAgain = { onPlayAgain() },
                  navController = navController
@@ -141,7 +141,7 @@ fun ButtonGrid(
         //show tie
         else if (uiState.times == 9){
             ShowWinner(
-                winner = "Draw!",
+                winner = "Draw",
                 text = "Try to win next time",
                 onPlayAgain = { onPlayAgain() },
                 navController)
@@ -294,27 +294,74 @@ fun ButtonGrid(
 
 @Composable
 fun ShowWinner(winner: String, text: String, onPlayAgain: () -> Unit, navController: NavController) {
+    val colors = MaterialTheme.colorScheme
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
-    AlertDialog(
-        containerColor = Secondery,
+    Dialog(
         onDismissRequest = {},
-        title = { Text(text = winner, fontWeight = FontWeight.ExtraBold, color = Color.Black, textAlign = TextAlign.Center)},
-        text = { Text(text = text, color = Color.Black, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold)},
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    navController.navigate(GameScreen.Start.title)
-                }
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth(0.8f)
+                .background(colors.background),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.Absolute.Left
             ) {
-                Text("Exit")
+                Text(
+                    text = winner,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = colors.onBackground,
+                    fontSize = screenHeight.value.sp * 0.02,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "!",
+                    fontWeight = FontWeight.ExtraBold,
+                    color = colors.onBackground,
+                    fontSize = screenHeight.value.sp * 0.02,
+                    textAlign = TextAlign.Center
+                )
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onPlayAgain) {
-                Text(text = "Play again")
+
+            Text(
+                text = text,
+                color = colors.onBackground,
+                textAlign = TextAlign.Center,
+                fontSize = screenHeight.value.sp * 0.02,
+                fontWeight = FontWeight.SemiBold
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(0.9f),
+                horizontalArrangement = Arrangement.Absolute.Left
+            ) {
+                TextButton(
+                    onClick = {
+                        navController.navigate(GameScreen.Home.title)
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "Exit",
+                        fontSize = screenHeight.value.sp * 0.02
+                    )
+                }
+
+
+                TextButton(
+                    onClick = onPlayAgain,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "Play again",
+                        fontSize = screenHeight.value.sp * 0.02
+                    )
+                }
             }
         }
-    )
+    }
 }
 
 

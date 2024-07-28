@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.MySplashScreen" parent="Theme.SplashScreen">
+        <item name="android:windowSplashScreenAnimatedIcon">@color/statusBarColor</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/statusBarColor</item>
+        <item name="windowSplashScreenBackground">@color/statusBarColor</item>
+        <item name="postSplashScreenTheme">@style/Theme.TicTacToe</item>
+    </style>
+</resources>

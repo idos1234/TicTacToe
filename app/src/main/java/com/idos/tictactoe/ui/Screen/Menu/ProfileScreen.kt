@@ -1,9 +1,5 @@
 package com.idos.tictactoe.ui.Screen.Menu
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,26 +16,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,19 +38,21 @@ import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.google.accompanist.flowlayout.FlowMainAxisAlignment
+import com.google.accompanist.flowlayout.FlowRow
+import com.google.accompanist.flowlayout.SizeMode
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -292,6 +285,86 @@ private fun LevelBar(
 }
 
 @Composable
+fun ShowSkinsList(
+    modifier: Modifier,
+    profile: MainPlayerUiState
+) {
+    var playerImage by remember {
+        mutableStateOf(profile.currentImage)
+    }
+    var playerX by remember {
+        mutableStateOf(profile.currentX)
+    }
+    var playerO by remember {
+        mutableStateOf(profile.currentO)
+    }
+    var option by remember {
+        mutableIntStateOf(0)
+    }
+    var text by remember {
+        mutableStateOf("images")
+    }
+
+    val colors = MaterialTheme.colorScheme
+
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(4),
+        colors = CardDefaults.cardColors(colors.background)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            //change skins button
+            Box(
+                modifier = Modifier.fillMaxWidth(0.9f),
+                contentAlignment = AbsoluteAlignment.CenterLeft
+            ) {
+                Card(
+                    onClick = {
+                        ++option
+                        option %= 3
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f),
+                    colors = CardDefaults.cardColors(colors.secondary)
+                ) {
+                    Text(
+                        text = "Show all $text",
+                        fontSize = (LocalConfiguration.current.screenHeightDp*0.015).sp,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
+
+            when(option) {
+                0 -> {
+                    ShowPlayerImages(player = profile, image = playerImage) {
+                        playerImage = it
+                    }
+                    text = "images"
+                }
+                1 -> {
+                    ShowPlayerX(player = profile, image = playerX) {
+                        playerX = it
+                    }
+                    text = "x"
+                }
+                2 -> {
+                    ShowPlayerO(player = profile, image = playerO) {
+                        playerO = it
+                    }
+                    text = "o"
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun ProfileScreen(player: String) {
     var profile by remember {
         mutableStateOf(MainPlayerUiState())
@@ -328,173 +401,50 @@ fun ProfileScreen(player: String) {
     val scoreFromCurrentLevel = getPrevLevelScore(profile.level)
     val scoreToNextLevel = getNextLevelScore(profile.level)
 
-    Column(
+    LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxSize()
             .background(brush)
     ) {
         //player's card(name, score, wins, loses, skins)
-        PlayerCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Transparent)
-                .padding((LocalConfiguration.current.screenWidthDp * 16 / 412).dp),
-            profile = profile,
-            currentImage = currentImage,
-            currentX = currentX,
-            currentO = currentO
-        )
+        item {
+            PlayerCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Transparent)
+                    .padding((LocalConfiguration.current.screenWidthDp * 16 / 412).dp),
+                profile = profile,
+                currentImage = currentImage,
+                currentX = currentX,
+                currentO = currentO
+            )
+        }
 
 
         //progress to the next rank
-        LevelBar(
-            modifier = Modifier.fillMaxWidth(0.9f),
-            profile = profile,
-            scoreToNextLevel = scoreToNextLevel,
-            scoreFromCurrentLevel = scoreFromCurrentLevel
-        )
-
-        var expand by remember {
-            mutableStateOf(false)
+        item {
+            LevelBar(
+                modifier = Modifier.fillMaxWidth(0.9f),
+                profile = profile,
+                scoreToNextLevel = scoreToNextLevel,
+                scoreFromCurrentLevel = scoreFromCurrentLevel
+            )
         }
-        val rotationState by animateFloatAsState(
-            targetValue = if (expand) 180f else 0f
-        )
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .animateContentSize(
-                    animationSpec = tween(
-                        durationMillis = 500,
-                        easing = LinearOutSlowInEasing
-                    )
-                )
-                .fillMaxWidth(0.7f)
-                .height((LocalConfiguration.current.screenHeightDp * 680 / 915).dp)
-                .padding(vertical = (LocalConfiguration.current.screenHeightDp * 12 / 915).dp)
-        ) {
-            if (expand) {
-                var image by remember {
-                    mutableStateOf(currentImage)
-                }
-                var x by remember {
-                    mutableStateOf(currentX)
-                }
-                var o by remember {
-                    mutableStateOf(currentO)
-                }
-                var option by remember {
-                    mutableStateOf(1)
-                }
-
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .background(colors.background), contentAlignment = Alignment.Center) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth(0.9f)
-                            .background(colors.background),
-                        horizontalArrangement = Arrangement.Absolute.Left,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Card(
-                            modifier = Modifier
-                                .size((LocalConfiguration.current.screenWidthDp * 0.7 * 0.9 / 4).dp)
-                                .clickable(onClick = { option = 1 }),
-                            shape = RoundedCornerShape(20),
-                            elevation = CardDefaults.cardElevation(8.dp)
-                        ) {
-                            Image(
-                                painter = painterResource(id = GetXO(image)),
-                                contentDescription = "Player's Image",
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                        Spacer(modifier = Modifier.width((LocalConfiguration.current.screenWidthDp * 0.7 * 0.9 / 8).dp))
-                        Card(
-                            modifier = Modifier
-                                .size((LocalConfiguration.current.screenWidthDp * 0.7 * 0.9 / 4).dp)
-                                .clickable(onClick = { option = 2 }),
-                            shape = RoundedCornerShape(20),
-                            elevation = CardDefaults.cardElevation(8.dp),
-                            colors = CardDefaults.cardColors(containerColor = colors.onPrimary)
-                        ) {
-                            Image(
-                                painter = painterResource(id = GetX(x)),
-                                contentDescription = "Player's X",
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                        Spacer(modifier = Modifier.width((LocalConfiguration.current.screenWidthDp * 0.7 * 0.9 / 8).dp))
-                        Card(
-                            modifier = Modifier
-                                .size((LocalConfiguration.current.screenWidthDp * 0.7 * 0.9 / 4).dp)
-                                .clickable(onClick = { option = 3 }),
-                            shape = RoundedCornerShape(20),
-                            elevation = CardDefaults.cardElevation(8.dp),
-                            colors = CardDefaults.cardColors(containerColor = colors.onPrimary)
-                        ) {
-                            Image(
-                                painter = painterResource(id = GetO(o)),
-                                contentDescription = "Player's O",
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                    }
-                }
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RectangleShape,
-                    colors = CardDefaults.cardColors(colors.onPrimary)
-                ) {
-                    when(option) {
-                        1 -> ShowPlayersImages(
-                            player = profile,
-                            image = image,
-                            onChangingImage = {image = it},
-                        )
-                        2 -> ShowPlayerX(
-                            player = profile,
-                            image = x,
-                            onChangingImage = {x = it},
-                        )
-                        3 -> ShowPlayerO(
-                            player = profile,
-                            image = o,
-                            onChangingImage = {o = it},
-                        )
-                    }
-                }
-            }
-            //arrow button
-            Card(
+        item {
+            ShowSkinsList(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height((LocalConfiguration.current.screenHeightDp * 30 / 915).dp),
-                shape = RoundedCornerShape(20),
-                colors = CardDefaults.cardColors(colors.secondary)
-            ) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    IconButton(
-                        onClick = { expand = !expand },
-                        modifier = Modifier.rotate(rotationState),
-                        ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = Icons.Default.ArrowDropDown.name,
-                            tint = colors.onSecondary
-                        )
-                    }
-                }
-            }
+                    .fillMaxWidth(0.9f)
+                    .padding(top = (LocalConfiguration.current.screenHeightDp * 20 / 915).dp)
+                    .wrapContentHeight(),
+                profile = profile
+            )
         }
     }
 }
 
 @Composable
-fun ShowPlayersImages(
+fun ShowPlayerImages(
     player: MainPlayerUiState,
     image: String,
     onChangingImage: (String) -> Unit,
@@ -504,88 +454,97 @@ fun ShowPlayersImages(
     var changeImage by remember {
         mutableStateOf(false)
     }
+    val size = (LocalConfiguration.current.screenWidthDp*0.9-5*2)/4
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .fillMaxWidth()
-        .background(colors.background)
+        .background(Color.Transparent)
         .wrapContentHeight()) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-            content = {
-                items(player.unlockedImages) { photo ->
-                    AsyncImage(
-                        model = GetXO( photo ),
-                        contentScale = ContentScale.Crop,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .border(
-                                BorderStroke(
-                                    if (photo == image) { 2.dp } else { 0.dp },
-                                    if (photo == image) { colors.onPrimary } else { colors.primary }
-                                ),
-                                shape = RoundedCornerShape(0)
-                            )
-                            .clickable(onClick = {
-                                onChangingImage(photo)
-                            })
-
-                    )
-                }
-            },
+        Card(
             modifier = Modifier
                 .padding(5.dp)
-                .background(colors.primary)
-                .wrapContentHeight()
-        )
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-            content = {
-                items(player.lockedImages) { photo ->
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .wrapContentSize()
-                    ) {
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(4),
+            colors = CardDefaults.cardColors(colors.primary)
+        ) {
+            FlowRow(
+                mainAxisSize = SizeMode.Expand,
+                mainAxisAlignment = FlowMainAxisAlignment.Start,
+                content = {
+                    for (photo in player.unlockedImages) {
                         AsyncImage(
-                            model = GetXO( photo ),
+                            model = GetXO(photo),
                             contentScale = ContentScale.Crop,
                             contentDescription = null,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight(),
-                            colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0.25f) })
+                                .size(size.dp)
+                                .border(
+                                    BorderStroke(
+                                        if (photo == image) {
+                                            2.dp
+                                        } else {
+                                            0.dp
+                                        },
+                                        if (photo == image) {
+                                            colors.onPrimary
+                                        } else {
+                                            colors.primary
+                                        }
+                                    ),
+                                    shape = RoundedCornerShape(0)
+                                )
+                                .clickable(onClick = {
+                                    onChangingImage(photo)
+                                })
+
                         )
-                        Icon(imageVector = Icons.Default.Lock, contentDescription = "locked image")
                     }
-                }
-            },
+                },
+                modifier = Modifier
+                    .wrapContentHeight()
+            )
+        }
+
+        Card(
             modifier = Modifier
                 .padding(5.dp)
-                .background(colors.primary)
-                .wrapContentHeight()
-
-        )
-
-        if (image != player.currentImage) {
-            Card(
-                modifier = Modifier
-                    .height((LocalConfiguration.current.screenHeightDp * 30 / 915).dp)
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(20),
-                colors = CardDefaults.cardColors(Color.Green)
-            ) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    IconButton(onClick = { changeImage = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = Icons.Default.Check.name,
-                            tint = Color.Black
-                        )
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(4),
+            colors = CardDefaults.cardColors(colors.primary)
+        ) {
+            FlowRow(
+                mainAxisSize = SizeMode.Expand,
+                mainAxisAlignment = FlowMainAxisAlignment.Start,
+                content = {
+                    for (photo in player.lockedImages) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .wrapContentSize()
+                        ) {
+                            AsyncImage(
+                                model = GetXO(photo),
+                                contentScale = ContentScale.Crop,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(size.dp),
+                                colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
+                                    setToSaturation(
+                                        0.25f
+                                    )
+                                })
+                            )
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "locked image"
+                            )
+                        }
                     }
-                }
-            }
+                },
+                modifier = Modifier
+                    .wrapContentHeight()
+
+            )
         }
     }
 
@@ -605,86 +564,97 @@ fun ShowPlayerX(
     var changeImage by remember {
         mutableStateOf(false)
     }
+
+    val size = (LocalConfiguration.current.screenWidthDp*0.9-5*2)/4
+
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .fillMaxWidth()
-        .background(colors.background)
+        .background(Color.Transparent)
         .wrapContentHeight()) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-            content = {
-                items(player.unlockedX) { X ->
-                    AsyncImage(
-                        model = GetX( X ),
-                        contentScale = ContentScale.Crop,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .border(
-                                BorderStroke(
-                                    if (X == image) { 2.dp } else { 0.dp },
-                                    if (X == image) { colors.onPrimary } else { colors.primary }
-                                ),
-                                shape = RoundedCornerShape(0)
-                            )
-                            .clickable(onClick = {
-                                onChangingImage(X)
-                            })
-
-                    )
-                }
-            },
+        Card(
             modifier = Modifier
                 .padding(5.dp)
-                .background(colors.primary)
-                .wrapContentHeight()
-        )
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-            content = {
-                items(player.lockedX) { X ->
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .wrapContentSize()
-                    ) {
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(4),
+            colors = CardDefaults.cardColors(colors.primary)
+        ) {
+            FlowRow(
+                mainAxisSize = SizeMode.Expand,
+                mainAxisAlignment = FlowMainAxisAlignment.Start,
+                content = {
+                    for (X in player.unlockedX) {
                         AsyncImage(
-                            model = GetX( X ),
+                            model = GetX(X),
                             contentScale = ContentScale.Crop,
                             contentDescription = null,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight(),
-                            colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0.25f) })
+                                .size(size.dp)
+                                .border(
+                                    BorderStroke(
+                                        if (X == image) {
+                                            2.dp
+                                        } else {
+                                            0.dp
+                                        },
+                                        color = if (X == image) {
+                                            colors.onPrimary
+                                        } else {
+                                            colors.primary
+                                        }
+                                    ),
+                                    shape = RoundedCornerShape(4)
+                                )
+                                .clickable(onClick = {
+                                    onChangingImage(X)
+                                })
+
                         )
-                        Icon(imageVector = Icons.Default.Lock, contentDescription = "locked X")
                     }
-                }
-            },
+                },
+                modifier = Modifier
+                    .wrapContentHeight()
+            )
+        }
+        Card(
             modifier = Modifier
                 .padding(5.dp)
-                .background(colors.primary)
-                .wrapContentHeight()
-        )
-
-        if (image != player.currentX) {
-            Card(
-                modifier = Modifier
-                    .height((LocalConfiguration.current.screenHeightDp * 30 / 915).dp)
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(20),
-                colors = CardDefaults.cardColors(Color.Green)
-            ) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    IconButton(onClick = { changeImage = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = Icons.Default.Check.name,
-                            tint = Color.Black
-                        )
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(4),
+            colors = CardDefaults.cardColors(colors.primary)
+        ) {
+            FlowRow(
+                mainAxisSize = SizeMode.Expand,
+                mainAxisAlignment = FlowMainAxisAlignment.Start,
+                content = {
+                    for (X in player.lockedX) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .wrapContentSize()
+                        ) {
+                            AsyncImage(
+                                model = GetX(X),
+                                contentScale = ContentScale.Crop,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(size.dp),
+                                colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
+                                    setToSaturation(
+                                        0.25f
+                                    )
+                                })
+                            )
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "locked X",
+                                tint = Color(0xFF2B2B2B)
+                            )
+                        }
                     }
-                }
-            }
+                },
+                modifier = Modifier
+                    .wrapContentHeight()
+            )
         }
     }
 
@@ -715,86 +685,95 @@ fun ShowPlayerO(
     var changeImage by remember {
         mutableStateOf(false)
     }
+
+    val size = (LocalConfiguration.current.screenWidthDp*0.9-5*2)/4
+
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .fillMaxWidth()
-        .background(colors.background)
+        .background(Color.Transparent)
         .wrapContentHeight()) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-            content = {
-                items(player.unlockedO) { O ->
-                    AsyncImage(
-                        model = GetO( O ),
-                        contentScale = ContentScale.Crop,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .border(
-                                BorderStroke(
-                                    if (O == image) { 2.dp } else { 0.dp },
-                                    if (O == image) { colors.onPrimary } else { colors.primary }
-                                ),
-                                shape = RoundedCornerShape(0)
-                            )
-                            .clickable(onClick = {
-                                onChangingImage(O)
-                            })
-
-                    )
-                }
-            },
+        Card(
             modifier = Modifier
                 .padding(5.dp)
-                .background(colors.primary)
-                .wrapContentHeight()
-        )
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(4),
-            content = {
-                items(player.lockedO) { O ->
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .wrapContentSize()
-                    ) {
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(4),
+            colors = CardDefaults.cardColors(colors.primary)
+        ) {
+            FlowRow(
+                mainAxisSize = SizeMode.Expand,
+                mainAxisAlignment = FlowMainAxisAlignment.Start,
+                content = {
+                    for (O in player.unlockedO) {
                         AsyncImage(
-                            model = GetO( O ),
+                            model = GetO(O),
                             contentScale = ContentScale.Crop,
                             contentDescription = null,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight(),
-                            colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0.25f) })
+                                .size(size.dp)
+                                .border(
+                                    BorderStroke(
+                                        if (O == image) {
+                                            2.dp
+                                        } else {
+                                            0.dp
+                                        },
+                                        if (O == image) {
+                                            colors.onPrimary
+                                        } else {
+                                            colors.primary
+                                        }
+                                    ),
+                                    shape = RoundedCornerShape(0)
+                                )
+                                .clickable(onClick = {
+                                    onChangingImage(O)
+                                    changeImage = true
+                                })
+
                         )
-                        Icon(imageVector = Icons.Default.Lock, contentDescription = "locked O")
                     }
-                }
-            },
+                },
+                modifier = Modifier
+                    .wrapContentHeight()
+            )
+        }
+
+        Card(
             modifier = Modifier
                 .padding(5.dp)
-                .background(colors.primary)
-                .wrapContentHeight()
-        )
-
-        if (image != player.currentO) {
-            Card(
-                modifier = Modifier
-                    .height((LocalConfiguration.current.screenHeightDp * 30 / 915).dp)
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(20),
-                colors = CardDefaults.cardColors(Color.Green)
-            ) {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    IconButton(onClick = { changeImage = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = Icons.Default.Check.name,
-                            tint = Color.Black
-                        )
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(4),
+            colors = CardDefaults.cardColors(colors.primary)
+        ) {
+            FlowRow(
+                mainAxisSize = SizeMode.Expand,
+                mainAxisAlignment = FlowMainAxisAlignment.Start,
+                content = {
+                    for (O in player.lockedO) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .wrapContentSize()
+                        ) {
+                            AsyncImage(
+                                model = GetO(O),
+                                contentScale = ContentScale.Crop,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(size.dp),
+                                colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
+                                    setToSaturation(
+                                        0.25f
+                                    )
+                                })
+                            )
+                            Icon(imageVector = Icons.Default.Lock, contentDescription = "locked O")
+                        }
                     }
-                }
-            }
+                },
+                modifier = Modifier
+                    .wrapContentHeight()
+            )
         }
     }
 

@@ -33,7 +33,7 @@ fun TimeUp(navController: NavController) {
     Box(modifier = Modifier
         .background(brush)
         .fillMaxSize()) {
-        Dialog(onDismissRequest = { navController.navigate(GameScreen.Start.title) }) {
+        Dialog(onDismissRequest = { navController.navigate(GameScreen.Home.title) }) {
             Column(
                 modifier = Modifier
                     .background(colors.primary)
@@ -62,7 +62,7 @@ fun TimeUp(navController: NavController) {
                     horizontalArrangement = Arrangement.Absolute.Left
                 ) {
                     TextButton(
-                        onClick = { navController.navigate(GameScreen.Start.title) },
+                        onClick = { navController.navigate(GameScreen.Home.title) },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(

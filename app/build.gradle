@@ -108,4 +108,12 @@ dependencies {
     //in app updates
     implementation("com.google.android.play:app-update:2.1.0")
     implementation("com.google.android.play:app-update-ktx:2.1.0")
+
+    //splash screen
+    implementation ("androidx.core:core-splashscreen:1.0.1")
+    //lottie animations
+    implementation("com.airbnb.android:lottie-compose:4.0.0")
+
+    //flow row
+    implementation ("com.google.accompanist:accompanist-flowlayout:0.20.0")
 }

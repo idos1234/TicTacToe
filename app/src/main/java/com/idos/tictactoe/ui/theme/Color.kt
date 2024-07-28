@@ -2,11 +2,6 @@ package com.idos.tictactoe.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Primery = Color(0xFFDF3C5F)
-val BackGround = Color(0xFF224193)
-val Secondery = Color(0xFF6F9BD1)
-
-
 val md_theme_dark_primary = Color(0xFF134B5F)
 val md_theme_dark_onPrimary = Color(0xFFA6EEFF)
 val md_theme_dark_primaryContainer = Color(0xFF004788)

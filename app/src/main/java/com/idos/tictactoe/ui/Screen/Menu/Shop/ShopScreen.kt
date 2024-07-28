@@ -1,7 +1,7 @@
 package com.idos.tictactoe.ui.screens.Shop
 
 import android.content.Context
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -663,10 +663,11 @@ fun ShowDeal(
             .fillMaxHeight()
             .rotate(rotation)
             .clickable(
-                enabled = (collectedDeals[dealNumber - 1] == 0),
+                enabled = (collectedDeals[dealNumber - 1] == 0 && !error),
                 onClick = {
                     if (player.coins < skin.price) {
                         showError = true
+                        error = true
                     } else {
                         buyDeal = true
                     }
@@ -743,14 +744,13 @@ fun ShowDeal(
     }
 
     if(showError) {
+        showError = false
         LaunchedEffect(error, rotation) {
-            error = true
             Timer().schedule(200) {
                 error = false
                 rotation = 0f
             }
         }
-        showError = false
     }
 
     if(error) {
@@ -759,7 +759,7 @@ fun ShowDeal(
             initialValue = 5f,
             targetValue = -5f,
             animationSpec = infiniteRepeatable(
-                animation = tween(100, easing = FastOutSlowInEasing),
+                animation = tween(100, easing = LinearOutSlowInEasing),
                 repeatMode = RepeatMode.Reverse
             ), label = ""
         ).value

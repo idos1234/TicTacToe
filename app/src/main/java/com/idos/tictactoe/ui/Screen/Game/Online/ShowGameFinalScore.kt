@@ -128,7 +128,7 @@ fun GameScoreDialogFriendly(
                         deleteGame(context, databaseReference)
 
                         gameState.game = OnlineGameUiState()
-                        navController.navigate(GameScreen.Start.title)
+                        navController.navigate(GameScreen.Home.title)
                     },
                     colors = ButtonDefaults.buttonColors(colors.primary),
                     modifier = Modifier.fillMaxWidth(0.4f)
@@ -285,7 +285,7 @@ fun GameScoreDialog(
                         deleteGame(context, databaseReference)
 
                         gameState.game = OnlineGameUiState()
-                        navController.navigate(GameScreen.Start.title)
+                        navController.navigate(GameScreen.Home.title)
                     },
                     colors = ButtonDefaults.buttonColors(colors.primary),
                     modifier = Modifier.fillMaxWidth(0.4f)
