@@ -62,6 +62,7 @@ fun SearchGameScreen(
     player: String,
     currentGame: OnlineGameRememberedValues,
     viewModel: CodeGameViewModel,
+    enable: Enable
     ) {
 
     //get database
@@ -158,6 +159,7 @@ fun SearchGameScreen(
         wasGameStarted = true
         currentGame.player1 = getPlayer(email = currentGame.game.player1)
         currentGame.player2 = getPlayer(email = currentGame.game.player2)
+        enable.enable = true
         navController.navigate("${GameScreen.Online.title}/Games")
     }
 

@@ -495,6 +495,7 @@ fun ShowPlayerImages(
                                 )
                                 .clickable(onClick = {
                                     onChangingImage(photo)
+                                    changeImage = true
                                 })
 
                         )
@@ -536,7 +537,8 @@ fun ShowPlayerImages(
                             )
                             Icon(
                                 imageVector = Icons.Default.Lock,
-                                contentDescription = "locked image"
+                                contentDescription = "locked image",
+                                tint = Color(0xFF2B2B2B)
                             )
                         }
                     }
@@ -606,6 +608,7 @@ fun ShowPlayerX(
                                 )
                                 .clickable(onClick = {
                                     onChangingImage(X)
+                                    changeImage = true
                                 })
 
                         )
@@ -767,7 +770,11 @@ fun ShowPlayerO(
                                     )
                                 })
                             )
-                            Icon(imageVector = Icons.Default.Lock, contentDescription = "locked O")
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "locked O",
+                                tint = Color(0xFF2B2B2B)
+                            )
                         }
                     }
                 },

@@ -145,6 +145,12 @@ fun GameScoreDialogFriendly(
     }
 }
 
+enum class LevelStatus {
+    LevelUp,
+    LevelDown,
+    SameLevel
+}
+
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun GameScoreDialog(
@@ -152,10 +158,14 @@ fun GameScoreDialog(
     navController: NavController,
     context: Context,
     coins: Int,
-    levelUp: Boolean,
+    levelStatus: LevelStatus,
     playerUiState: MainPlayerUiState,
     won: Boolean
 ) {
+    var delete by remember {
+        mutableStateOf(false)
+    }
+
 
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference("Games")
@@ -203,20 +213,32 @@ fun GameScoreDialog(
                 //show players
                 ShowPlayersDialog(gameState = gameState)
                 //level
-                val level = if (levelUp) {
-                    playerUiState.level - 1
-                } else {
-                    playerUiState.level
+                val level = when (levelStatus) {
+                    LevelStatus.LevelUp -> playerUiState.level - 1
+                    LevelStatus.LevelDown -> playerUiState.level + 1
+                    LevelStatus.SameLevel -> playerUiState.level
                 }
+                val maxValue = when (levelStatus) {
+                    LevelStatus.LevelUp -> getNextLevelScore(level) - getPrevLevelScore(level)
+                    LevelStatus.LevelDown -> getNextLevelScore(level-1) - getPrevLevelScore(level-1)
+                    LevelStatus.SameLevel -> getNextLevelScore(level) - getPrevLevelScore(level)
+                }
+                val currentValue = when (levelStatus) {
+                    LevelStatus.LevelUp -> playerUiState.score - getPrevLevelScore(level)
+                    LevelStatus.LevelDown -> playerUiState.score - getPrevLevelScore(level-1)
+                    LevelStatus.SameLevel -> playerUiState.score - getPrevLevelScore(level)
+                }
+
                 if (level != 15) {
                     AnimatedCircularProgressIndicator(
-                        currentValue = playerUiState.score - getPrevLevelScore(level),
-                        maxValue = getNextLevelScore(level) - getPrevLevelScore(level),
+                        currentValue = currentValue,
+                        maxValue = maxValue,
                         level = level,
                         progressIndicatorColor = colors.primary,
                         progressBackgroundColor = Color.DarkGray,
                         xp = playerUiState.score,
-                        won = won
+                        won = won,
+                        levelStatus = levelStatus
                     )
                 } else {
                     Box(
@@ -282,10 +304,13 @@ fun GameScoreDialog(
 
                 Button(
                     onClick = {
-                        deleteGame(context, databaseReference)
+                        if(!delete) {
+                            delete = true
+                            deleteGame(context, databaseReference)
 
-                        gameState.game = OnlineGameUiState()
-                        navController.navigate(GameScreen.Home.title)
+                            gameState.game = OnlineGameUiState()
+                            navController.navigate(GameScreen.Home.title)
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(colors.primary),
                     modifier = Modifier.fillMaxWidth(0.4f)
@@ -412,7 +437,8 @@ fun AnimatedCircularProgressIndicator(
     progressIndicatorColor: Color,
     modifier: Modifier = Modifier,
     xp: Int,
-    won: Boolean
+    won: Boolean,
+    levelStatus: LevelStatus
 ) {
     val colors = MaterialTheme.colorScheme
     val configuration = LocalConfiguration.current
@@ -424,9 +450,6 @@ fun AnimatedCircularProgressIndicator(
     var animatedLevel  by remember {
         mutableIntStateOf(level)
     }
-    var nextLevel by remember {
-        mutableStateOf(true)
-    }
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         ProgressStatus(
@@ -435,26 +458,52 @@ fun AnimatedCircularProgressIndicator(
             xp = xp
         )
 
-        var animateFloat = remember {
+        val animateFloat = remember {
             Animatable(
-                if (won) {
-                    (currentValue - 1) / maxValue.toFloat()
+                if(levelStatus != LevelStatus.LevelDown) {
+                    if (won) {
+                        (currentValue - 1) / maxValue.toFloat()
+                    } else {
+                        (currentValue + 1) / maxValue.toFloat()
+                    }
                 } else {
-                    (currentValue + 1) / maxValue.toFloat()
+                    0f
                 }
             )
         }
         LaunchedEffect(animateFloat) {
-            animateFloat.animateTo(
-                targetValue = currentValue / maxValue.toFloat(),
-                animationSpec = tween(durationMillis = 2000, easing = LinearOutSlowInEasing)
-            )
+            when(levelStatus) {
+                LevelStatus.LevelUp -> {
+                    animateFloat.animateTo(
+                        targetValue = currentValue / maxValue.toFloat(),
+                        animationSpec = tween(durationMillis = 2000, easing = LinearOutSlowInEasing)
+                    )
+                    animateFloat.animateTo(
+                        targetValue = 0f,
+                        animationSpec = tween(durationMillis = 0, easing = LinearOutSlowInEasing)
+                    )
+                    ++animatedLevel
+                }
+                LevelStatus.LevelDown -> {
+                    animateFloat.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(durationMillis = 0, easing = LinearOutSlowInEasing)
+                    )
+                    animateFloat.animateTo(
+                        targetValue = currentValue / maxValue.toFloat(),
+                        animationSpec = tween(durationMillis = 2000, easing = LinearOutSlowInEasing)
+                    )
+                    --animatedLevel
+                }
+                LevelStatus.SameLevel -> {
+                    animateFloat.animateTo(
+                        targetValue = currentValue / maxValue.toFloat(),
+                        animationSpec = tween(durationMillis = 2000, easing = LinearOutSlowInEasing)
+                    )
+                }
+            }
         }
-        if(animateFloat.value == 1f && nextLevel) run {
-            animateFloat = Animatable(0f)
-            ++animatedLevel
-            nextLevel = false
-        }
+
 
         Canvas(
             Modifier

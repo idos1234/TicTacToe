@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -183,8 +184,7 @@ fun OnlineGameButton(
     box: String,
     enableState: Enable,
     databaseReference: DatabaseReference,
-    modifier: Modifier,
-    myTurn: String?
+    modifier: Modifier
 ) {
     databaseReference.addValueEventListener(object : ValueEventListener {
         //on success
@@ -222,7 +222,7 @@ fun OnlineGameButton(
                     enableState.enable = false
                     SetBox = true
                 },
-                enabled = (box == "") && enableState.enable && gameState.game.playerTurn == myTurn && wasGameStarted,
+                enabled = (box == "") && enableState.enable && gameState.game.playerTurn == MyTurn && wasGameStarted,
             ),
         border = BorderStroke(1.dp, colors.onPrimary),
         colors = CardDefaults.cardColors(containerColor = colors.primary)
@@ -263,7 +263,6 @@ fun OnlineGameButton(
 )
 @Composable
 fun OnlineButtonGrid(
-    myTurn: String?,
     player: String,
     databaseReference: DatabaseReference,
     viewModel: CodeGameViewModel,
@@ -272,8 +271,10 @@ fun OnlineButtonGrid(
     gameState: OnlineGameRememberedValues,
     modifier: Modifier,
     dbName: String,
-    context: Context = LocalContext.current
+    context: Context = LocalContext.current,
+    lastScore: Int
 ) {
+
     var foundWinner by remember {
         mutableStateOf(false)
     }
@@ -286,7 +287,9 @@ fun OnlineButtonGrid(
     var boxes by remember {
         mutableStateOf(gameState.game.boxes)
     }
-    
+    var gameFinished by remember {
+        mutableStateOf(false)
+    }
     Column(
         modifier = modifier
             .background(Color.Transparent)
@@ -303,8 +306,7 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(1f),
-                myTurn = myTurn
+                    .weight(1f)
             )
             OnlineGameButton(
                 gameState = gameState,
@@ -314,8 +316,7 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(1f),
-                myTurn = myTurn
+                    .weight(1f)
             )
             OnlineGameButton(
                 gameState = gameState,
@@ -325,8 +326,7 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(1f),
-                myTurn = myTurn
+                    .weight(1f)
             )
         }
         Row(
@@ -341,8 +341,7 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(1f),
-                myTurn = myTurn
+                    .weight(1f)
             )
             OnlineGameButton(
                 gameState = gameState,
@@ -352,8 +351,7 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(1f),
-                myTurn = myTurn
+                    .weight(1f)
             )
             OnlineGameButton(
                 gameState = gameState,
@@ -363,8 +361,7 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(1f),
-                myTurn = myTurn
+                    .weight(1f)
             )
         }
         Row(
@@ -379,8 +376,7 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(1f),
-                myTurn = myTurn
+                    .weight(1f)
             )
             OnlineGameButton(
                 gameState = gameState,
@@ -390,8 +386,7 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(1f),
-                myTurn = myTurn
+                    .weight(1f)
             )
             OnlineGameButton(
                 gameState = gameState,
@@ -401,8 +396,7 @@ fun OnlineButtonGrid(
                 enableState = enableState,
                 databaseReference = databaseReference,
                 modifier = Modifier
-                    .weight(1f),
-                myTurn = myTurn
+                    .weight(1f)
             )
         }
     }
@@ -418,6 +412,12 @@ fun OnlineButtonGrid(
             } catch (e: Exception) {
                 gameState.game = OnlineGameUiState()
             }
+
+            if (!startedCountDown) {
+                foundWinner = gameState.game.foundWinner
+                times = gameState.game.times
+            }
+            gameFinished = (gameState.game.player1Score >= 2) || (gameState.game.player2Score >= 2)
             boxes = gameState.game.boxes
         }
 
@@ -459,7 +459,7 @@ fun OnlineButtonGrid(
 
             // if has final winner
             if (gameState.game.player1Score == 2) {
-                if (myTurn == "X") {
+                if (MyTurn == "X") {
                     //won
                     viewModel.updateFinalScoreScreenData("You won", gameState.game, gameState.player1,  gameState.player2)
                     gameState.FinalScoreText = "You won"
@@ -470,7 +470,8 @@ fun OnlineButtonGrid(
                             context = context,
                             gameState = gameState,
                             navController = navController,
-                            codeGameViewModel = viewModel
+                            codeGameViewModel = viewModel,
+                            lastScore = lastScore
                         )
                     } else if(dbName == "GamesWithCode") {
                         GameScoreDialogFriendly(
@@ -480,7 +481,7 @@ fun OnlineButtonGrid(
                         )
                     }
                 }
-                else if (myTurn == "O") {
+                else if (MyTurn == "O") {
                     //lose
                     viewModel.updateFinalScoreScreenData("You lost", gameState.game, gameState.player1,  gameState.player2)
                     gameState.FinalScoreText = "You lost"
@@ -492,7 +493,8 @@ fun OnlineButtonGrid(
                             context = context,
                             gameState = gameState,
                             navController = navController,
-                            codeGameViewModel = viewModel
+                            codeGameViewModel = viewModel,
+                            lastScore = lastScore
                         )
                     } else if(dbName == "GamesWithCode") {
                         GameScoreDialogFriendly(
@@ -504,7 +506,7 @@ fun OnlineButtonGrid(
                 }
                 // show score screen
             } else if (gameState.game.player2Score == 2) {
-                if (myTurn == "O") {
+                if (MyTurn == "O") {
                     //won
                     viewModel.updateFinalScoreScreenData("You won", gameState.game, gameState.player1,  gameState.player2)
                     gameState.FinalScoreText = "You won"
@@ -515,7 +517,8 @@ fun OnlineButtonGrid(
                             context = context,
                             gameState = gameState,
                             navController = navController,
-                            codeGameViewModel = viewModel
+                            codeGameViewModel = viewModel,
+                            lastScore = lastScore
                         )
                     } else if(dbName == "GamesWithCode") {
                         GameScoreDialogFriendly(
@@ -525,7 +528,7 @@ fun OnlineButtonGrid(
                         )
                     }
                 }
-                else if (myTurn == "X") {
+                else if (MyTurn == "X") {
                     //lose
                     viewModel.updateFinalScoreScreenData("You lost", gameState.game, gameState.player1,  gameState.player2)
                     gameState.FinalScoreText = "You lost"
@@ -536,7 +539,8 @@ fun OnlineButtonGrid(
                             context = context,
                             gameState = gameState,
                             navController = navController,
-                            codeGameViewModel = viewModel
+                            codeGameViewModel = viewModel,
+                            lastScore = lastScore
                         )
                     } else if(dbName == "GamesWithCode") {
                         GameScoreDialogFriendly(
@@ -567,20 +571,19 @@ fun OnlineButtonGrid(
         }
     }
 
-
-    if (!startedCountDown) {
-        foundWinner = gameState.game.foundWinner
-    }
     //show countDown dialog for winning
-    if (foundWinner && (gameState.game.player1Score != 2) && (gameState.game.player2Score != 2)) {
+    if (foundWinner && !gameFinished) {
         startedCountDown = true
         gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
         gameState.player1 = getPlayer(email = gameState.game.player1)
         gameState.player2 = getPlayer(email = gameState.game.player2)
+
         NextRoundDialog(
             gameState = gameState,
             onZeroSecs = {
                 times = 0
+                foundWinner = false
+                boxes = Boxes()
                 startedCountDown = false
                 ResetGame(
                     game = gameState.game,
@@ -590,19 +593,20 @@ fun OnlineButtonGrid(
             }
         )
     }
-    if (!startedCountDown) {
-        times = gameState.game.times
-    }
+
     //show countDown dialog for tie
-    if ((times == 9) && (gameState.game.player1Score != 2) && (gameState.game.player2Score != 2)) {
+    if (times == 9 && !foundWinner && !gameFinished) {
         startedCountDown = true
         gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
         gameState.player1 = getPlayer(email = gameState.game.player1)
         gameState.player2 = getPlayer(email = gameState.game.player2)
+
         NextRoundDialog(
             gameState = gameState,
             onZeroSecs = {
                 times = 0
+                foundWinner = false
+                boxes = Boxes()
                 startedCountDown = false
                 ResetGame(
                     game = gameState.game,
@@ -717,6 +721,13 @@ fun OnlineTicTacToe(
     currentGame.player1 = getPlayer(email = currentGame.game.player1)
     currentGame.player2 = getPlayer(email = currentGame.game.player2)
 
+    var changeScore by remember {
+        mutableStateOf(true)
+    }
+    var lastScore by remember {
+        mutableIntStateOf(0)
+    }
+
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
 
@@ -726,6 +737,40 @@ fun OnlineTicTacToe(
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
     val databaseReference = firebaseDatabase.getReference(dbName)
+
+    //players database
+    val playersDataBase = firebaseDatabase.getReference("Players")
+    //get Players collection from database
+    playersDataBase.addValueEventListener(object : ValueEventListener {
+        //on success
+        override fun onDataChange(snapshot: DataSnapshot) {
+            val list = snapshot.children
+            try {
+                if (changeScore) {
+                    changeScore = false
+
+                    val playerUiState = list.find {
+                        it.getValue(MainPlayerUiState::class.java)!!.email == player
+                    }?.getValue(MainPlayerUiState::class.java)!!
+
+                    lastScore = playerUiState.score
+
+                    if (lastScore == 0) {
+                        playersDataBase.child(playerUiState.key).child("score").setValue(0)
+                    } else {
+                        playersDataBase.child(playerUiState.key).child("score")
+                            .setValue(lastScore - 1)
+                    }
+                }
+
+            } catch (_: Exception) {
+            }
+
+        }
+
+        override fun onCancelled(error: DatabaseError) {
+        }
+    })
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -740,7 +785,6 @@ fun OnlineTicTacToe(
             databaseReference = databaseReference
         )
         OnlineButtonGrid(
-            myTurn = MyTurn,
             player = player,
             databaseReference = databaseReference,
             viewModel = viewModel,
@@ -751,7 +795,8 @@ fun OnlineTicTacToe(
                 .padding(10.dp)
                 .weight(3f)
                 .fillMaxSize(),
-            dbName = dbName
+            dbName = dbName,
+            lastScore = lastScore
         )
         Spacer(modifier = Modifier.weight(1f))
     }
@@ -764,22 +809,14 @@ fun UpdateScore(
     codeGameViewModel: CodeGameViewModel,
     playerName: String,
     context: Context,
-    addedScore: Int
+    addedScore: Int,
+    lastScore: Int
 ) {
     var player by remember {
         mutableStateOf(MainPlayerUiState())
     }
-    var score by remember {
-        mutableStateOf(0)
-    }
-    var levelUp by remember {
-        mutableStateOf(false)
-    }
     var updatedPlayer by remember {
         mutableStateOf(MainPlayerUiState())
-    }
-    var newLevel by remember {
-        mutableStateOf(player.level)
     }
     var failed by remember {
         mutableStateOf(false)
@@ -792,6 +829,9 @@ fun UpdateScore(
     }
     var updateScore by remember {
         mutableStateOf(false)
+    }
+    var levelStatus by remember {
+        mutableStateOf(LevelStatus.SameLevel)
     }
 
     //get database
@@ -810,82 +850,15 @@ fun UpdateScore(
                         it.getValue(MainPlayerUiState::class.java)!!.email == playerName
                     }?.getValue(MainPlayerUiState::class.java)!!
 
-                    score =
+                    player.score = lastScore
+
+                    val score =
                         if (player.score + addedScore < 0) 0 else player.score + addedScore
+                    val newLevel = calculateNewLevel(score = score, currentLevel = player.level)
+
                     if (addedScore == 1) {
-                        when (score) {
-                            25 -> if (player.level == 1) {
-                                newLevel = 2
-                                levelUp = true
-                            }
-
-                            50 -> if (player.level == 2) {
-                                newLevel = 3
-                                levelUp = true
-                            }
-
-                            100 -> if (player.level == 3) {
-                                newLevel = 4
-                                levelUp = true
-                            }
-
-                            150 -> if (player.level == 4) {
-                                newLevel = 5
-                                levelUp = true
-                            }
-
-                            200 -> if (player.level == 5) {
-                                newLevel = 6
-                                levelUp = true
-                            }
-
-                            300 -> if (player.level == 6) {
-                                newLevel = 7
-                                levelUp = true
-                            }
-
-                            400 -> if (player.level == 7) {
-                                newLevel = 8
-                                levelUp = true
-                            }
-
-                            500 -> if (player.level == 8) {
-                                newLevel = 9
-                                levelUp = true
-                            }
-
-                            600 -> if (player.level == 9) {
-                                newLevel = 10
-                                levelUp = true
-                            }
-
-                            700 -> if (player.level == 10) {
-                                newLevel = 11
-                                levelUp = true
-                            }
-
-                            800 -> if (player.level == 11) {
-                                newLevel = 12
-                                levelUp = true
-                            }
-
-                            900 -> if (player.level == 12) {
-                                newLevel = 13
-                                levelUp = true
-                            }
-
-                            1000 -> if (player.level == 13) {
-                                newLevel = 14
-                                levelUp = true
-                            }
-
-                            1200 -> if (player.level == 14) {
-                                newLevel = 15
-                                levelUp = true
-                            }
-
-                        }
-                        if (levelUp) {
+                        if (newLevel > player.level) {
+                            levelStatus = LevelStatus.LevelUp
                             coins = ((10 + newLevel * 2)..(20 + newLevel * 2)).random()
                             updatedPlayer = player.copy(
                                 score = score,
@@ -895,6 +868,7 @@ fun UpdateScore(
                             )
                             showScore = true
                         } else {
+                            levelStatus = LevelStatus.SameLevel
                             coins = ((5 + newLevel * 2)..(20 + newLevel * 2)).random()
                             updatedPlayer = player.copy(
                                 score = score,
@@ -905,20 +879,32 @@ fun UpdateScore(
                         }
                     } else if (addedScore == -1) {
                         coins = 0
-                        updatedPlayer = player.copy(
-                            score = score,
-                            loses = player.loses + 1,
-                        )
+                        if (newLevel < player.level) {
+                            levelStatus = LevelStatus.LevelDown
+                            updatedPlayer = player.copy(
+                                score = score,
+                                wins = player.loses + 1,
+                                level = newLevel,
+                            )
+                            showScore = true
+                        } else {
+                            levelStatus = LevelStatus.SameLevel
+                            updatedPlayer = player.copy(
+                                score = score,
+                                wins = player.loses + 1,
+                            )
+                            showScore = true
+                        }
                         showScore = true
                     }
                     if(!updateScore) {
                         updateScore = true
                         databaseReference.child(player.key).setValue(updatedPlayer)
                     }
-                } catch (_: Exception) {}
+                } catch (_: Exception) { failed = true }
             }
 
-            override fun onCancelled(error: DatabaseError) { }
+            override fun onCancelled(error: DatabaseError) { failed = true }
         })
     }
 
@@ -929,7 +915,8 @@ fun UpdateScore(
             codeGameViewModel = codeGameViewModel,
             playerName = playerName,
             context = context,
-            addedScore = addedScore
+            addedScore = addedScore,
+            lastScore = lastScore
         )
         failed = false
     } else if(showScore) {
@@ -938,11 +925,137 @@ fun UpdateScore(
             navController = navController,
             context = context,
             coins = coins,
-            levelUp = levelUp,
+            levelStatus = levelStatus,
             playerUiState = updatedPlayer,
             won = addedScore == 1
         )
     }
+}
+
+fun calculateNewLevel(
+    score: Int,
+    currentLevel: Int
+): Int {
+    var newLevel = 0
+
+    when (score) {
+        //level up
+        25 -> if (currentLevel == 1) {
+            newLevel =  2
+        }
+
+        50 -> if (currentLevel == 2) {
+            newLevel = 3
+        }
+
+        100 -> if (currentLevel == 3) {
+            newLevel = 4
+        }
+
+        150 -> if (currentLevel == 4) {
+            newLevel = 5
+        }
+
+        200 -> if (currentLevel == 5) {
+            newLevel = 6
+        }
+
+        300 -> if (currentLevel == 6) {
+            newLevel = 7
+        }
+
+        400 -> if (currentLevel == 7) {
+            newLevel = 8
+        }
+
+        500 -> if (currentLevel == 8) {
+            newLevel = 9
+        }
+
+        600 -> if (currentLevel == 9) {
+            newLevel = 10
+        }
+
+        700 -> if (currentLevel == 10) {
+            newLevel = 11
+        }
+
+        800 -> if (currentLevel == 11) {
+            newLevel = 12
+        }
+
+        900 -> if (currentLevel == 12) {
+            newLevel = 13
+        }
+
+        1000 -> if (currentLevel == 13) {
+            newLevel = 14
+        }
+
+        1200 -> if (currentLevel == 14) {
+            newLevel = 15
+        }
+
+        //level down
+        24 -> if (currentLevel == 2) {
+            newLevel =  1
+        }
+
+        49 -> if (currentLevel == 3) {
+            newLevel = 2
+        }
+
+        99 -> if (currentLevel == 4) {
+            newLevel = 3
+        }
+
+        149 -> if (currentLevel == 5) {
+            newLevel = 4
+        }
+
+        199 -> if (currentLevel == 6) {
+            newLevel = 5
+        }
+
+        299 -> if (currentLevel == 7) {
+            newLevel = 6
+        }
+
+        399 -> if (currentLevel == 8) {
+            newLevel = 7
+        }
+
+        499 -> if (currentLevel == 9) {
+            newLevel = 8
+        }
+
+        599 -> if (currentLevel == 10) {
+            newLevel = 9
+        }
+
+        699 -> if (currentLevel == 11) {
+            newLevel = 10
+        }
+
+        799 -> if (currentLevel == 12) {
+            newLevel = 11
+        }
+
+        899 -> if (currentLevel == 13) {
+            newLevel = 12
+        }
+
+        999 -> if (currentLevel == 14) {
+            newLevel = 13
+        }
+
+        1199 -> if (currentLevel == 15) {
+            newLevel = 14
+        }
+        else -> newLevel = currentLevel
+    }
+
+    return newLevel
 }
 
 @Composable
@@ -950,19 +1063,18 @@ fun CheckExitGame(
     onQuitClick: () -> Unit,
     onCancelClick: () -> Unit,
 ) {
-
     Dialog(
         onDismissRequest = onCancelClick,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Column(
             Modifier
-                .fillMaxWidth(0.8f)
+                .fillMaxWidth(0.9f)
                 .padding(((LocalConfiguration.current.screenWidthDp * 16 / 412).dp))
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.background),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Absolute.Left
             ) {
                 Text(
@@ -976,35 +1088,36 @@ fun CheckExitGame(
             }
             Spacer(modifier = Modifier.height((LocalConfiguration.current.screenWidthDp * 30 / 412).dp))
             Row(
-                Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Absolute.Left
             ) {
-                Spacer(modifier = Modifier.weight(1f))
                 Button(
                     onClick = onCancelClick,
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-                    modifier = Modifier.weight(4f)
+                    modifier = Modifier.width((LocalConfiguration.current.screenWidthDp*0.8*0.8*0.4).dp)
                 ) {
                     Text(
                         text = "Cancel",
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
-                Spacer(modifier = Modifier.weight(2f))
+
+                Spacer(
+                    modifier = Modifier.width((LocalConfiguration.current.screenWidthDp*0.8*0.8*0.1).dp)
+                )
+
                 Button(
                     onClick = {
                     onQuitClick()
                     onCancelClick()
                     },
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-                    modifier = Modifier.weight(4f)
+                    modifier = Modifier.width((LocalConfiguration.current.screenWidthDp*0.8*0.8*0.4).dp)
                 ) {
                     Text(
                         text = "Quit",
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
-                Spacer(modifier = Modifier.weight(1f))
             }
         }
     }

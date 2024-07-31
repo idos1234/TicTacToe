@@ -22,6 +22,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
+        actionBar?.hide()
 
         appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
         checkForUpdates()

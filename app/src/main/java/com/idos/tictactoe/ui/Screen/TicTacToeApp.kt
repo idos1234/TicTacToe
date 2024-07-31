@@ -80,6 +80,8 @@ import com.idos.tictactoe.ui.Screen.Menu.CustomLinearProgressIndicator
 import com.idos.tictactoe.ui.Screen.Menu.HomeScreen
 import com.idos.tictactoe.ui.Screen.Menu.LeaderBoardScreen
 import com.idos.tictactoe.ui.Screen.Menu.ProfileScreen
+import com.idos.tictactoe.ui.Screen.Menu.getNextLevelScore
+import com.idos.tictactoe.ui.Screen.Menu.getPrevLevelScore
 import com.idos.tictactoe.ui.screens.Shop.SetNewDeals
 import com.idos.tictactoe.ui.screens.Shop.ShopScreen
 import com.idos.tictactoe.ui.screens.Shop.refresh
@@ -144,6 +146,14 @@ fun TopAppBar(
     val screenHeight = configuration.screenHeightDp
     val colors = MaterialTheme.colorScheme
 
+    val scoreFromCurrentLevel = getPrevLevelScore(player.level)
+    val scoreToNextLevel = getNextLevelScore(player.level)
+    val progress:Float = if(player.level != 15) {
+        (player.score-scoreFromCurrentLevel)/(scoreToNextLevel-scoreFromCurrentLevel).toFloat()
+    } else {
+        1f
+    }
+
     Row(
         Modifier
             .fillMaxWidth()
@@ -155,7 +165,7 @@ fun TopAppBar(
         Spacer(modifier = Modifier.weight(1f))
         Box(contentAlignment = Alignment.Center, modifier = Modifier.weight(2f)) {
             CustomLinearProgressIndicator(
-                progress = 0.7f,
+                progress = progress,
                 progressColor = colors.secondary,
                 backgroundColor = Color.DarkGray,
                 clipShape = CircleShape,
@@ -599,6 +609,7 @@ fun TicTacToeApp(
                     context = LocalContext.current,
                     player = email.value,
                     navController = navController,
+                    enable = enableState
                 )
             }
 
@@ -612,6 +623,7 @@ fun TicTacToeApp(
                     context = LocalContext.current,
                     player = email.value,
                     navController = navController,
+                    enable = enableState
                 )
             }
 
@@ -699,7 +711,8 @@ fun TicTacToeApp(
                     navController = navController,
                     player = email.value,
                     currentGame = onlineGameValuesUiState,
-                    viewModel = codeGameViewModel
+                    viewModel = codeGameViewModel,
+                    enable = enableState
                 )
             }
 

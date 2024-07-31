@@ -156,6 +156,7 @@ fun EnterGameOnline(
     context: Context,
     player: String,
     navController: NavController,
+    enable: Enable
 ) {
     val currentGame by remember {
         mutableStateOf(OnlineGameRememberedValues())
@@ -219,7 +220,8 @@ fun EnterGameOnline(
         onLeaveGame = {
             databaseReference.child(onlineGameId).child("player2").setValue("")
             navController.popBackStack()
-        }
+        },
+        enable = enable
     )
 
 }
@@ -229,6 +231,7 @@ fun OpenGameOnline(
     context: Context,
     player: String,
     navController: NavController,
+    enable: Enable
 ) {
     val currentGame by remember {
         mutableStateOf(OnlineGameRememberedValues())
@@ -311,7 +314,8 @@ fun OpenGameOnline(
                 databaseReference
             )
             navController.popBackStack()
-        }
+        },
+        enable = enable
     )
 }
 
@@ -320,7 +324,8 @@ private fun CodeGameWaitingRoomScreen(
     gameState: OnlineGameRememberedValues,
     isLeader: Boolean,
     navController: NavController,
-    onLeaveGame: () -> Unit
+    onLeaveGame: () -> Unit,
+    enable: Enable
 ) {
     var foundPlayer by remember {
         mutableStateOf(false)
@@ -347,6 +352,7 @@ private fun CodeGameWaitingRoomScreen(
             if(gameState.game.wasGameStarted && !chengedScreen) {
                 chengedScreen = true
                 wasGameStarted = true
+                enable.enable = true
                 navController.navigate("${GameScreen.Online.title}/GamesWithCode")
             }
 
