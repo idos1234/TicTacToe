@@ -20,20 +20,30 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun TimeUp(navController: NavController) {
+    val configuration = LocalConfiguration.current
+
+    val screenHeight = configuration.screenHeightDp.dp
+
     val colors = MaterialTheme.colorScheme
     val brush = Brush.verticalGradient(listOf(colors.background, colors.primary))
 
     Box(modifier = Modifier
         .background(brush)
         .fillMaxSize()) {
-        Dialog(onDismissRequest = { navController.navigate(GameScreen.Home.title) }) {
+        Dialog(
+            onDismissRequest = { navController.navigate(GameScreen.Home.title) },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
             Column(
                 modifier = Modifier
                     .background(colors.primary)
@@ -43,19 +53,19 @@ fun TimeUp(navController: NavController) {
             ) {
                 Text(
                     text = "There are no players online",
-                    fontSize = 20.sp,
+                    fontSize = screenHeight.value.sp * 0.02,
                     color = colors.onBackground,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Left
                 )
                 Text(
                     text = "Please try again later",
-                    fontSize = 20.sp,
+                    fontSize = screenHeight.value.sp * 0.02,
                     color = colors.onBackground,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Left
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(screenHeight*16/915))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -67,7 +77,8 @@ fun TimeUp(navController: NavController) {
                     ) {
                         Text(
                             text = "Back",
-                            color = colors.onBackground
+                            color = colors.onBackground,
+                            fontSize = screenHeight.value.sp * 0.02
                         )
                     }
                     TextButton(
@@ -76,7 +87,8 @@ fun TimeUp(navController: NavController) {
                     ) {
                         Text(
                             text = "Try again",
-                            color = colors.onBackground
+                            color = colors.onBackground,
+                            fontSize = screenHeight.value.sp * 0.02
                         )
                     }
                 }

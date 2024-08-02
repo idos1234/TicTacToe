@@ -1,10 +1,8 @@
 package com.idos.tictactoe.ui.Screen.Menu
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,6 +49,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.draganddrop.ui.DragTarget
+import com.example.draganddrop.ui.DragableScreen
+import com.example.draganddrop.ui.DropItem
+import com.example.draganddrop.ui.LocalDragTargetInfo
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.SizeMode
@@ -289,23 +292,24 @@ fun ShowSkinsList(
     modifier: Modifier,
     profile: MainPlayerUiState
 ) {
-    var playerImage by remember {
-        mutableStateOf(profile.currentImage)
-    }
-    var playerX by remember {
-        mutableStateOf(profile.currentX)
-    }
-    var playerO by remember {
-        mutableStateOf(profile.currentO)
-    }
     var option by remember {
         mutableIntStateOf(0)
     }
     var text by remember {
         mutableStateOf("images")
     }
+    var databaseChild by remember {
+        mutableStateOf("")
+    }
+
+    //get database
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("Players")
 
     val colors = MaterialTheme.colorScheme
+
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
 
     Card(
         modifier = modifier,
@@ -319,45 +323,97 @@ fun ShowSkinsList(
             //change skins button
             Box(
                 modifier = Modifier.fillMaxWidth(0.9f),
-                contentAlignment = AbsoluteAlignment.CenterLeft
             ) {
-                Card(
-                    onClick = {
-                        ++option
-                        option %= 3
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(0.6f),
-                    colors = CardDefaults.cardColors(colors.secondary)
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Absolute.Left
                 ) {
-                    Text(
-                        text = "Show all $text",
-                        fontSize = (LocalConfiguration.current.screenHeightDp*0.015).sp,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
+                    Card(
+                        onClick = {
+                            ++option
+                            option %= 3
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth(0.6f),
+                        colors = CardDefaults.cardColors(colors.secondary)
+                    ) {
+                        Text(
+                            text = "Show all $text",
+                            fontSize = (LocalConfiguration.current.screenHeightDp * 0.015).sp,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width((LocalConfiguration.current.screenWidthDp*0.9*0.9*0.1).dp))
+                    
+                    DropItem<String>(
+                        modifier = Modifier
+                            .size((LocalConfiguration.current.screenWidthDp*0.9/4).dp)
+                    ) { isInBound, skin ->
+                        if(skin != null){
+                            databaseReference.child(profile.key).child(databaseChild).setValue(skin)
+                            LocalDragTargetInfo.current.dataToDrop = null
+                        }
+                        if(isInBound){
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .border(
+                                        1.dp,
+                                        color = colors.onPrimary,
+                                        shape = RoundedCornerShape(15.dp)
+                                    )
+                                    .background(colors.primary, RoundedCornerShape(15.dp)),
+                                contentAlignment = Alignment.Center
+                            ){
+                                Text(
+                                    text = "Drag and drop skin here",
+                                    fontSize = screenHeight.value.sp * 0.0125,
+                                    color = colors.onPrimary,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }else{
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .border(
+                                        1.dp,
+                                        color = colors.onPrimary.copy(0.5f),
+                                        shape = RoundedCornerShape(15.dp)
+                                    )
+                                    .background(colors.primary.copy(0.5f), RoundedCornerShape(15.dp)),
+                                contentAlignment = Alignment.Center
+                            ){
+                                Text(
+                                    text = "Drag and drop skin here",
+                                    fontSize = screenHeight.value.sp * 0.0125,
+                                    color = colors.onPrimary,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
                 }
             }
             Spacer(modifier = Modifier.fillMaxHeight(0.05f))
 
             when(option) {
                 0 -> {
-                    ShowPlayerImages(player = profile, image = playerImage) {
-                        playerImage = it
-                    }
+                    ShowPlayerImages(player = profile)
                     text = "images"
+                    databaseChild = "currentImage"
                 }
                 1 -> {
-                    ShowPlayerX(player = profile, image = playerX) {
-                        playerX = it
-                    }
+                    ShowPlayerX(player = profile)
                     text = "x"
+                    databaseChild = "currentX"
                 }
                 2 -> {
-                    ShowPlayerO(player = profile, image = playerO) {
-                        playerO = it
-                    }
+                    ShowPlayerO(player = profile)
                     text = "o"
+                    databaseChild = "currentO"
                 }
             }
         }
@@ -432,29 +488,29 @@ fun ProfileScreen(player: String) {
         }
 
         item {
-            ShowSkinsList(
+            DragableScreen(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .padding(top = (LocalConfiguration.current.screenHeightDp * 20 / 915).dp)
-                    .wrapContentHeight(),
-                profile = profile
-            )
+                    .wrapContentHeight()
+                ) {
+                ShowSkinsList(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    profile = profile
+                )
+            }
         }
     }
 }
 
 @Composable
 fun ShowPlayerImages(
-    player: MainPlayerUiState,
-    image: String,
-    onChangingImage: (String) -> Unit,
+    player: MainPlayerUiState
 ) {
     val colors = MaterialTheme.colorScheme
-
-    var changeImage by remember {
-        mutableStateOf(false)
-    }
-    val size = (LocalConfiguration.current.screenWidthDp*0.9-5*2)/4
+    val size = (LocalConfiguration.current.screenWidthDp*0.9-5*2-0000.1)/4
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .fillMaxWidth()
@@ -471,34 +527,17 @@ fun ShowPlayerImages(
                 mainAxisSize = SizeMode.Expand,
                 mainAxisAlignment = FlowMainAxisAlignment.Start,
                 content = {
-                    for (photo in player.unlockedImages) {
-                        AsyncImage(
-                            model = GetXO(photo),
-                            contentScale = ContentScale.Crop,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(size.dp)
-                                .border(
-                                    BorderStroke(
-                                        if (photo == image) {
-                                            2.dp
-                                        } else {
-                                            0.dp
-                                        },
-                                        if (photo == image) {
-                                            colors.onPrimary
-                                        } else {
-                                            colors.primary
-                                        }
-                                    ),
-                                    shape = RoundedCornerShape(0)
-                                )
-                                .clickable(onClick = {
-                                    onChangingImage(photo)
-                                    changeImage = true
-                                })
-
-                        )
+                    player.unlockedImages.forEach { photo ->
+                        DragTarget(
+                            dataToDrop = photo,
+                        ) {
+                            AsyncImage(
+                                model = GetXO(photo),
+                                contentScale = ContentScale.Crop,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(0.25f)
+                            )
+                        }
                     }
                 },
                 modifier = Modifier
@@ -517,7 +556,7 @@ fun ShowPlayerImages(
                 mainAxisSize = SizeMode.Expand,
                 mainAxisAlignment = FlowMainAxisAlignment.Start,
                 content = {
-                    for (photo in player.lockedImages) {
+                    player.lockedImages.forEach { photo ->
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
@@ -549,25 +588,14 @@ fun ShowPlayerImages(
             )
         }
     }
-
-    if (changeImage) {
-        ChangeImage(image = image, player = player)
-        changeImage = false
-    }
 }
 @Composable
 fun ShowPlayerX(
-    player: MainPlayerUiState,
-    image: String,
-    onChangingImage: (String) -> Unit,
+    player: MainPlayerUiState
 ) {
     val colors = MaterialTheme.colorScheme
 
-    var changeImage by remember {
-        mutableStateOf(false)
-    }
-
-    val size = (LocalConfiguration.current.screenWidthDp*0.9-5*2)/4
+    val size = (LocalConfiguration.current.screenWidthDp*0.9-5*2-0000.1)/4
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .fillMaxWidth()
@@ -584,34 +612,18 @@ fun ShowPlayerX(
                 mainAxisSize = SizeMode.Expand,
                 mainAxisAlignment = FlowMainAxisAlignment.Start,
                 content = {
-                    for (X in player.unlockedX) {
-                        AsyncImage(
-                            model = GetX(X),
-                            contentScale = ContentScale.Crop,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(size.dp)
-                                .border(
-                                    BorderStroke(
-                                        if (X == image) {
-                                            2.dp
-                                        } else {
-                                            0.dp
-                                        },
-                                        color = if (X == image) {
-                                            colors.onPrimary
-                                        } else {
-                                            colors.primary
-                                        }
-                                    ),
-                                    shape = RoundedCornerShape(4)
-                                )
-                                .clickable(onClick = {
-                                    onChangingImage(X)
-                                    changeImage = true
-                                })
-
-                        )
+                    player.unlockedX.forEach { X ->
+                        DragTarget(
+                            dataToDrop = X,
+                        ) {
+                            AsyncImage(
+                                model = GetX(X),
+                                contentScale = ContentScale.Crop,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(size.dp)
+                            )
+                        }
                     }
                 },
                 modifier = Modifier
@@ -629,7 +641,7 @@ fun ShowPlayerX(
                 mainAxisSize = SizeMode.Expand,
                 mainAxisAlignment = FlowMainAxisAlignment.Start,
                 content = {
-                    for (X in player.lockedX) {
+                    player.lockedX.forEach { X ->
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
@@ -660,36 +672,15 @@ fun ShowPlayerX(
             )
         }
     }
-
-    if (changeImage) {
-        //get database
-        val firebaseDatabase = FirebaseDatabase.getInstance()
-        val databaseReference = firebaseDatabase.getReference("Players")
-
-        val updatedPlayer = player.copy(
-            currentX = image
-        )
-
-
-        databaseReference.child(player.key).setValue(updatedPlayer)
-
-        changeImage = false
-    }
 }
 
 @Composable
 fun ShowPlayerO(
     player: MainPlayerUiState,
-    image: String,
-    onChangingImage: (String) -> Unit,
 ) {
     val  colors = MaterialTheme.colorScheme
 
-    var changeImage by remember {
-        mutableStateOf(false)
-    }
-
-    val size = (LocalConfiguration.current.screenWidthDp*0.9-5*2)/4
+    val size = (LocalConfiguration.current.screenWidthDp*0.9-5*2-0000.1)/4
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         .fillMaxWidth()
@@ -706,34 +697,18 @@ fun ShowPlayerO(
                 mainAxisSize = SizeMode.Expand,
                 mainAxisAlignment = FlowMainAxisAlignment.Start,
                 content = {
-                    for (O in player.unlockedO) {
-                        AsyncImage(
-                            model = GetO(O),
-                            contentScale = ContentScale.Crop,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(size.dp)
-                                .border(
-                                    BorderStroke(
-                                        if (O == image) {
-                                            2.dp
-                                        } else {
-                                            0.dp
-                                        },
-                                        if (O == image) {
-                                            colors.onPrimary
-                                        } else {
-                                            colors.primary
-                                        }
-                                    ),
-                                    shape = RoundedCornerShape(0)
-                                )
-                                .clickable(onClick = {
-                                    onChangingImage(O)
-                                    changeImage = true
-                                })
-
-                        )
+                    player.unlockedO.forEach { O ->
+                        DragTarget(
+                            dataToDrop = O,
+                        ) {
+                            AsyncImage(
+                                model = GetO(O),
+                                contentScale = ContentScale.Crop,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(size.dp)
+                            )
+                        }
                     }
                 },
                 modifier = Modifier
@@ -752,7 +727,7 @@ fun ShowPlayerO(
                 mainAxisSize = SizeMode.Expand,
                 mainAxisAlignment = FlowMainAxisAlignment.Start,
                 content = {
-                    for (O in player.lockedO) {
+                    player.lockedO.forEach { O ->
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
@@ -783,34 +758,6 @@ fun ShowPlayerO(
             )
         }
     }
-
-    if (changeImage) {
-        //get database
-        val firebaseDatabase = FirebaseDatabase.getInstance()
-        val databaseReference = firebaseDatabase.getReference("Players")
-
-        val updatedPlayer = player.copy(
-            currentO = image
-        )
-
-
-        databaseReference.child(player.key).setValue(updatedPlayer)
-
-        changeImage = false
-    }
-}
-
-@Composable
-fun ChangeImage(image: String, player: MainPlayerUiState) {
-    //get database
-    val firebaseDatabase = FirebaseDatabase.getInstance()
-    val databaseReference = firebaseDatabase.getReference("Players")
-
-    val updatedPlayer = player.copy(
-        currentImage = image
-    )
-
-    databaseReference.child(player.key).setValue(updatedPlayer)
 }
 
 @Composable
