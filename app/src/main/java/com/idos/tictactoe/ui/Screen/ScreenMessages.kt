@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -20,13 +21,44 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.idos.tictactoe.ui.Screen.Game.Online.DotsFlashing
+
+
+@Composable
+fun WaitingForServerResponse() {
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidth = configuration.screenWidthDp
+
+    val colors = MaterialTheme.colorScheme
+
+    Dialog(onDismissRequest = {}) {
+        Box(
+            modifier = Modifier
+                .background(colors.background, CircleShape)
+                .fillMaxWidth(0.9f),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.Absolute.Left,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Waiting for server response",
+                    fontSize = screenHeight.value.sp * 0.0175,
+                    color = colors.onBackground,
+                    textAlign = TextAlign.Center
+                )
+                DotsFlashing(size = screenWidth * 10 / 450)
+            }
+        }
+    }
+}
 
 @Composable
 fun TimeUp(navController: NavController) {

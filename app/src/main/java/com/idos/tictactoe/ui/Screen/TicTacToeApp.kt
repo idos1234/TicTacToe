@@ -38,6 +38,7 @@ import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -55,6 +56,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.example.draganddrop.ui.DragableScreen
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -583,7 +585,17 @@ fun TicTacToeApp(
                 storeColor = colors.onPrimary
 
                 BackHandler {navController.navigate(GameScreen.Home.title)}
-                ProfileScreen(player = email.value)
+
+
+                val brush = Brush.verticalGradient(listOf(colors.background, colors.primary))
+
+                DragableScreen(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(brush)
+                ) {
+                    ProfileScreen(player = email.value)
+                }
             }
 
             //codeGame

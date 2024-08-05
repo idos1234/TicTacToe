@@ -37,7 +37,6 @@ import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -50,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.draganddrop.ui.DragTarget
-import com.example.draganddrop.ui.DragableScreen
 import com.example.draganddrop.ui.DropItem
 import com.example.draganddrop.ui.LocalDragTargetInfo
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
@@ -64,6 +62,9 @@ import com.idos.tictactoe.data.GetO
 import com.idos.tictactoe.data.GetX
 import com.idos.tictactoe.data.GetXO
 import com.idos.tictactoe.data.MainPlayerUiState
+import com.idos.tictactoe.ui.Screen.WaitingForServerResponse
+import java.util.Timer
+import kotlin.concurrent.schedule
 
 @Composable
 fun PlayerCard(
@@ -301,6 +302,9 @@ fun ShowSkinsList(
     var databaseChild by remember {
         mutableStateOf("")
     }
+    var waitingForServerResponse by remember {
+        mutableStateOf(false)
+    }
 
     //get database
     val firebaseDatabase = FirebaseDatabase.getInstance()
@@ -352,7 +356,12 @@ fun ShowSkinsList(
                             .size((LocalConfiguration.current.screenWidthDp*0.9/4).dp)
                     ) { isInBound, skin ->
                         if(skin != null){
-                            databaseReference.child(profile.key).child(databaseChild).setValue(skin)
+                            waitingForServerResponse = true
+                            Timer().schedule(500) {
+                                databaseReference.child(profile.key).child(databaseChild).setValue(skin).addOnSuccessListener {
+                                    waitingForServerResponse = false
+                                }
+                            }
                             LocalDragTargetInfo.current.dataToDrop = null
                         }
                         if(isInBound){
@@ -383,7 +392,10 @@ fun ShowSkinsList(
                                         color = colors.onPrimary.copy(0.5f),
                                         shape = RoundedCornerShape(15.dp)
                                     )
-                                    .background(colors.primary.copy(0.5f), RoundedCornerShape(15.dp)),
+                                    .background(
+                                        colors.primary.copy(0.5f),
+                                        RoundedCornerShape(15.dp)
+                                    ),
                                 contentAlignment = Alignment.Center
                             ){
                                 Text(
@@ -418,6 +430,10 @@ fun ShowSkinsList(
             }
         }
     }
+
+    if (waitingForServerResponse) {
+        WaitingForServerResponse()
+    }
 }
 
 @Composable
@@ -447,9 +463,6 @@ fun ProfileScreen(player: String) {
         override fun onCancelled(error: DatabaseError) {}
     })
 
-    val colors = MaterialTheme.colorScheme
-    val brush = Brush.verticalGradient(listOf(colors.background, colors.primary))
-
     val currentX = profile.currentX
     val currentO = profile.currentO
     val currentImage = profile.currentImage
@@ -457,10 +470,10 @@ fun ProfileScreen(player: String) {
     val scoreFromCurrentLevel = getPrevLevelScore(profile.level)
     val scoreToNextLevel = getNextLevelScore(profile.level)
 
+
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
             .fillMaxSize()
-            .background(brush)
     ) {
         //player's card(name, score, wins, loses, skins)
         item {
@@ -488,19 +501,13 @@ fun ProfileScreen(player: String) {
         }
 
         item {
-            DragableScreen(
+            ShowSkinsList(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .padding(top = (LocalConfiguration.current.screenHeightDp * 20 / 915).dp)
-                    .wrapContentHeight()
-                ) {
-                ShowSkinsList(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    profile = profile
-                )
-            }
+                    .wrapContentHeight(),
+                profile = profile
+            )
         }
     }
 }
@@ -535,7 +542,7 @@ fun ShowPlayerImages(
                                 model = GetXO(photo),
                                 contentScale = ContentScale.Crop,
                                 contentDescription = null,
-                                modifier = Modifier.fillMaxSize(0.25f)
+                                modifier = Modifier.size(size.dp)
                             )
                         }
                     }
