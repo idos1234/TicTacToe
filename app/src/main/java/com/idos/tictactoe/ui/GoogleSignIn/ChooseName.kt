@@ -72,6 +72,9 @@ fun ChooseName(
     var setDelay by remember {
         mutableStateOf(false)
     }
+    var setSharedPreferences by remember {
+        mutableStateOf(false)
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         SignInBackGround()
@@ -158,18 +161,23 @@ fun ChooseName(
                     score = 0,
                     key = key
                 )
-                databaseReference.child(key).setValue(player)
-                changeEmail(emailState.email2!!.toSHA256())
-                done = false
-                if(!setDelay) {
-                    SetNewDelay(
-                        hour = 11,
-                        min = 0,
-                        context = context
-                    )
-                    setDelay = true
+                databaseReference.child(key).setValue(player).addOnSuccessListener {
+                    changeEmail(emailState.email2!!.toSHA256())
+                    if (!setDelay) {
+                        SetNewDelay(
+                            hour = 11,
+                            min = 0,
+                            context = context
+                        )
+                        setDelay = true
+                    }
+                    setSharedPreferences = true
                 }
-                onClick()
             }
+    }
+
+    if (setSharedPreferences) {
+        setSharedPreferences = false
+        onClick()
     }
 }

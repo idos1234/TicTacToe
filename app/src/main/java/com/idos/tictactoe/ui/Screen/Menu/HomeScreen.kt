@@ -44,6 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.network.Connection.ConnectionState
+import com.example.network.Connection.connectivityState
 import com.idos.tictactoe.ui.Screen.Game.Online.OnlineGameService
 import com.idos.tictactoe.ui.theme.Shapes
 
@@ -59,6 +61,8 @@ fun HomeScreen(
     onOnlineClick: () -> Unit = {},
     context: Context
 ) {
+    val connection by connectivityState()
+
     var showTrainingGames by remember {
         mutableStateOf(false)
     }
@@ -130,20 +134,22 @@ fun HomeScreen(
                 //online game button
                 Button(
                     onClick = {
-                        context.startService(Intent(context, OnlineGameService::class.java))
-                        onOnlineClick()
+                        if (connection == ConnectionState.Available) {
+                            context.startService(Intent(context, OnlineGameService::class.java))
+                            onOnlineClick()
+                        }
                     },
                     modifier = Modifier
                         .wrapContentSize()
                         .fillMaxWidth(0.5f),
-                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
+                    colors = ButtonDefaults.buttonColors(if(connection == ConnectionState.Available) {colors.primary} else {Color.Gray})
                 ) {
                     Text(
                         text = "Play",
                         style = type.bodyMedium,
                         fontSize = screenHeight.value.sp*0.03,
                         fontWeight = FontWeight.SemiBold,
-                        color = colors.onPrimary
+                        color = if(connection == ConnectionState.Available) {colors.onPrimary} else {Color.Black}
                     )
                 }
 
@@ -151,18 +157,22 @@ fun HomeScreen(
 
                 //online game button
                 Button(
-                    onClick = onFriendlyBattleClick,
+                    onClick = {
+                        if (connection == ConnectionState.Available) {
+                            onFriendlyBattleClick()
+                        }
+                              },
                     modifier = Modifier
                         .wrapContentSize()
                         .fillMaxWidth(0.7f),
-                    colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
+                    colors = ButtonDefaults.buttonColors(if(connection == ConnectionState.Available) {colors.primary} else {Color.Gray})
                 ) {
                     Text(
                         text = "Friendly Battle",
                         style = type.bodyMedium,
                         fontSize = screenHeight.value.sp*0.03,
                         fontWeight = FontWeight.SemiBold,
-                        color = colors.onPrimary
+                        color = if(connection == ConnectionState.Available) {colors.onPrimary} else {Color.Black}
                     )
                 }
             }

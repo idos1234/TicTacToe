@@ -57,10 +57,13 @@ import androidx.navigation.navArgument
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.example.draganddrop.ui.DragableScreen
+import com.example.network.Connection.ConnectionState
+import com.example.network.Connection.connectivityState
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.idos.tictactoe.Connection.NoInternetConnectionScreen
 import com.idos.tictactoe.R
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
@@ -108,7 +111,8 @@ enum class GameScreen(val title: String) {
     TimeUp("TimeUp"),
     SearchGame("SearchGame"),
     Store("Store"),
-    SplashScreen("SplashScreen")
+    SplashScreen("SplashScreen"),
+    NoInternet("NoInternet")
 }
 
 @Composable
@@ -265,6 +269,24 @@ fun BackTopBar(
 }
 
 @Composable
+fun NoInternetTopAppBar() {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.error),
+        horizontalArrangement = Arrangement.Absolute.Left,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "No internet",
+            fontSize = LocalConfiguration.current.screenHeightDp.sp * 0.03,
+            color = MaterialTheme.colorScheme.onError,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
 fun BottomAppBar(
     navController: NavController,
     leadBoardColor: Color,
@@ -272,6 +294,8 @@ fun BottomAppBar(
     profileColor: Color,
     storeColor: Color
 ) {
+    val connection by connectivityState()
+
     Row(horizontalArrangement = Arrangement.Absolute.Left) {
         Box(modifier = Modifier
             .weight(1f)
@@ -280,14 +304,15 @@ fun BottomAppBar(
                 onClick = {
                     refresh.value = true
                     navController.navigate(GameScreen.Store.title)
-                }
+                },
+                enabled = connection == ConnectionState.Available,
             ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.store),
                 contentDescription = "Store",
-                tint = storeColor
+                tint = if(connection == ConnectionState.Available) {storeColor} else {Color.Gray}
             )
         }
         Box(modifier = Modifier
@@ -296,14 +321,15 @@ fun BottomAppBar(
             .clickable(
                 onClick = {
                     navController.navigate(GameScreen.LeaderBoard.title)
-                }
+                },
+                enabled = connection == ConnectionState.Available,
             ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.leaderboard),
                 contentDescription = "LeadBoard",
-                tint = leadBoardColor
+                tint = if(connection == ConnectionState.Available) {leadBoardColor} else {Color.Gray}
             )
         }
         Box(modifier = Modifier
@@ -312,7 +338,8 @@ fun BottomAppBar(
             .clickable(
                 onClick = {
                     navController.navigate(GameScreen.Home.title)
-                }
+                },
+                enabled = connection == ConnectionState.Available,
             ),
             contentAlignment = Alignment.Center
         ) {
@@ -328,14 +355,15 @@ fun BottomAppBar(
             .clickable(
                 onClick = {
                     navController.navigate(GameScreen.ProfileScreen.title)
-                }
+                },
+                enabled = connection == ConnectionState.Available,
             ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Rounded.AccountCircle,
                 contentDescription = "Account",
-                tint = profileColor
+                tint = if(connection == ConnectionState.Available) {profileColor} else {Color.Gray}
             )
         }
     }
@@ -365,6 +393,9 @@ fun TicTacToeApp(
 
     var timesPlayed by remember {
         mutableIntStateOf(0)
+    }
+    var showMessage by remember {
+        mutableStateOf(true)
     }
 
     //encrypted shared preferences
@@ -432,6 +463,11 @@ fun TicTacToeApp(
         mutableStateOf({})
     }
 
+    //connection state
+    val connection by connectivityState()
+    if (connection == ConnectionState.Available) {
+        showMessage = true
+    }
 
     Scaffold(
         bottomBar = bottomAppBar,
@@ -455,7 +491,12 @@ fun TicTacToeApp(
             //home screen
             composable(route = GameScreen.Home.title) {
                 bottomAppBar = defaultBottomBar
-                topAppBar = defaultTopAppBar
+
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = defaultTopAppBar
+                }
 
                 leadBoardColor = colors.onPrimary
                 homeColor = colors.secondary
@@ -475,7 +516,13 @@ fun TicTacToeApp(
             //game screen
             composable(route = GameScreen.TwoPlayers.title) {
                 bottomAppBar = {}
-                topAppBar = { BackTopBar(onClick = {backClick = true}) }
+
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = { BackTopBar(onClick = {backClick = true}) }
+                }
+
                 onClick = { navController.popBackStack() }
 
                 BackHandler {}
@@ -501,7 +548,13 @@ fun TicTacToeApp(
             //single player game screen
             composable(route = GameScreen.SinglePlayer.title) {
                 bottomAppBar = {}
-                topAppBar = { BackTopBar(onClick = {backClick = true}) }
+
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = { BackTopBar(onClick = {backClick = true}) }
+                }
+
                 onClick = { navController.popBackStack() }
 
                 BackHandler {}
@@ -539,7 +592,13 @@ fun TicTacToeApp(
                 )
             ) {
                 bottomAppBar = {}
-                topAppBar = { BackTopBar(onClick = {backClick = true}) }
+
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = { BackTopBar(onClick = {backClick = true}) }
+                }
+
                 onClick = {
                     deleteGame(
                         context = context,
@@ -563,7 +622,12 @@ fun TicTacToeApp(
             //leaderboard screen
             composable(route = GameScreen.LeaderBoard.title) {
                 bottomAppBar = defaultBottomBar
-                topAppBar = defaultTopAppBar
+
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = defaultTopAppBar
+                }
 
                 leadBoardColor = colors.secondary
                 homeColor = colors.onPrimary
@@ -577,7 +641,12 @@ fun TicTacToeApp(
             //profile screen
             composable(route = GameScreen.ProfileScreen.title) {
                 bottomAppBar = defaultBottomBar
-                topAppBar = defaultTopAppBar
+
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = defaultTopAppBar
+                }
 
                 leadBoardColor = colors.onPrimary
                 homeColor = colors.onPrimary
@@ -601,7 +670,12 @@ fun TicTacToeApp(
             //codeGame
             composable(route = GameScreen.CodeGame.title) {
                 bottomAppBar = {}
-                topAppBar = { BackTopBar(onClick = {navController.popBackStack()}) }
+
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = { BackTopBar(onClick = {navController.popBackStack()}) }
+                }
 
                 BackHandler {}
                 CodeGameScreen(
@@ -613,8 +687,12 @@ fun TicTacToeApp(
             //open game with code
             composable(route = GameScreen.OpenGameWithCode.title) {
                 bottomAppBar = {}
-                topAppBar = {}
 
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = {}
+                }
 
                 BackHandler {}
                 OpenGameOnline(
@@ -628,7 +706,12 @@ fun TicTacToeApp(
             //enter game with code
             composable(route = GameScreen.EnterGameWithCode.title) {
                 bottomAppBar = {}
-                topAppBar = {}
+
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = {}
+                }
 
                 BackHandler {}
                 EnterGameOnline(
@@ -642,7 +725,12 @@ fun TicTacToeApp(
             // google sign in
             composable(GameScreen.GoogleSignIn.title) {
                 bottomAppBar = {}
-                topAppBar = {}
+
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = {}
+                }
 
                 BackHandler {}
                 GoogleSignInScreen(
@@ -676,7 +764,12 @@ fun TicTacToeApp(
                 route = GameScreen.NewName.title
             ) {
                 bottomAppBar = {}
-                topAppBar = {}
+
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = {}
+                }
 
                 BackHandler {}
                 ChooseName(
@@ -708,7 +801,12 @@ fun TicTacToeApp(
             
             composable(GameScreen.TimeUp.title) {
                 bottomAppBar = {}
-                topAppBar = {}
+
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = {}
+                }
 
                 BackHandler {}
                 TimeUp(navController = navController)
@@ -716,7 +814,12 @@ fun TicTacToeApp(
             
             composable(GameScreen.SearchGame.title) {
                 bottomAppBar = {}
-                topAppBar = {}
+
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = {}
+                }
 
                 BackHandler {}
                 SearchGameScreen(
@@ -731,7 +834,12 @@ fun TicTacToeApp(
             //store
             composable(GameScreen.Store.title) {
                 bottomAppBar = defaultBottomBar
-                topAppBar = defaultTopAppBar
+
+                if(connection == ConnectionState.UnAvailable) {
+                    topAppBar = { NoInternetTopAppBar() }
+                } else {
+                    topAppBar = defaultTopAppBar
+                }
 
                 BackHandler {navController.navigate(GameScreen.Home.title)}
                 leadBoardColor = colors.onPrimary
@@ -744,6 +852,15 @@ fun TicTacToeApp(
                 )
             }
 
+            //no internet screen
+            composable(GameScreen.NoInternet.title) {
+                BackHandler {}
+                NoInternetConnectionScreen(
+                    navController = navController,
+                    onPlayOffline = {showMessage = false}
+                )
+            }
+
         }
         if(backClick) {
             CheckExitGame(
@@ -751,6 +868,20 @@ fun TicTacToeApp(
                 onCancelClick = { backClick = false }
             )
         }
+    }
+
+    if (
+        showMessage &&
+        connection == ConnectionState.UnAvailable &&
+        navController.currentDestination?.route != GameScreen.SplashScreen.title &&
+        navController.currentDestination?.route != GameScreen.NoInternet.title &&
+        navController.currentDestination?.route != GameScreen.GoogleSignIn.title &&
+        navController.currentDestination != null
+    ) {
+        NoInternetDialog(
+            navController = navController,
+            onPlayOffline = { showMessage = false }
+        )
     }
 }
 

@@ -17,6 +17,8 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.network.Connection.ConnectionState
+import com.example.network.Connection.connectivityState
 import com.idos.tictactoe.R
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -66,6 +68,11 @@ fun SplashScreen(navController: NavHostController, startDestination: String) {
     }
 
     if(navigate) {
-        navController.navigate(startDestination)
+        val connection by connectivityState()
+        if(connection == ConnectionState.UnAvailable && startDestination == GameScreen.Home.title) {
+            navController.navigate(GameScreen.NoInternet.title)
+        } else {
+            navController.navigate(startDestination)
+        }
     }
 }

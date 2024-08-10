@@ -10,7 +10,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.WifiOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,6 +34,76 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.idos.tictactoe.ui.Screen.Game.Online.DotsFlashing
+
+@Composable
+fun NoInternetDialog(navController: NavController, onPlayOffline: () -> Unit) {
+    val screenHeight = LocalConfiguration.current.screenHeightDp
+    val screenWidth = LocalConfiguration.current.screenWidthDp
+    val colors = MaterialTheme.colorScheme
+
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .background(colors.background),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height((screenHeight / 50).dp))
+
+            Text(
+                text = "No internet",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = screenHeight.sp * 0.05,
+                color = colors.onBackground
+            )
+            Text(
+                text = "connection",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = screenHeight.sp * 0.05,
+                color = colors.onBackground
+            )
+
+            Icon(
+                imageVector = Icons.Default.WifiOff,
+                contentDescription = "No Wifi",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .size((screenWidth * 0.8).dp),
+                tint = colors.onBackground
+            )
+
+            Spacer(modifier = Modifier.height((screenHeight / 20).dp))
+
+            Button(
+                onClick = {
+                    onPlayOffline()
+                    navController.navigate(GameScreen.Home.title)
+                },
+                modifier = Modifier
+                    .fillMaxWidth(0.95f)
+                    .wrapContentHeight(),
+                colors = ButtonDefaults.buttonColors(colors.onBackground),
+                shape = CircleShape,
+                elevation = ButtonDefaults.buttonElevation(10.dp)
+            ) {
+                Text(
+                    text = "Play offline",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    fontSize = screenHeight.sp * 0.035,
+                    color = colors.primary
+                )
+            }
+
+            Spacer(modifier = Modifier.height((screenHeight / 50).dp))
+        }
+    }
+}
 
 
 @Composable

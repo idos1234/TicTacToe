@@ -1,6 +1,5 @@
 package com.idos.tictactoe.ui.GoogleSignIn
 
-import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.BorderStroke
@@ -51,17 +50,11 @@ import com.idos.tictactoe.ui.Screen.GameScreen
 
 @Composable
 fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavController, changeEmail: (String) -> Unit, onClick: @Composable () -> Unit) {
-    var text by remember {
-        mutableStateOf<String?>(null)
-    }
     val user by remember(viewModel) {
         viewModel.googleUser
     }.collectAsState()
     val signInRequestCode = 1
     val context = LocalContext.current
-    var isError by remember {
-        mutableStateOf(false)
-    }
     var searchedPlayer by remember {
         mutableStateOf(false)
     }
@@ -74,24 +67,23 @@ fun GoogleSignInScreen(viewModel: GoogleSignInViewModel, navController: NavContr
             val account = it?.getResult(ApiException::class.java)
             //if sign in failed
             if (account == null) {
-                text = "Google sign in failed"
-                isError = true
+                Toast.makeText(
+                    context,
+                    "Something went wrong...",
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
                 //getting user data
                 viewModel.fetchSignInUser(email = account.email!!, name = account.displayName!!)
             }
-        } catch (e: ApiException) {
-            text = e.localizedMessage
-        }
+        } catch (_: ApiException) { }
     }
 
     //sign in button
     ScreenView(
         onClick = {
             authResultLauncher.launch(signInRequestCode)
-                  },
-        isError = isError,
-        context = context
+                  }
     )
 
     user?.let {
@@ -235,9 +227,7 @@ private fun GoogleSignInButton(modifier: Modifier, onClick: () -> Unit) {
 
 @Composable
 fun ScreenView(
-    onClick: () -> Unit,
-    isError: Boolean = false,
-    context: Context
+    onClick: () -> Unit
 ) {
 
     val colors = MaterialTheme.colorScheme
@@ -272,17 +262,6 @@ fun ScreenView(
             GoogleSignInButton(
                 onClick = onClick,
                 modifier = Modifier.fillMaxWidth(0.7f))
-        }
-        when {
-            isError -> {
-                isError.let {
-                    Toast.makeText(
-                        context,
-                        "Something went wrong...",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
         }
     }
 }
