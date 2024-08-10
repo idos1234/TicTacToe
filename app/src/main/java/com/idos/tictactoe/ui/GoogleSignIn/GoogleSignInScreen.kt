@@ -38,6 +38,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.network.Connection.ConnectionState
+import com.example.network.Connection.connectivityState
 import com.google.android.gms.base.R
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.database.DataSnapshot
@@ -201,8 +203,11 @@ private fun GoogleSignInButton(modifier: Modifier, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
+    val connection by connectivityState()
+
     OutlinedButton(
         onClick = onClick,
+        enabled = connection == ConnectionState.Available,
         colors = ButtonDefaults.buttonColors(colors.primary),
         border = BorderStroke(1.dp, colors.onPrimary),
         modifier = modifier,
