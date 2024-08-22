@@ -30,7 +30,11 @@ data class OnlineGameUiState(
     //if player 2 quit
     var player2Quit: Boolean = false,
     //for friendly games
-    var wasGameStarted: Boolean = false
+    var wasGameStarted: Boolean = false,
+    //player 1 progress
+    var player1Progress: Float = 100f,
+    //player 2 progress
+    var player2Progress: Float = 100f
 )
 
 data class Boxes (

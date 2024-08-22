@@ -303,7 +303,9 @@ fun BottomAppBar(
             .clickable(
                 onClick = {
                     refresh.value = true
-                    navController.navigate(GameScreen.Store.title)
+                    if (navController.currentDestination?.route != GameScreen.Store.title) {
+                        navController.navigate(GameScreen.Store.title)
+                    }
                 },
                 enabled = connection == ConnectionState.Available,
             ),
@@ -320,7 +322,9 @@ fun BottomAppBar(
             .background(MaterialTheme.colorScheme.primary)
             .clickable(
                 onClick = {
-                    navController.navigate(GameScreen.LeaderBoard.title)
+                    if (navController.currentDestination?.route != GameScreen.LeaderBoard.title) {
+                        navController.navigate(GameScreen.LeaderBoard.title)
+                    }
                 },
                 enabled = connection == ConnectionState.Available,
             ),
@@ -337,7 +341,9 @@ fun BottomAppBar(
             .background(MaterialTheme.colorScheme.primary)
             .clickable(
                 onClick = {
-                    navController.navigate(GameScreen.Home.title)
+                    if (navController.currentDestination?.route != GameScreen.Home.title) {
+                        navController.navigate(GameScreen.Home.title)
+                    }
                 },
                 enabled = connection == ConnectionState.Available,
             ),
@@ -354,7 +360,9 @@ fun BottomAppBar(
             .background(MaterialTheme.colorScheme.primary)
             .clickable(
                 onClick = {
-                    navController.navigate(GameScreen.ProfileScreen.title)
+                    if (navController.currentDestination?.route != GameScreen.ProfileScreen.title) {
+                        navController.navigate(GameScreen.ProfileScreen.title)
+                    }
                 },
                 enabled = connection == ConnectionState.Available,
             ),

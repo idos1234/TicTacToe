@@ -67,6 +67,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.idos.tictactoe.data.CountDownTimerRead
+import com.idos.tictactoe.data.CountDownTimerWrite
 import com.idos.tictactoe.data.Draw
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
@@ -101,7 +103,8 @@ fun PlayersBar(
     screenWidth: Int,
     colors: ColorScheme,
     gameState: OnlineGameRememberedValues,
-    databaseReference: DatabaseReference
+    databaseReference: DatabaseReference,
+    reset: Boolean,
 ) {
     gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
     Row(
@@ -113,13 +116,22 @@ fun PlayersBar(
             Modifier.weight(2f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            gameState.player1.Draw(
-                modifier = Modifier
-                    .size(((screenWidth - 40) / 4).dp),
-                screenWidth = screenWidth,
-                shape = RoundedCornerShape(20),
-                border = BorderStroke(2.dp, if (gameState.game.playerTurn == "X") colors.tertiary else { colors.background})
-            )
+            if(MyTurn == "X") {
+                gameState.player1.CountDownTimerWrite(
+                    imageSize = ((screenWidth - 40) / 4).dp,
+                    currentGame = gameState,
+                    reset = reset,
+                    databaseReference = databaseReference,
+                    playerNumber = 1
+                )
+            } else {
+                gameState.player1.CountDownTimerRead(
+                    imageSize = ((screenWidth - 40) / 4).dp,
+                    currentGame = gameState,
+                    databaseReference = databaseReference,
+                    playerNumber = 1
+                )
+            }
         }
         Card(
             colors = CardDefaults.cardColors(containerColor = colors.primary),
@@ -140,13 +152,22 @@ fun PlayersBar(
             Modifier.weight(2f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            gameState.player2.Draw(
-                modifier = Modifier
-                    .size(((screenWidth - 40) / 4).dp),
-                screenWidth = screenWidth,
-                shape = RoundedCornerShape(20),
-                border = BorderStroke(2.dp, if (gameState.game.playerTurn == "O") colors.tertiary else { colors.background})
-            )
+            if(MyTurn == "O") {
+                gameState.player2.CountDownTimerWrite(
+                    imageSize = ((screenWidth - 40) / 4).dp,
+                    currentGame = gameState,
+                    reset = reset,
+                    databaseReference = databaseReference,
+                    playerNumber = 2
+                )
+            } else {
+                gameState.player2.CountDownTimerRead(
+                    imageSize = ((screenWidth - 40) / 4).dp,
+                    currentGame = gameState,
+                    databaseReference = databaseReference,
+                    playerNumber = 2
+                )
+            }
         }
     }
 }

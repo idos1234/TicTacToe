@@ -272,7 +272,9 @@ fun OnlineButtonGrid(
     modifier: Modifier,
     dbName: String,
     context: Context = LocalContext.current,
-    lastScore: Int
+    lastScore: Int,
+    startedCountDown: Boolean,
+    changeStartedCountDown: (Boolean) -> Unit
 ) {
 
     var foundWinner by remember {
@@ -280,9 +282,6 @@ fun OnlineButtonGrid(
     }
     var times by remember {
         mutableStateOf(0)
-    }
-    var startedCountDown by remember {
-        mutableStateOf(false)
     }
     var boxes by remember {
         mutableStateOf(gameState.game.boxes)
@@ -419,6 +418,25 @@ fun OnlineButtonGrid(
             }
             gameFinished = (gameState.game.player1Score >= 2) || (gameState.game.player2Score >= 2)
             boxes = gameState.game.boxes
+
+            if(!foundWinner) {
+                if (gameState.game.player1Progress == 0f) {
+                    changeStartedCountDown(true)
+
+                    databaseReference.child(onlineGameId).child("foundWinner").setValue(true)
+
+                    databaseReference.child(onlineGameId).child("player2Score")
+                        .setValue(gameState.game.player2Score + 1)
+                }
+                if (gameState.game.player2Progress == 0f) {
+                    changeStartedCountDown(true)
+
+                    databaseReference.child(onlineGameId).child("foundWinner").setValue(true)
+
+                    databaseReference.child(onlineGameId).child("player1Score")
+                        .setValue(gameState.game.player1Score + 1)
+                }
+            }
         }
 
         override fun onCancelled(error: DatabaseError) {}
@@ -573,7 +591,7 @@ fun OnlineButtonGrid(
 
     //show countDown dialog for winning
     if (foundWinner && !gameFinished) {
-        startedCountDown = true
+        changeStartedCountDown(true)
         gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
         gameState.player1 = getPlayer(email = gameState.game.player1)
         gameState.player2 = getPlayer(email = gameState.game.player2)
@@ -584,7 +602,7 @@ fun OnlineButtonGrid(
                 times = 0
                 foundWinner = false
                 boxes = Boxes()
-                startedCountDown = false
+                changeStartedCountDown(false)
                 ResetGame(
                     game = gameState.game,
                     databaseReference = databaseReference
@@ -596,7 +614,7 @@ fun OnlineButtonGrid(
 
     //show countDown dialog for tie
     if (times == 9 && !foundWinner && !gameFinished) {
-        startedCountDown = true
+        changeStartedCountDown(true)
         gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
         gameState.player1 = getPlayer(email = gameState.game.player1)
         gameState.player2 = getPlayer(email = gameState.game.player2)
@@ -607,7 +625,7 @@ fun OnlineButtonGrid(
                 times = 0
                 foundWinner = false
                 boxes = Boxes()
-                startedCountDown = false
+                changeStartedCountDown(false)
                 ResetGame(
                     game = gameState.game,
                     databaseReference = databaseReference
@@ -727,6 +745,9 @@ fun OnlineTicTacToe(
     var lastScore by remember {
         mutableIntStateOf(0)
     }
+    var startedCountDown by remember {
+        mutableStateOf(false)
+    }
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
@@ -782,7 +803,8 @@ fun OnlineTicTacToe(
             screenWidth = screenWidth.value.toInt(),
             colors = colors,
             gameState = currentGame,
-            databaseReference = databaseReference
+            databaseReference = databaseReference,
+            reset = startedCountDown
         )
         OnlineButtonGrid(
             player = player,
@@ -796,7 +818,9 @@ fun OnlineTicTacToe(
                 .weight(3f)
                 .fillMaxSize(),
             dbName = dbName,
-            lastScore = lastScore
+            lastScore = lastScore,
+            startedCountDown = startedCountDown,
+            changeStartedCountDown = {startedCountDown = it}
         )
         Spacer(modifier = Modifier.weight(1f))
     }
