@@ -103,8 +103,7 @@ fun PlayersBar(
     screenWidth: Int,
     colors: ColorScheme,
     gameState: OnlineGameRememberedValues,
-    databaseReference: DatabaseReference,
-    reset: Boolean,
+    databaseReference: DatabaseReference
 ) {
     gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
     Row(
@@ -118,18 +117,25 @@ fun PlayersBar(
         ) {
             if(MyTurn == "X") {
                 gameState.player1.CountDownTimerWrite(
-                    imageSize = ((screenWidth - 40) / 4).dp,
-                    currentGame = gameState,
-                    reset = reset,
+                    playerNumber = 1,
+                    gameState = gameState,
                     databaseReference = databaseReference,
-                    playerNumber = 1
+                    modifier = Modifier.size(((screenWidth - 40) / 4).dp),
+                    screenWidth = screenWidth,
+                    screenHeight = LocalConfiguration.current.screenHeightDp,
+                    shape = RoundedCornerShape((screenWidth * 20 / 400).dp),
+                    border = BorderStroke(2.dp, if (gameState.game.playerTurn == "X") colors.tertiary else { colors.background})
                 )
             } else {
                 gameState.player1.CountDownTimerRead(
-                    imageSize = ((screenWidth - 40) / 4).dp,
-                    currentGame = gameState,
+                    playerNumber = 1,
+                    gameState = gameState,
                     databaseReference = databaseReference,
-                    playerNumber = 1
+                    modifier = Modifier.size(((screenWidth - 40) / 4).dp),
+                    screenWidth = screenWidth,
+                    screenHeight = LocalConfiguration.current.screenHeightDp,
+                    shape = RoundedCornerShape((screenWidth * 20 / 400).dp),
+                    border = BorderStroke(2.dp, if (gameState.game.playerTurn == "X") colors.tertiary else { colors.background})
                 )
             }
         }
@@ -154,18 +160,25 @@ fun PlayersBar(
         ) {
             if(MyTurn == "O") {
                 gameState.player2.CountDownTimerWrite(
-                    imageSize = ((screenWidth - 40) / 4).dp,
-                    currentGame = gameState,
-                    reset = reset,
+                    playerNumber = 2,
+                    gameState = gameState,
                     databaseReference = databaseReference,
-                    playerNumber = 2
+                    modifier = Modifier.size(((screenWidth - 40) / 4).dp),
+                    screenWidth = screenWidth,
+                    screenHeight = LocalConfiguration.current.screenHeightDp,
+                    shape = RoundedCornerShape((screenWidth * 20 / 400).dp),
+                    border = BorderStroke(2.dp, if (gameState.game.playerTurn == "O") colors.tertiary else { colors.background})
                 )
             } else {
                 gameState.player2.CountDownTimerRead(
-                    imageSize = ((screenWidth - 40) / 4).dp,
-                    currentGame = gameState,
+                    playerNumber = 2,
+                    gameState = gameState,
                     databaseReference = databaseReference,
-                    playerNumber = 2
+                    modifier = Modifier.size(((screenWidth - 40) / 4).dp),
+                    screenWidth = screenWidth,
+                    screenHeight = LocalConfiguration.current.screenHeightDp,
+                    shape = RoundedCornerShape((screenWidth * 20 / 400).dp),
+                    border = BorderStroke(2.dp, if (gameState.game.playerTurn == "O") colors.tertiary else { colors.background})
                 )
             }
         }

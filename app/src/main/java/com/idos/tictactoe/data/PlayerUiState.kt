@@ -1,41 +1,26 @@
 package com.idos.tictactoe.data
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.RoundRect
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathMeasure
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.database.DataSnapshot
@@ -46,7 +31,8 @@ import com.idos.tictactoe.R
 import com.idos.tictactoe.ui.Screen.Game.Online.MyTurn
 import com.idos.tictactoe.ui.Screen.Game.Online.OnlineGameRememberedValues
 import com.idos.tictactoe.ui.Screen.Game.Online.onlineGameId
-import kotlin.math.absoluteValue
+import java.util.Timer
+import kotlin.concurrent.schedule
 
 //data class for every player in database
 data class MainPlayerUiState(
@@ -216,152 +202,95 @@ fun MainPlayerUiState.Draw(
 
 @Composable
 fun MainPlayerUiState.CountDownTimerWrite(
-    imageSize: Dp,
-    currentGame: OnlineGameRememberedValues,
-    reset: Boolean,
+    playerNumber: Int,
+    gameState: OnlineGameRememberedValues,
     databaseReference: DatabaseReference,
-    playerNumber: Int
+    modifier: Modifier,
+    screenWidth: Int,
+    screenHeight: Int,
+    shape: RoundedCornerShape,
+    border: BorderStroke,
 ) {
-    val startDurationInSeconds = 10
-    val screenWidth = LocalConfiguration.current.screenWidthDp
-    val screenHeight = LocalConfiguration.current.screenHeightDp
-
     val colors = MaterialTheme.colorScheme
 
-    var currentTime by remember {
-        mutableStateOf(startDurationInSeconds)
+    var timeLeft by remember {
+        mutableIntStateOf(10)
     }
-
-    var targetValue by remember {
-        mutableStateOf(100f)
+    var setDelay by remember {
+        mutableStateOf(true)
     }
-
-    val progress by animateFloatAsState(
-        targetValue = targetValue,
-        animationSpec = tween(currentTime * 1000, easing = LinearEasing)
-    )
-    if(!reset) {
-        currentTime = progress.toInt() / 10
+    var reset by remember {
+        mutableStateOf(false)
     }
-
-    databaseReference.child(onlineGameId).child("player${playerNumber}Progress").setValue(progress)
 
     databaseReference.addValueEventListener(object : ValueEventListener {
         //on success
         override fun onDataChange(snapshot: DataSnapshot) {
             //find game
             try {
-                currentGame.game = snapshot.children.find {
+                gameState.game = snapshot.children.find {
                     it.getValue(OnlineGameUiState::class.java)!!.id == onlineGameId
                 }?.getValue(OnlineGameUiState::class.java)!!
+            } catch (_: Exception) { }
 
-                if(currentGame.game.foundWinner) {
-                    if(reset) {
-                        currentTime = 0
-                    }
-                    targetValue = 100f
-                }
-            } catch (_: Exception) {}
+            if (playerNumber == 1) {
+                timeLeft = gameState.game.player1TimeLeft
+            } else {
+                timeLeft = gameState.game.player2TimeLeft
+            }
+
+            reset = gameState.game.foundWinner || gameState.game.times == 9
 
         }
 
         override fun onCancelled(error: DatabaseError) {}
     })
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // This is the progress path which wis changed using path measure
-        val pathWithProgress by remember {
-            mutableStateOf(Path())
+
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Card(
+            modifier = modifier,
+            shape = shape,
+            border = border
+        ) {
+            Image(
+                painter = painterResource(id = GetXO(currentImage)),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(shape)
+            )
         }
 
-        // using path
-        val pathMeasure by remember { mutableStateOf(PathMeasure()) }
-
-        val path = remember {
-            Path()
-        }
-
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(imageSize)) {
-            Canvas(modifier = Modifier.size(imageSize)) {
-
-                if (path.isEmpty) {
-                    path.addRoundRect(
-                        RoundRect(
-                            Rect(offset = Offset.Zero, size),
-                            cornerRadius = CornerRadius(
-                                (screenWidth*20/400).dp.toPx(),
-                                (screenWidth*20/400).dp.toPx(),
-                            )
-                        )
-                    )
-                }
-                pathWithProgress.reset()
-
-                pathMeasure.setPath(path, forceClosed = false)
-                pathMeasure.getSegment(
-                    startDistance = 0f,
-                    stopDistance = pathMeasure.length * progress / 100f,
-                    pathWithProgress,
-                    startWithMoveTo = true
-                )
-
-                drawPath(
-                    path = path,
-                    style = Stroke(
-                        (screenWidth * 10 / 400).dp.toPx(),
-                    ),
-                    color = Color.Gray
-                )
-
-                drawPath(
-                    path = pathWithProgress,
-                    style = Stroke(
-                        (screenWidth * 10 / 400).dp.toPx(),
-                    ),
-                    color = colors.tertiary
-                )
-            }
-
-            Card(
-                modifier = Modifier.size(imageSize),
-                shape = RoundedCornerShape((screenWidth*20/400).dp)
-            ) {
-                Image(
-                    painter = painterResource(id = GetXO(currentImage)),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape((screenWidth * 20 / 400).dp))
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height((screenHeight*10/900).dp))
+        Spacer(modifier = Modifier.height((screenHeight * 20 / 900).dp))
 
         Text(
             text = name,
             fontSize = screenWidth.sp * 0.075,
             color = colors.onBackground
         )
-
-        Spacer(modifier = Modifier.height((screenHeight*5/900).dp))
-
+        Spacer(modifier = Modifier.height((screenHeight * 5 / 900).dp))
         Text(
-            text = "%.1f".format(progress / 10),
+            text = timeLeft.toString(),
             fontSize = screenWidth.sp * 0.075,
             color = colors.onBackground
         )
-
     }
 
-    if (progress > 0f) {
-        if (MyTurn == currentGame.game.playerTurn && !reset) {
-            targetValue = 0f
-        } else {
-            targetValue = progress.absoluteValue
+    if (timeLeft > 0) {
+        if (setDelay && MyTurn == gameState.game.playerTurn && !reset) {
+            setDelay = false
+            Timer().schedule(1000){
+                if(MyTurn == gameState.game.playerTurn && !reset) {
+                    databaseReference
+                        .child(onlineGameId)
+                        .child("player${playerNumber}TimeLeft")
+                        .setValue(timeLeft-1)
+                }
+                setDelay = true
+            }
         }
     }
 }
@@ -369,18 +298,19 @@ fun MainPlayerUiState.CountDownTimerWrite(
 
 @Composable
 fun MainPlayerUiState.CountDownTimerRead(
-    imageSize: Dp,
-    currentGame: OnlineGameRememberedValues,
+    playerNumber: Int,
+    gameState: OnlineGameRememberedValues,
     databaseReference: DatabaseReference,
-    playerNumber: Int
+    modifier: Modifier,
+    screenWidth: Int,
+    screenHeight: Int,
+    shape: RoundedCornerShape,
+    border: BorderStroke
 ) {
-    val screenWidth = LocalConfiguration.current.screenWidthDp
-    val screenHeight = LocalConfiguration.current.screenHeightDp
-
     val colors = MaterialTheme.colorScheme
 
-    var progress by remember {
-        mutableStateOf(100f)
+    var timeLeft by remember {
+        mutableIntStateOf(10)
     }
 
     databaseReference.addValueEventListener(object : ValueEventListener {
@@ -388,15 +318,15 @@ fun MainPlayerUiState.CountDownTimerRead(
         override fun onDataChange(snapshot: DataSnapshot) {
             //find game
             try {
-                currentGame.game = snapshot.children.find {
+                gameState.game = snapshot.children.find {
                     it.getValue(OnlineGameUiState::class.java)!!.id == onlineGameId
                 }?.getValue(OnlineGameUiState::class.java)!!
             } catch (_: Exception) { }
 
             if (playerNumber == 1) {
-                progress = currentGame.game.player1Progress
+                timeLeft = gameState.game.player1TimeLeft
             } else {
-                progress = currentGame.game.player2Progress
+                timeLeft = gameState.game.player2TimeLeft
             }
 
         }
@@ -404,92 +334,36 @@ fun MainPlayerUiState.CountDownTimerRead(
         override fun onCancelled(error: DatabaseError) {}
     })
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // This is the progress path which wis changed using path measure
-        val pathWithProgress by remember {
-            mutableStateOf(Path())
+
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Card(
+            modifier = modifier,
+            shape = shape,
+            border = border
+        ) {
+            Image(
+                painter = painterResource(id = GetXO(currentImage)),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(shape)
+            )
         }
 
-        // using path
-        val pathMeasure by remember { mutableStateOf(PathMeasure()) }
-
-        val path = remember {
-            Path()
-        }
-
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(imageSize)) {
-            Canvas(modifier = Modifier.size(imageSize)) {
-
-                if (path.isEmpty) {
-                    path.addRoundRect(
-                        RoundRect(
-                            Rect(offset = Offset.Zero, size),
-                            cornerRadius = CornerRadius(
-                                (screenWidth * 20 / 400).dp.toPx(),
-                                (screenWidth * 20 / 400).dp.toPx(),
-                            )
-                        )
-                    )
-                }
-                pathWithProgress.reset()
-
-                pathMeasure.setPath(path, forceClosed = false)
-                pathMeasure.getSegment(
-                    startDistance = 0f,
-                    stopDistance = pathMeasure.length * progress / 100f,
-                    pathWithProgress,
-                    startWithMoveTo = true
-                )
-
-                drawPath(
-                    path = path,
-                    style = Stroke(
-                        (screenWidth * 10 / 400).dp.toPx(),
-                    ),
-                    color = Color.Gray
-                )
-
-                drawPath(
-                    path = pathWithProgress,
-                    style = Stroke(
-                        (screenWidth * 10 / 400).dp.toPx(),
-                    ),
-                    color = colors.tertiary
-                )
-            }
-
-            Card(
-                modifier = Modifier.size(imageSize),
-                shape = RoundedCornerShape((screenWidth * 20 / 400).dp)
-            ) {
-                Image(
-                    painter = painterResource(id = GetXO(currentImage)),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape((screenWidth * 20 / 400).dp))
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height((screenHeight * 10 / 900).dp))
+        Spacer(modifier = Modifier.height((screenHeight * 20 / 900).dp))
 
         Text(
             text = name,
             fontSize = screenWidth.sp * 0.075,
             color = colors.onBackground
         )
-
         Spacer(modifier = Modifier.height((screenHeight * 5 / 900).dp))
-
         Text(
-            text = "%.1f".format(progress / 10),
+            text = timeLeft.toString(),
             fontSize = screenWidth.sp * 0.075,
             color = colors.onBackground
         )
-
     }
 }

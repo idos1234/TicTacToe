@@ -32,9 +32,9 @@ data class OnlineGameUiState(
     //for friendly games
     var wasGameStarted: Boolean = false,
     //player 1 progress
-    var player1Progress: Float = 100f,
+    var player1TimeLeft: Int = 10,
     //player 2 progress
-    var player2Progress: Float = 100f
+    var player2TimeLeft: Int = 10
 )
 
 data class Boxes (

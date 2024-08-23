@@ -272,9 +272,7 @@ fun OnlineButtonGrid(
     modifier: Modifier,
     dbName: String,
     context: Context = LocalContext.current,
-    lastScore: Int,
-    startedCountDown: Boolean,
-    changeStartedCountDown: (Boolean) -> Unit
+    lastScore: Int
 ) {
 
     var foundWinner by remember {
@@ -289,6 +287,10 @@ fun OnlineButtonGrid(
     var gameFinished by remember {
         mutableStateOf(false)
     }
+    var startedCountDown by remember {
+        mutableStateOf(false)
+    }
+
     Column(
         modifier = modifier
             .background(Color.Transparent)
@@ -420,18 +422,20 @@ fun OnlineButtonGrid(
             boxes = gameState.game.boxes
 
             if(!foundWinner) {
-                if (gameState.game.player1Progress == 0f) {
-                    changeStartedCountDown(true)
+                if (gameState.game.player1TimeLeft == 0) {
+                    startedCountDown = true
 
                     databaseReference.child(onlineGameId).child("foundWinner").setValue(true)
+                    foundWinner = true
 
                     databaseReference.child(onlineGameId).child("player2Score")
                         .setValue(gameState.game.player2Score + 1)
                 }
-                if (gameState.game.player2Progress == 0f) {
-                    changeStartedCountDown(true)
+                if (gameState.game.player2TimeLeft == 0) {
+                    startedCountDown = true
 
                     databaseReference.child(onlineGameId).child("foundWinner").setValue(true)
+                    foundWinner = true
 
                     databaseReference.child(onlineGameId).child("player1Score")
                         .setValue(gameState.game.player1Score + 1)
@@ -474,102 +478,6 @@ fun OnlineButtonGrid(
                     }
                 }
             }
-
-            // if has final winner
-            if (gameState.game.player1Score == 2) {
-                if (MyTurn == "X") {
-                    //won
-                    viewModel.updateFinalScoreScreenData("You won", gameState.game, gameState.player1,  gameState.player2)
-                    gameState.FinalScoreText = "You won"
-                    if(dbName == "Games") {
-                        UpdateScore(
-                            playerName = player,
-                            addedScore = 1,
-                            context = context,
-                            gameState = gameState,
-                            navController = navController,
-                            codeGameViewModel = viewModel,
-                            lastScore = lastScore
-                        )
-                    } else if(dbName == "GamesWithCode") {
-                        GameScoreDialogFriendly(
-                            gameState = gameState,
-                            navController = navController,
-                            context = context
-                        )
-                    }
-                }
-                else if (MyTurn == "O") {
-                    //lose
-                    viewModel.updateFinalScoreScreenData("You lost", gameState.game, gameState.player1,  gameState.player2)
-                    gameState.FinalScoreText = "You lost"
-
-                    if (dbName == "Games") {
-                        UpdateScore(
-                            playerName = player,
-                            addedScore = -1,
-                            context = context,
-                            gameState = gameState,
-                            navController = navController,
-                            codeGameViewModel = viewModel,
-                            lastScore = lastScore
-                        )
-                    } else if(dbName == "GamesWithCode") {
-                        GameScoreDialogFriendly(
-                            gameState = gameState,
-                            navController = navController,
-                            context = context
-                        )
-                    }
-                }
-                // show score screen
-            } else if (gameState.game.player2Score == 2) {
-                if (MyTurn == "O") {
-                    //won
-                    viewModel.updateFinalScoreScreenData("You won", gameState.game, gameState.player1,  gameState.player2)
-                    gameState.FinalScoreText = "You won"
-                    if (dbName == "Games") {
-                        UpdateScore(
-                            playerName = player,
-                            addedScore = 1,
-                            context = context,
-                            gameState = gameState,
-                            navController = navController,
-                            codeGameViewModel = viewModel,
-                            lastScore = lastScore
-                        )
-                    } else if(dbName == "GamesWithCode") {
-                        GameScoreDialogFriendly(
-                            gameState = gameState,
-                            navController = navController,
-                            context = context
-                        )
-                    }
-                }
-                else if (MyTurn == "X") {
-                    //lose
-                    viewModel.updateFinalScoreScreenData("You lost", gameState.game, gameState.player1,  gameState.player2)
-                    gameState.FinalScoreText = "You lost"
-                    if (dbName == "Games") {
-                        UpdateScore(
-                            playerName = player,
-                            addedScore = -1,
-                            context = context,
-                            gameState = gameState,
-                            navController = navController,
-                            codeGameViewModel = viewModel,
-                            lastScore = lastScore
-                        )
-                    } else if(dbName == "GamesWithCode") {
-                        GameScoreDialogFriendly(
-                            gameState = gameState,
-                            navController = navController,
-                            context = context
-                        )
-                    }
-                }
-                // show score screen
-            }
         }
         //tie
         else if (gameState.game.times == 9){
@@ -591,7 +499,7 @@ fun OnlineButtonGrid(
 
     //show countDown dialog for winning
     if (foundWinner && !gameFinished) {
-        changeStartedCountDown(true)
+        startedCountDown = true
         gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
         gameState.player1 = getPlayer(email = gameState.game.player1)
         gameState.player2 = getPlayer(email = gameState.game.player2)
@@ -602,11 +510,11 @@ fun OnlineButtonGrid(
                 times = 0
                 foundWinner = false
                 boxes = Boxes()
-                changeStartedCountDown(false)
                 ResetGame(
                     game = gameState.game,
                     databaseReference = databaseReference
                 )
+                startedCountDown = false
                 viewModel.changeEnable(true)
             }
         )
@@ -614,7 +522,7 @@ fun OnlineButtonGrid(
 
     //show countDown dialog for tie
     if (times == 9 && !foundWinner && !gameFinished) {
-        changeStartedCountDown(true)
+        startedCountDown = true
         gameState.game = findGame(gameId = onlineGameId, databaseReference = databaseReference)
         gameState.player1 = getPlayer(email = gameState.game.player1)
         gameState.player2 = getPlayer(email = gameState.game.player2)
@@ -625,14 +533,110 @@ fun OnlineButtonGrid(
                 times = 0
                 foundWinner = false
                 boxes = Boxes()
-                changeStartedCountDown(false)
                 ResetGame(
                     game = gameState.game,
                     databaseReference = databaseReference
                 )
+                startedCountDown = false
                 viewModel.changeEnable(true)
             }
         )
+    }
+
+
+    // if has final winner
+    if (gameState.game.player1Score == 2) {
+        if (MyTurn == "X") {
+            //won
+            viewModel.updateFinalScoreScreenData("You won", gameState.game, gameState.player1,  gameState.player2)
+            gameState.FinalScoreText = "You won"
+            if(dbName == "Games") {
+                UpdateScore(
+                    playerName = player,
+                    addedScore = 1,
+                    context = context,
+                    gameState = gameState,
+                    navController = navController,
+                    codeGameViewModel = viewModel,
+                    lastScore = lastScore
+                )
+            } else if(dbName == "GamesWithCode") {
+                GameScoreDialogFriendly(
+                    gameState = gameState,
+                    navController = navController,
+                    context = context
+                )
+            }
+        }
+        else if (MyTurn == "O") {
+            //lose
+            viewModel.updateFinalScoreScreenData("You lost", gameState.game, gameState.player1,  gameState.player2)
+            gameState.FinalScoreText = "You lost"
+
+            if (dbName == "Games") {
+                UpdateScore(
+                    playerName = player,
+                    addedScore = -1,
+                    context = context,
+                    gameState = gameState,
+                    navController = navController,
+                    codeGameViewModel = viewModel,
+                    lastScore = lastScore
+                )
+            } else if(dbName == "GamesWithCode") {
+                GameScoreDialogFriendly(
+                    gameState = gameState,
+                    navController = navController,
+                    context = context
+                )
+            }
+        }
+        // show score screen
+    } else if (gameState.game.player2Score == 2) {
+        if (MyTurn == "O") {
+            //won
+            viewModel.updateFinalScoreScreenData("You won", gameState.game, gameState.player1,  gameState.player2)
+            gameState.FinalScoreText = "You won"
+            if (dbName == "Games") {
+                UpdateScore(
+                    playerName = player,
+                    addedScore = 1,
+                    context = context,
+                    gameState = gameState,
+                    navController = navController,
+                    codeGameViewModel = viewModel,
+                    lastScore = lastScore
+                )
+            } else if(dbName == "GamesWithCode") {
+                GameScoreDialogFriendly(
+                    gameState = gameState,
+                    navController = navController,
+                    context = context
+                )
+            }
+        }
+        else if (MyTurn == "X") {
+            //lose
+            viewModel.updateFinalScoreScreenData("You lost", gameState.game, gameState.player1,  gameState.player2)
+            gameState.FinalScoreText = "You lost"
+            if (dbName == "Games") {
+                UpdateScore(
+                    playerName = player,
+                    addedScore = -1,
+                    context = context,
+                    gameState = gameState,
+                    navController = navController,
+                    codeGameViewModel = viewModel,
+                    lastScore = lastScore
+                )
+            } else if(dbName == "GamesWithCode") {
+                GameScoreDialogFriendly(
+                    gameState = gameState,
+                    navController = navController,
+                    context = context
+                )
+            }
+        }
     }
 
     if(gameState.game.player1Quit || gameState.game.player2Quit) {
@@ -713,6 +717,8 @@ fun findGame(gameId: String, databaseReference: DatabaseReference): OnlineGameUi
 
 fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
     if (game.id != "") {
+        databaseReference.child(onlineGameId).child("player1TimeLeft").setValue(10)
+        databaseReference.child(onlineGameId).child("player2TimeLeft").setValue(10)
         databaseReference.child(onlineGameId).child("boxes").setValue(Boxes())
         databaseReference.child(onlineGameId).child("winner").setValue("")
         databaseReference.child(onlineGameId).child("times").setValue(0)
@@ -744,9 +750,6 @@ fun OnlineTicTacToe(
     }
     var lastScore by remember {
         mutableIntStateOf(0)
-    }
-    var startedCountDown by remember {
-        mutableStateOf(false)
     }
 
     val configuration = LocalConfiguration.current
@@ -803,8 +806,7 @@ fun OnlineTicTacToe(
             screenWidth = screenWidth.value.toInt(),
             colors = colors,
             gameState = currentGame,
-            databaseReference = databaseReference,
-            reset = startedCountDown
+            databaseReference = databaseReference
         )
         OnlineButtonGrid(
             player = player,
@@ -818,9 +820,7 @@ fun OnlineTicTacToe(
                 .weight(3f)
                 .fillMaxSize(),
             dbName = dbName,
-            lastScore = lastScore,
-            startedCountDown = startedCountDown,
-            changeStartedCountDown = {startedCountDown = it}
+            lastScore = lastScore
         )
         Spacer(modifier = Modifier.weight(1f))
     }
