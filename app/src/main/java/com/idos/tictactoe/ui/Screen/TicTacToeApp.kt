@@ -22,6 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -85,6 +86,7 @@ import com.idos.tictactoe.ui.Screen.Menu.CustomLinearProgressIndicator
 import com.idos.tictactoe.ui.Screen.Menu.HomeScreen
 import com.idos.tictactoe.ui.Screen.Menu.LeaderBoardScreen
 import com.idos.tictactoe.ui.Screen.Menu.ProfileScreen
+import com.idos.tictactoe.ui.Screen.Menu.Settings
 import com.idos.tictactoe.ui.Screen.Menu.getNextLevelScore
 import com.idos.tictactoe.ui.Screen.Menu.getPrevLevelScore
 import com.idos.tictactoe.ui.screens.Shop.SetNewDeals
@@ -112,7 +114,8 @@ enum class GameScreen(val title: String) {
     SearchGame("SearchGame"),
     Store("Store"),
     SplashScreen("SplashScreen"),
-    NoInternet("NoInternet")
+    NoInternet("NoInternet"),
+    Settings("Settings")
 }
 
 @Composable
@@ -292,7 +295,8 @@ fun BottomAppBar(
     leadBoardColor: Color,
     homeColor: Color,
     profileColor: Color,
-    storeColor: Color
+    storeColor: Color,
+    settingsColor: Color
 ) {
     val connection by connectivityState()
 
@@ -345,7 +349,7 @@ fun BottomAppBar(
                         navController.navigate(GameScreen.Home.title)
                     }
                 },
-                enabled = connection == ConnectionState.Available,
+                enabled = true,
             ),
             contentAlignment = Alignment.Center
         ) {
@@ -372,6 +376,25 @@ fun BottomAppBar(
                 imageVector = Icons.Rounded.AccountCircle,
                 contentDescription = "Account",
                 tint = if(connection == ConnectionState.Available) {profileColor} else {Color.Gray}
+            )
+        }
+        Box(modifier = Modifier
+            .weight(1f)
+            .background(MaterialTheme.colorScheme.primary)
+            .clickable(
+                onClick = {
+                    if (navController.currentDestination?.route != GameScreen.Settings.title) {
+                        navController.navigate(GameScreen.Settings.title)
+                    }
+                },
+                enabled = true,
+            ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Settings,
+                contentDescription = "Settings",
+                tint = settingsColor
             )
         }
     }
@@ -411,6 +434,9 @@ fun TicTacToeApp(
     val email = remember {
         mutableStateOf("")
     }
+    val botDifficulty = remember {
+        mutableStateOf(1)
+    }
     val masterKey = MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
         .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
         .build()
@@ -424,7 +450,9 @@ fun TicTacToeApp(
     )
 
     val emailStr = encryptedSharedPreferences.getString("email", "")
+    val botD = encryptedSharedPreferences.getInt("botDifficulty", 1)
     email.value = emailStr!!
+    botDifficulty.value = botD
 
 
     //menu bar
@@ -442,6 +470,9 @@ fun TicTacToeApp(
     var storeColor by remember {
         mutableStateOf( colors.onPrimary )
     }
+    var settingsColor by remember {
+        mutableStateOf( colors.onPrimary )
+    }
 
     val defaultBottomBar: @Composable () -> Unit = {
         BottomAppBar(
@@ -449,7 +480,8 @@ fun TicTacToeApp(
             leadBoardColor,
             homeColor,
             profileColor,
-            storeColor
+            storeColor,
+            settingsColor
         )
     }
     var bottomAppBar: @Composable () -> Unit by remember {
@@ -510,6 +542,7 @@ fun TicTacToeApp(
                 homeColor = colors.secondary
                 profileColor = colors.onPrimary
                 storeColor = colors.onPrimary
+                settingsColor = colors.onPrimary
 
                 HomeScreen(
                     onTwoPlayersClick = { navController.navigate(GameScreen.TwoPlayers.title) },
@@ -641,6 +674,7 @@ fun TicTacToeApp(
                 homeColor = colors.onPrimary
                 profileColor = colors.onPrimary
                 storeColor = colors.onPrimary
+                settingsColor = colors.onPrimary
 
                 BackHandler {navController.navigate(GameScreen.Home.title)}
                 LeaderBoardScreen(yourPlayer = email.value)
@@ -660,6 +694,7 @@ fun TicTacToeApp(
                 homeColor = colors.onPrimary
                 profileColor = colors.secondary
                 storeColor = colors.onPrimary
+                settingsColor = colors.onPrimary
 
                 BackHandler {navController.navigate(GameScreen.Home.title)}
 
@@ -866,6 +901,38 @@ fun TicTacToeApp(
                 NoInternetConnectionScreen(
                     navController = navController,
                     onPlayOffline = {showMessage = false}
+                )
+            }
+            
+            //settings
+            composable(GameScreen.Settings.title) {
+                leadBoardColor = colors.onPrimary
+                homeColor = colors.onPrimary
+                profileColor = colors.onPrimary
+                storeColor = colors.onPrimary
+                settingsColor = colors.secondary
+
+                BackHandler {navController.navigate(GameScreen.Home.title)}
+
+                val masterKey =
+                    MasterKey.Builder(context, MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+                        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                        .build()
+
+                val encryptedSharedPreferences = EncryptedSharedPreferences.create(
+                    context,
+                    "MyPref",
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                )
+
+
+                Settings(
+                    playerEmail = email.value,
+                    botDifficulty = botDifficulty.value,
+                    changeBotDifficulty = { botDifficulty.value = it },
+                    onDone = { encryptedSharedPreferences.edit().putInt("botDifficulty", botDifficulty.value).apply() }
                 )
             }
 

@@ -68,7 +68,6 @@ fun HomeScreen(
     }
 
     val configuration = LocalConfiguration.current
-
     val screenHeight = configuration.screenHeightDp.dp
 
     val colors = MaterialTheme.colorScheme

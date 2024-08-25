@@ -105,7 +105,8 @@ data class MainPlayerUiState(
         "o_15"
     ),
     var currentX: String = "x_1",
-    var currentO: String= "o_1"
+    var currentO: String= "o_1",
+    var onlineTimeLimit: Int = 40
 )
 
 fun GetXO(xo: String): Int {
