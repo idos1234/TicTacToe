@@ -92,7 +92,7 @@ class TicTacToeViewModel: ViewModel() {
         _uiState.value.targets.removeAll(setOf(box))
     }
 
-    fun botTurn(uiState: UiState) {
+    fun botTurn(uiState: UiState, botDifficulty: Int) {
 
         val negativePlayer = when (uiState.player_Turn) {
             "X" -> "O"
@@ -100,139 +100,360 @@ class TicTacToeViewModel: ViewModel() {
         }
 
         //if bot can win
-        when (WillWin(uiState = uiState, player = uiState.player_Turn)) {
-            1 -> {
-                _uiState.value.boxes = _uiState.value.boxes.copy(Box1 = uiState.player_Turn)
-                _uiState.value.targets.removeAll(setOf(1))
-            }
-            2 -> {
-                _uiState.value.boxes = _uiState.value.boxes.copy(Box2 = uiState.player_Turn)
-                _uiState.value.targets.removeAll(setOf(2))
-            }
-            3 -> {
-                _uiState.value.boxes = _uiState.value.boxes.copy(Box3 = uiState.player_Turn)
-                _uiState.value.targets.removeAll(setOf(3))
-            }
-            4 -> {
-                _uiState.value.boxes = _uiState.value.boxes.copy(Box4 = uiState.player_Turn)
-                _uiState.value.targets.removeAll(setOf(4))
-            }
-            5 -> {
-                _uiState.value.boxes = _uiState.value.boxes.copy(Box5 = uiState.player_Turn)
-                _uiState.value.targets.removeAll(setOf(5))
-            }
-            6 -> {
-                _uiState.value.boxes = _uiState.value.boxes.copy(Box6 = uiState.player_Turn)
-                _uiState.value.targets.removeAll(setOf(6))
-            }
-            7 -> {
-                _uiState.value.boxes = _uiState.value.boxes.copy(Box7 = uiState.player_Turn)
-                _uiState.value.targets.removeAll(setOf(7))
-            }
-            8 -> {
-                _uiState.value.boxes = _uiState.value.boxes.copy(Box8 = uiState.player_Turn)
-                _uiState.value.targets.removeAll(setOf(8))
-            }
-            9 -> {
-                _uiState.value.boxes = _uiState.value.boxes.copy(Box9 = uiState.player_Turn)
-                _uiState.value.targets.removeAll(setOf(9))
-            }
-            else -> {
+        if (botDifficulty == 3) {
+            when (WillWin(uiState = uiState, player = uiState.player_Turn)) {
+                1 -> {
+                    _uiState.value.boxes = _uiState.value.boxes.copy(Box1 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(1))
+                }
 
-                //if bot need to defend
-                when (WillWin(uiState = uiState, player = negativePlayer)) {
-                    1 -> {
-                        _uiState.value.boxes = _uiState.value.boxes.copy(Box1 = uiState.player_Turn)
-                        _uiState.value.targets.removeAll(setOf(1))
-                    }
-                    2 -> {
-                        _uiState.value.boxes = _uiState.value.boxes.copy(Box2 = uiState.player_Turn)
-                        _uiState.value.targets.removeAll(setOf(2))
-                    }
-                    3 -> {
-                        _uiState.value.boxes = _uiState.value.boxes.copy(Box3 = uiState.player_Turn)
-                        _uiState.value.targets.removeAll(setOf(3))
-                    }
-                    4 -> {
-                        _uiState.value.boxes = _uiState.value.boxes.copy(Box4 = uiState.player_Turn)
-                        _uiState.value.targets.removeAll(setOf(4))
-                    }
-                    5 -> {
-                        _uiState.value.boxes = _uiState.value.boxes.copy(Box5 = uiState.player_Turn)
-                        _uiState.value.targets.removeAll(setOf(5))
-                    }
-                    6 -> {
-                        _uiState.value.boxes = _uiState.value.boxes.copy(Box6 = uiState.player_Turn)
-                        _uiState.value.targets.removeAll(setOf(6))
-                    }
-                    7 -> {
-                        _uiState.value.boxes = _uiState.value.boxes.copy(Box7 = uiState.player_Turn)
-                        _uiState.value.targets.removeAll(setOf(7))
-                    }
-                    8 -> {
-                        _uiState.value.boxes = _uiState.value.boxes.copy(Box8 = uiState.player_Turn)
-                        _uiState.value.targets.removeAll(setOf(8))
-                    }
-                    9 -> {
-                        _uiState.value.boxes = _uiState.value.boxes.copy(Box9 = uiState.player_Turn)
-                        _uiState.value.targets.removeAll(setOf(9))
-                    }
-                    //random box
-                    else -> {
+                2 -> {
+                    _uiState.value.boxes = _uiState.value.boxes.copy(Box2 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(2))
+                }
 
-                        val randomBox =
-                            if (_uiState.value.targets.isEmpty()) {
-                                listOf(1,2,3,4,5,6,7,8,9).random()
-                            } else {
-                                _uiState.value.targets.random()
-                            }
-                        when (randomBox) {
-                            1 -> {
-                                _uiState.value.boxes = _uiState.value.boxes.copy(Box1 = uiState.player_Turn)
-                                _uiState.value.targets.removeAll(setOf(1))
-                            }
+                3 -> {
+                    _uiState.value.boxes = _uiState.value.boxes.copy(Box3 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(3))
+                }
 
-                            2 -> {
-                                _uiState.value.boxes = _uiState.value.boxes.copy(Box2 = uiState.player_Turn)
-                                _uiState.value.targets.removeAll(setOf(2))
-                            }
+                4 -> {
+                    _uiState.value.boxes = _uiState.value.boxes.copy(Box4 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(4))
+                }
 
-                            3 -> {
-                                _uiState.value.boxes = _uiState.value.boxes.copy(Box3 = uiState.player_Turn)
-                                _uiState.value.targets.removeAll(setOf(3))
-                            }
+                5 -> {
+                    _uiState.value.boxes = _uiState.value.boxes.copy(Box5 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(5))
+                }
 
-                            4 -> {
-                                _uiState.value.boxes = _uiState.value.boxes.copy(Box4 = uiState.player_Turn)
-                                _uiState.value.targets.removeAll(setOf(4))
-                            }
+                6 -> {
+                    _uiState.value.boxes = _uiState.value.boxes.copy(Box6 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(6))
+                }
 
-                            5 -> {
-                                _uiState.value.boxes = _uiState.value.boxes.copy(Box5 = uiState.player_Turn)
-                                _uiState.value.targets.removeAll(setOf(5))
-                            }
+                7 -> {
+                    _uiState.value.boxes = _uiState.value.boxes.copy(Box7 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(7))
+                }
 
-                            6 -> {
-                                _uiState.value.boxes = _uiState.value.boxes.copy(Box6 = uiState.player_Turn)
-                                _uiState.value.targets.removeAll(setOf(6))
-                            }
+                8 -> {
+                    _uiState.value.boxes = _uiState.value.boxes.copy(Box8 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(8))
+                }
 
-                            7 -> {
-                                _uiState.value.boxes = _uiState.value.boxes.copy(Box7 = uiState.player_Turn)
-                                _uiState.value.targets.removeAll(setOf(7))
-                            }
+                9 -> {
+                    _uiState.value.boxes = _uiState.value.boxes.copy(Box9 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(9))
+                }
 
-                            8 -> {
-                                _uiState.value.boxes = _uiState.value.boxes.copy(Box8 = uiState.player_Turn)
-                                _uiState.value.targets.removeAll(setOf(8))
-                            }
+                else -> {
 
-                            9 -> {
-                                _uiState.value.boxes = _uiState.value.boxes.copy(Box9 = uiState.player_Turn)
-                                _uiState.value.targets.removeAll(setOf(9))
+                    //if bot need to defend
+                    when (WillWin(uiState = uiState, player = negativePlayer)) {
+                        1 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box1 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(1))
+                        }
+
+                        2 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box2 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(2))
+                        }
+
+                        3 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box3 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(3))
+                        }
+
+                        4 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box4 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(4))
+                        }
+
+                        5 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box5 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(5))
+                        }
+
+                        6 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box6 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(6))
+                        }
+
+                        7 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box7 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(7))
+                        }
+
+                        8 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box8 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(8))
+                        }
+
+                        9 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box9 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(9))
+                        }
+                        //random box
+                        else -> {
+
+                            val randomBox =
+                                if (_uiState.value.targets.isEmpty()) {
+                                    listOf(1, 2, 3, 4, 5, 6, 7, 8, 9).random()
+                                } else {
+                                    _uiState.value.targets.random()
+                                }
+                            when (randomBox) {
+                                1 -> {
+                                    _uiState.value.boxes =
+                                        _uiState.value.boxes.copy(Box1 = uiState.player_Turn)
+                                    _uiState.value.targets.removeAll(setOf(1))
+                                }
+
+                                2 -> {
+                                    _uiState.value.boxes =
+                                        _uiState.value.boxes.copy(Box2 = uiState.player_Turn)
+                                    _uiState.value.targets.removeAll(setOf(2))
+                                }
+
+                                3 -> {
+                                    _uiState.value.boxes =
+                                        _uiState.value.boxes.copy(Box3 = uiState.player_Turn)
+                                    _uiState.value.targets.removeAll(setOf(3))
+                                }
+
+                                4 -> {
+                                    _uiState.value.boxes =
+                                        _uiState.value.boxes.copy(Box4 = uiState.player_Turn)
+                                    _uiState.value.targets.removeAll(setOf(4))
+                                }
+
+                                5 -> {
+                                    _uiState.value.boxes =
+                                        _uiState.value.boxes.copy(Box5 = uiState.player_Turn)
+                                    _uiState.value.targets.removeAll(setOf(5))
+                                }
+
+                                6 -> {
+                                    _uiState.value.boxes =
+                                        _uiState.value.boxes.copy(Box6 = uiState.player_Turn)
+                                    _uiState.value.targets.removeAll(setOf(6))
+                                }
+
+                                7 -> {
+                                    _uiState.value.boxes =
+                                        _uiState.value.boxes.copy(Box7 = uiState.player_Turn)
+                                    _uiState.value.targets.removeAll(setOf(7))
+                                }
+
+                                8 -> {
+                                    _uiState.value.boxes =
+                                        _uiState.value.boxes.copy(Box8 = uiState.player_Turn)
+                                    _uiState.value.targets.removeAll(setOf(8))
+                                }
+
+                                9 -> {
+                                    _uiState.value.boxes =
+                                        _uiState.value.boxes.copy(Box9 = uiState.player_Turn)
+                                    _uiState.value.targets.removeAll(setOf(9))
+                                }
                             }
                         }
                     }
+                }
+            }
+        } else if (botDifficulty == 2) {
+            //if bot need to defend
+            when (WillWin(uiState = uiState, player = negativePlayer)) {
+                1 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box1 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(1))
+                }
+
+                2 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box2 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(2))
+                }
+
+                3 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box3 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(3))
+                }
+
+                4 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box4 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(4))
+                }
+
+                5 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box5 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(5))
+                }
+
+                6 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box6 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(6))
+                }
+
+                7 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box7 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(7))
+                }
+
+                8 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box8 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(8))
+                }
+
+                9 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box9 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(9))
+                }
+                //random box
+                else -> {
+
+                    val randomBox =
+                        if (_uiState.value.targets.isEmpty()) {
+                            listOf(1, 2, 3, 4, 5, 6, 7, 8, 9).random()
+                        } else {
+                            _uiState.value.targets.random()
+                        }
+                    when (randomBox) {
+                        1 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box1 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(1))
+                        }
+
+                        2 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box2 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(2))
+                        }
+
+                        3 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box3 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(3))
+                        }
+
+                        4 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box4 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(4))
+                        }
+
+                        5 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box5 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(5))
+                        }
+
+                        6 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box6 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(6))
+                        }
+
+                        7 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box7 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(7))
+                        }
+
+                        8 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box8 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(8))
+                        }
+
+                        9 -> {
+                            _uiState.value.boxes =
+                                _uiState.value.boxes.copy(Box9 = uiState.player_Turn)
+                            _uiState.value.targets.removeAll(setOf(9))
+                        }
+                    }
+                }
+            }
+        } else if (botDifficulty == 1) {
+            val randomBox =
+                if (_uiState.value.targets.isEmpty()) {
+                    listOf(1, 2, 3, 4, 5, 6, 7, 8, 9).random()
+                } else {
+                    _uiState.value.targets.random()
+                }
+            when (randomBox) {
+                1 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box1 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(1))
+                }
+
+                2 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box2 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(2))
+                }
+
+                3 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box3 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(3))
+                }
+
+                4 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box4 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(4))
+                }
+
+                5 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box5 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(5))
+                }
+
+                6 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box6 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(6))
+                }
+
+                7 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box7 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(7))
+                }
+
+                8 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box8 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(8))
+                }
+
+                9 -> {
+                    _uiState.value.boxes =
+                        _uiState.value.boxes.copy(Box9 = uiState.player_Turn)
+                    _uiState.value.targets.removeAll(setOf(9))
                 }
             }
         }

@@ -614,12 +614,13 @@ fun TicTacToeApp(
                         )
                         Timer().schedule(1000) {
                             if ((timesPlayed % 2 == 1) && uiState.player_Turn == "O") {
-                                viewModel.botTurn(uiState)
+                                viewModel.botTurn(uiState, botDifficulty = botDifficulty.value)
                             }
                         }
                     },
                     playerName = email.value,
-                    navController = navController
+                    navController = navController,
+                    botDifficulty = botDifficulty.value
                 )
             }
 
