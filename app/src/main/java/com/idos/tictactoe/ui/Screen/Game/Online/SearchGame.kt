@@ -48,6 +48,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.idos.tictactoe.R
 import com.idos.tictactoe.data.Boxes
+import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.Screen.GameScreen
 import com.idos.tictactoe.ui.Screen.Menu.getPlayer
@@ -79,6 +80,8 @@ fun SearchGameScreen(
     var foundPlayer by remember {
         mutableStateOf(false)
     }
+    val myPlayer = getPlayer(email = player)
+
 
     if(waitingTimeFlag) {
         waitingTimeFlag = false
@@ -97,11 +100,11 @@ fun SearchGameScreen(
     databaseReference.addValueEventListener(object : ValueEventListener {
         //on success
         override fun onDataChange(snapshot: DataSnapshot) {
-            while (times == 1) {
+            while (times == 1 && MainPlayerUiState() != myPlayer) {
                 Loop@ for (Game in snapshot.children) {
                     val game = Game.getValue(OnlineGameUiState::class.java)
                     //enter room
-                    if ((game!!.player2 == "")) {
+                    if ((game!!.player2 == "" && game.player1TimeLeft == myPlayer.onlineTimeLimit)) {
                         val updatedGame = OnlineGameUiState(
                             id = game.id,
                             player1 = game.player1,
@@ -126,7 +129,9 @@ fun SearchGameScreen(
                         player1 = player,
                         player2 = "",
                         winner = "",
-                        boxes = Boxes()
+                        boxes = Boxes(),
+                        player1TimeLeft = myPlayer.onlineTimeLimit,
+                        player2TimeLeft = myPlayer.onlineTimeLimit
                     )
                     onlineGameId = key
                     databaseReference.child(key).setValue(newGame)

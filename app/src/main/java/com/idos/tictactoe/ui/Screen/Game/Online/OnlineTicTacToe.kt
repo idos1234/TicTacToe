@@ -512,7 +512,8 @@ fun OnlineButtonGrid(
                 boxes = Boxes()
                 ResetGame(
                     game = gameState.game,
-                    databaseReference = databaseReference
+                    databaseReference = databaseReference,
+                    timeLimit = gameState.player1.onlineTimeLimit
                 )
                 startedCountDown = false
                 viewModel.changeEnable(true)
@@ -535,7 +536,8 @@ fun OnlineButtonGrid(
                 boxes = Boxes()
                 ResetGame(
                     game = gameState.game,
-                    databaseReference = databaseReference
+                    databaseReference = databaseReference,
+                    timeLimit = gameState.player1.onlineTimeLimit
                 )
                 startedCountDown = false
                 viewModel.changeEnable(true)
@@ -715,10 +717,10 @@ fun findGame(gameId: String, databaseReference: DatabaseReference): OnlineGameUi
     return game
 }
 
-fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference) {
+fun ResetGame(game: OnlineGameUiState, databaseReference: DatabaseReference, timeLimit: Int) {
     if (game.id != "") {
-        databaseReference.child(onlineGameId).child("player1TimeLeft").setValue(10)
-        databaseReference.child(onlineGameId).child("player2TimeLeft").setValue(10)
+        databaseReference.child(onlineGameId).child("player1TimeLeft").setValue(timeLimit)
+        databaseReference.child(onlineGameId).child("player2TimeLeft").setValue(timeLimit)
         databaseReference.child(onlineGameId).child("boxes").setValue(Boxes())
         databaseReference.child(onlineGameId).child("winner").setValue("")
         databaseReference.child(onlineGameId).child("times").setValue(0)
