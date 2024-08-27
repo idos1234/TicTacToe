@@ -284,7 +284,7 @@ fun OpenGameOnline(
     databaseReference.addValueEventListener(object : ValueEventListener {
         //on success
         override fun onDataChange(snapshot: DataSnapshot) {
-            while (times == 1) {
+            while (times == 1 && currentGame.player1 != MainPlayerUiState()) {
                 if (currentGame.game == OnlineGameUiState()) {
                     val key: String = databaseReference.push().key!!.takeLast(5)
                     val newGame = OnlineGameUiState(
@@ -292,7 +292,9 @@ fun OpenGameOnline(
                         player1 = player,
                         player2 = "",
                         winner = "",
-                        boxes = com.idos.tictactoe.data.Boxes()
+                        boxes = com.idos.tictactoe.data.Boxes(),
+                        player1TimeLeft = currentGame.player1.onlineTimeLimit,
+                        player2TimeLeft = currentGame.player1.onlineTimeLimit
                     )
                     onlineGameId = key
                     databaseReference.child(key)
@@ -425,7 +427,9 @@ private fun CodeGameWaitingRoomScreen(
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.fillMaxHeight(0.1f))
+        if (!isLeader) {
+            Spacer(modifier = Modifier.fillMaxHeight(0.1f))
+        }
         //game code
         Row(
             modifier = Modifier,
@@ -524,7 +528,7 @@ private fun CodeGameWaitingRoomScreen(
                     .fillMaxWidth(0.5f),
 
                 enabled = gameState.player2 != MainPlayerUiState(),
-                colors = ButtonDefaults.buttonColors(containerColor = colors.background)
+                colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
             ) {
                 Text(
                     text = "Start",

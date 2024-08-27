@@ -7,22 +7,28 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -48,6 +54,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavType
@@ -75,10 +83,12 @@ import com.idos.tictactoe.ui.Screen.Game.Online.CheckExitGame
 import com.idos.tictactoe.ui.Screen.Game.Online.CodeGameScreen
 import com.idos.tictactoe.ui.Screen.Game.Online.CodeGameViewModel
 import com.idos.tictactoe.ui.Screen.Game.Online.EnterGameOnline
+import com.idos.tictactoe.ui.Screen.Game.Online.OnlineGameRememberedValues
 import com.idos.tictactoe.ui.Screen.Game.Online.OnlineTicTacToe
 import com.idos.tictactoe.ui.Screen.Game.Online.OpenGameOnline
 import com.idos.tictactoe.ui.Screen.Game.Online.SearchGameScreen
 import com.idos.tictactoe.ui.Screen.Game.Online.deleteGame
+import com.idos.tictactoe.ui.Screen.Game.Online.onlineGameId
 import com.idos.tictactoe.ui.Screen.Game.TicTacToeScreen
 import com.idos.tictactoe.ui.Screen.Game.TicTacToeSinglePlayerScreen
 import com.idos.tictactoe.ui.Screen.Game.TicTacToeViewModel
@@ -246,6 +256,130 @@ fun TopAppBar(
             )
         }
         Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+fun SettingsTopBar(
+    gameState: OnlineGameRememberedValues
+) {
+
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+    var timeLimit by remember {
+        mutableStateOf(gameState.game.player1TimeLeft)
+    }
+
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("GamesWithCode")
+
+    databaseReference.addValueEventListener(object : ValueEventListener {
+        //on success
+        override fun onDataChange(snapshot: DataSnapshot) {
+            //find game
+            try {
+                gameState.game = snapshot.children.find {
+                    it.getValue(OnlineGameUiState::class.java)!!.id == onlineGameId
+                }?.getValue(OnlineGameUiState::class.java)!!
+                if (!gameState.game.wasGameStarted) {
+                    timeLimit = gameState.game.player1TimeLeft
+                }
+            } catch (e: Exception) {
+                gameState.game = OnlineGameUiState()
+            }
+        }
+
+        override fun onCancelled(error: DatabaseError) {}
+    })
+
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Absolute.Left,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Settings,
+            contentDescription = "Settings",
+            tint = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier
+                .size((LocalConfiguration.current.screenWidthDp * 50 / 412).dp)
+                .clickable(onClick = { showDialog = true })
+        )
+    }
+
+
+    if (showDialog) {
+        Dialog(
+            onDismissRequest = {},
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth(0.8f)
+                    .background(MaterialTheme.colorScheme.background),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Spacer(modifier = Modifier.fillMaxHeight(0.01f))
+
+                Text(
+                    text = "Change time limit",
+                    fontSize = LocalConfiguration.current.screenHeightDp.sp * 0.04,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+                Button(
+                    onClick = {
+                        val time = when(gameState.game.player1TimeLeft) {
+                            15 -> 30
+                            30 -> 40
+                            40 -> 15
+                            else -> 0
+                        }
+                        databaseReference.child(onlineGameId).child("player1TimeLeft").setValue(time)
+                        databaseReference.child(onlineGameId).child("player2TimeLeft").setValue(time)
+                    },
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .fillMaxWidth(0.95f),
+
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(
+                        text = "Time limit - $timeLimit sec",
+                        fontSize = LocalConfiguration.current.screenHeightDp.sp*0.03,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                
+                Spacer(modifier = Modifier.fillMaxHeight(0.1f))
+
+                Button(
+                    onClick = {
+                        showDialog = false
+                    },
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .fillMaxWidth(0.5f),
+
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(
+                        text = "Done",
+                        fontSize = LocalConfiguration.current.screenHeightDp.sp*0.03,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+
+                Spacer(modifier = Modifier.fillMaxHeight(0.01f))
+            }
+        }
     }
 }
 
@@ -735,7 +869,7 @@ fun TicTacToeApp(
                 if(connection == ConnectionState.UnAvailable) {
                     topAppBar = { NoInternetTopAppBar() }
                 } else {
-                    topAppBar = {}
+                    topAppBar = { SettingsTopBar(gameState = onlineGameValuesUiState)}
                 }
 
                 BackHandler {}

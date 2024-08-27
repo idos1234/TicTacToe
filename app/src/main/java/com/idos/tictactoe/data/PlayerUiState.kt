@@ -215,7 +215,13 @@ fun MainPlayerUiState.CountDownTimerWrite(
     val colors = MaterialTheme.colorScheme
 
     var timeLeft by remember {
-        mutableIntStateOf(10)
+        mutableIntStateOf(
+            if (playerNumber == 1) {
+                gameState.game.player1TimeLeft
+            } else {
+                gameState.game.player2TimeLeft
+            }
+        )
     }
     var setDelay by remember {
         mutableStateOf(true)
