@@ -165,6 +165,7 @@ fun SearchGameScreen(
         currentGame.player1 = getPlayer(email = currentGame.game.player1)
         currentGame.player2 = getPlayer(email = currentGame.game.player2)
         enable.enable = true
+        otherPlayerQuit = false
         navController.navigate("${GameScreen.Online.title}/Games")
     }
 

@@ -61,6 +61,7 @@ import com.idos.tictactoe.data.GetX
 import com.idos.tictactoe.data.MainPlayerUiState
 import com.idos.tictactoe.data.OnlineGameUiState
 import com.idos.tictactoe.ui.Screen.Menu.getPlayer
+import com.idos.tictactoe.ui.Screen.OpponentLeftGame
 import kotlinx.coroutines.delay
 
 var wasGameStarted = false
@@ -288,6 +289,12 @@ fun OnlineButtonGrid(
         mutableStateOf(false)
     }
     var startedCountDown by remember {
+        mutableStateOf(false)
+    }
+    var showDialog by remember {
+        mutableStateOf(true)
+    }
+    var technicalWin by remember {
         mutableStateOf(false)
     }
 
@@ -643,6 +650,38 @@ fun OnlineButtonGrid(
 
     if(gameState.game.player1Quit || gameState.game.player2Quit) {
         otherPlayerQuit = true
+    }
+
+    if (otherPlayerQuit && showDialog) {
+        OpponentLeftGame(
+            onClick = {
+                showDialog = false
+                technicalWin = true
+            }
+        )
+    }
+
+    if (technicalWin) {
+        viewModel.updateFinalScoreScreenData("You won", gameState.game, gameState.player1,  gameState.player2)
+        gameState.FinalScoreText = "You won"
+
+        if (dbName == "Games") {
+            UpdateScore(
+                playerName = player,
+                addedScore = 1,
+                context = context,
+                gameState = gameState,
+                navController = navController,
+                codeGameViewModel = viewModel,
+                lastScore = lastScore
+            )
+        } else if(dbName == "GamesWithCode") {
+            GameScoreDialogFriendly(
+                gameState = gameState,
+                navController = navController,
+                context = context
+            )
+        }
     }
 }
 

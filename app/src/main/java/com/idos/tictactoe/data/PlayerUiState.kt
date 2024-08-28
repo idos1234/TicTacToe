@@ -31,6 +31,7 @@ import com.idos.tictactoe.R
 import com.idos.tictactoe.ui.Screen.Game.Online.MyTurn
 import com.idos.tictactoe.ui.Screen.Game.Online.OnlineGameRememberedValues
 import com.idos.tictactoe.ui.Screen.Game.Online.onlineGameId
+import com.idos.tictactoe.ui.Screen.Game.Online.otherPlayerQuit
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -290,7 +291,7 @@ fun MainPlayerUiState.CountDownTimerWrite(
         if (setDelay && MyTurn == gameState.game.playerTurn && !reset) {
             setDelay = false
             Timer().schedule(1000){
-                if(MyTurn == gameState.game.playerTurn && !reset) {
+                if(MyTurn == gameState.game.playerTurn && !reset && !otherPlayerQuit) {
                     databaseReference
                         .child(onlineGameId)
                         .child("player${playerNumber}TimeLeft")

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +35,58 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.idos.tictactoe.ui.Screen.Game.Online.DotsFlashing
+
+@Composable
+fun OpponentLeftGame(onClick: () -> Unit) {
+    val screenHeight = LocalConfiguration.current.screenHeightDp
+    val colors = MaterialTheme.colorScheme
+
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .fillMaxHeight(0.15f)
+                .background(colors.background),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(0.9f),
+                horizontalAlignment = Alignment.CenterHorizontally
+
+            ) {
+                Text(
+                    text = "Your opponent has left the game",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    fontSize = screenHeight.sp * 0.02,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onBackground
+                )
+
+                Spacer(Modifier.weight(1f))
+
+                Button(
+                    onClick = onClick,
+                    modifier = Modifier.fillMaxWidth(0.4f),
+                    colors = ButtonDefaults.buttonColors(colors.primary)
+                ) {
+                    Text(
+                        text = "Ok",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        fontSize = screenHeight.sp * 0.02,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onPrimary
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun NoInternetDialog(navController: NavController, onPlayOffline: () -> Unit) {

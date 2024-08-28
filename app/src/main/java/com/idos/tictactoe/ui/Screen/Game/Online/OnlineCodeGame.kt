@@ -528,13 +528,13 @@ private fun CodeGameWaitingRoomScreen(
                     .fillMaxWidth(0.5f),
 
                 enabled = gameState.player2 != MainPlayerUiState(),
-                colors = ButtonDefaults.buttonColors(containerColor = colors.primary)
+                colors = ButtonDefaults.buttonColors(containerColor = colors.onPrimary)
             ) {
                 Text(
                     text = "Start",
                     fontSize = screenHeight.sp*0.03,
                     fontWeight = FontWeight.SemiBold,
-                    color = colors.onBackground
+                    color = if(gameState.player2 != MainPlayerUiState()) {colors.primary} else {colors.onPrimary}
                 )
             }
         }
@@ -553,7 +553,7 @@ private fun CodeGameWaitingRoomScreen(
                 text = "Leave",
                 fontSize = screenHeight.sp*0.03,
                 fontWeight = FontWeight.SemiBold,
-                color = if(gameState.player2 == MainPlayerUiState() || !isLeader) {colors.onPrimary} else {colors.onError}
+                color = if(gameState.player2 == MainPlayerUiState() || !isLeader) {colors.onError} else {colors.onPrimary}
             )
         }
     }
@@ -648,7 +648,7 @@ fun OpenNewGameButton(modifier: Modifier, navController: NavController, context:
             Spacer(modifier = Modifier.weight(2.2f))
             Button(
                 onClick = {openGame = true},
-                colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
+                colors = ButtonDefaults.buttonColors(containerColor = colors.onBackground),
                 modifier = Modifier.wrapContentSize()
             ) {
                 Text(
@@ -656,7 +656,7 @@ fun OpenNewGameButton(modifier: Modifier, navController: NavController, context:
                     fontWeight = FontWeight.SemiBold,
                     fontSize = screenHeight.value.sp * 0.03,
                     textAlign = TextAlign.Center,
-                    color = colors.onPrimary,
+                    color = colors.background,
                     modifier = Modifier
                 )
             }
