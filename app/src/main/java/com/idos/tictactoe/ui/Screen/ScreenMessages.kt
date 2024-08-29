@@ -35,6 +35,195 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.idos.tictactoe.ui.Screen.Game.Online.DotsFlashing
+import kotlin.system.exitProcess
+
+@Composable
+fun MaintenanceBreak() {
+    val screenHeight = LocalConfiguration.current.screenHeightDp
+    val colors = MaterialTheme.colorScheme
+
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .background(colors.background),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.fillMaxHeight(0.02f))
+
+            Text(
+                text = "Quick Timeout",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = screenHeight.sp * 0.03,
+                fontWeight = FontWeight.Medium,
+                color = colors.onBackground
+            )
+
+            Spacer(modifier = Modifier.fillMaxHeight(0.03f))
+
+            Text(
+                text = "We’re taking a short break to keep everything in top shape! Please hang tight—your game will resume",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = screenHeight.sp * 0.02,
+                fontWeight = FontWeight.Bold,
+                color = colors.onBackground
+            )
+            Row(horizontalArrangement = Arrangement.Absolute.Left) {
+                Text(
+                    text = "in just a few minutes",
+                    textAlign = TextAlign.Center,
+                    fontSize = screenHeight.sp * 0.02,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onBackground
+                )
+                Text(
+                    text = ".",
+                    textAlign = TextAlign.Center,
+                    fontSize = screenHeight.sp * 0.02,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onBackground
+                )
+            }
+
+            Spacer(modifier = Modifier.fillMaxHeight(0.02f))
+
+            Row(horizontalArrangement = Arrangement.Absolute.Left) {
+                Text(
+                    text = "Thanks for your patience",
+                    textAlign = TextAlign.Center,
+                    fontSize = screenHeight.sp * 0.025,
+                    fontWeight = FontWeight.Medium,
+                    color = colors.onBackground
+                )
+                Text(
+                    text = "!",
+                    textAlign = TextAlign.Center,
+                    fontSize = screenHeight.sp * 0.025,
+                    fontWeight = FontWeight.Medium,
+                    color = colors.onBackground
+                )
+            }
+
+            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
+
+            Button(
+                onClick = { exitProcess(0) },
+                modifier = Modifier.fillMaxWidth(0.4f),
+                colors = ButtonDefaults.buttonColors(colors.primary)
+            ) {
+                Text(
+                    text = "Ok",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    fontSize = screenHeight.sp * 0.02,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onPrimary
+                )
+            }
+
+            Spacer(modifier = Modifier.fillMaxHeight(0.02f))
+        }
+    }
+}
+
+@Composable
+fun UpdateMessage() {
+    val screenHeight = LocalConfiguration.current.screenHeightDp
+    val colors = MaterialTheme.colorScheme
+
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .background(colors.background),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.fillMaxHeight(0.02f))
+
+            Text(
+                text = "Quick Update Break",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = screenHeight.sp * 0.03,
+                fontWeight = FontWeight.Medium,
+                color = colors.onBackground
+            )
+
+            Spacer(modifier = Modifier.fillMaxHeight(0.03f))
+
+            Text(
+                text = "We're currently updating the game to bring you new features and improvements. The update will be",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = screenHeight.sp * 0.02,
+                fontWeight = FontWeight.Bold,
+                color = colors.onBackground
+            )
+            Row(horizontalArrangement = Arrangement.Absolute.Left) {
+                Text(
+                    text = "available in just a few minutes",
+                    textAlign = TextAlign.Center,
+                    fontSize = screenHeight.sp * 0.02,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onBackground
+                )
+                Text(
+                    text = ".",
+                    textAlign = TextAlign.Center,
+                    fontSize = screenHeight.sp * 0.02,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onBackground
+                )
+            }
+
+            Spacer(modifier = Modifier.fillMaxHeight(0.02f))
+
+            Row(horizontalArrangement = Arrangement.Absolute.Left) {
+                Text(
+                    text = "Thanks for your patience",
+                    textAlign = TextAlign.Center,
+                    fontSize = screenHeight.sp * 0.025,
+                    fontWeight = FontWeight.Medium,
+                    color = colors.onBackground
+                )
+                Text(
+                    text = "!",
+                    textAlign = TextAlign.Center,
+                    fontSize = screenHeight.sp * 0.025,
+                    fontWeight = FontWeight.Medium,
+                    color = colors.onBackground
+                )
+            }
+
+            Spacer(modifier = Modifier.fillMaxHeight(0.05f))
+
+            Button(
+                onClick = { exitProcess(0) },
+                modifier = Modifier.fillMaxWidth(0.4f),
+                colors = ButtonDefaults.buttonColors(colors.primary)
+            ) {
+                Text(
+                    text = "Ok",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    fontSize = screenHeight.sp * 0.02,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onPrimary
+                )
+            }
+
+            Spacer(modifier = Modifier.fillMaxHeight(0.02f))
+        }
+    }
+}
 
 @Composable
 fun OpponentLeftGame(onClick: () -> Unit) {

@@ -72,6 +72,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.idos.tictactoe.BuildConfig
 import com.idos.tictactoe.Connection.NoInternetConnectionScreen
 import com.idos.tictactoe.R
 import com.idos.tictactoe.data.MainPlayerUiState
@@ -1080,6 +1081,7 @@ fun TicTacToeApp(
         }
     }
 
+    //no internet dialog
     if (
         showMessage &&
         connection == ConnectionState.UnAvailable &&
@@ -1093,6 +1095,75 @@ fun TicTacToeApp(
             onPlayOffline = { showMessage = false }
         )
     }
+
+    //new version dialog
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val VersionDatabaseReference = firebaseDatabase.getReference("Version")
+    var versionCode by remember {
+        mutableIntStateOf(0)
+    }
+
+    VersionDatabaseReference.addValueEventListener(object : ValueEventListener {
+        override fun onDataChange(snapshot: DataSnapshot) {
+            versionCode = snapshot.getValue(Int::class.java)!!
+        }
+
+        override fun onCancelled(error: DatabaseError) {}
+    })
+
+    //Maintenance Break
+    val BuildStructureDatabaseReference = firebaseDatabase.getReference("BuildStructure")
+    var buildStructure by remember {
+        mutableStateOf(false)
+    }
+
+    BuildStructureDatabaseReference.addValueEventListener(object : ValueEventListener {
+        override fun onDataChange(snapshot: DataSnapshot) {
+            buildStructure = snapshot.getValue(Boolean::class.java)!!
+        }
+
+        override fun onCancelled(error: DatabaseError) {
+
+        }
+    })
+
+    if (
+        BuildConfig.VERSION_CODE < versionCode &&
+        navController.currentDestination!!.route != GameScreen.TwoPlayers.title &&
+        navController.currentDestination!!.route != GameScreen.SinglePlayer.title &&
+        navController.currentDestination!!.route != GameScreen.Online.title &&
+        navController.currentDestination!!.route != GameScreen.CodeGame.title &&
+        navController.currentDestination!!.route != GameScreen.OpenGameWithCode.title &&
+        navController.currentDestination!!.route != GameScreen.EnterGameWithCode.title &&
+        navController.currentDestination!!.route != GameScreen.GoogleSignIn.title &&
+        navController.currentDestination!!.route != GameScreen.NewName.title &&
+        navController.currentDestination!!.route != GameScreen.TimeUp.title &&
+        navController.currentDestination!!.route != GameScreen.SearchGame.title &&
+        navController.currentDestination!!.route != GameScreen.SplashScreen.title &&
+        navController.currentDestination!!.route != GameScreen.NoInternet.title
+    ) {
+        UpdateMessage()
+    }
+    else if (
+        buildStructure &&
+        navController.currentDestination!!.route != GameScreen.TwoPlayers.title &&
+        navController.currentDestination!!.route != GameScreen.SinglePlayer.title &&
+        navController.currentDestination!!.route != GameScreen.Online.title &&
+        navController.currentDestination!!.route != GameScreen.CodeGame.title &&
+        navController.currentDestination!!.route != GameScreen.OpenGameWithCode.title &&
+        navController.currentDestination!!.route != GameScreen.EnterGameWithCode.title &&
+        navController.currentDestination!!.route != GameScreen.GoogleSignIn.title &&
+        navController.currentDestination!!.route != GameScreen.NewName.title &&
+        navController.currentDestination!!.route != GameScreen.TimeUp.title &&
+        navController.currentDestination!!.route != GameScreen.SearchGame.title &&
+        navController.currentDestination!!.route != GameScreen.SplashScreen.title &&
+        navController.currentDestination!!.route != GameScreen.NoInternet.title
+    ) {
+        MaintenanceBreak()
+    }
+
+
+
 }
 
 fun resetGame(
