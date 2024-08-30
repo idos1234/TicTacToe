@@ -62,54 +62,54 @@ data class Skin(
 )
 
 val Xs = listOf(
-    Skin(x_2, "Candy", 200, "x_2") { BuyX(playerName = it, x = "x_2", price = 200) },
-    Skin(x_3, "Sport", 250, "x_3") { BuyX(playerName = it, x = "x_3", price = 250) },
-    Skin(x_4, "Food", 450, "x_4") { BuyX(playerName = it, x = "x_4", price = 450) },
-    Skin(x_5, "Nature", 600, "x_5") { BuyX(playerName = it, x = "x_5", price = 600) },
-    Skin(x_6, "Rainbow", 700, "x_6") { BuyX(playerName = it, x = "x_6", price = 700) },
-    Skin(x_7, "Knight", 1100, "x_7") { BuyX(playerName = it, x = "x_7", price = 1100) },
-    Skin(x_8, "Emoji", 1300, "x_8") { BuyX(playerName = it, x = "x_8", price = 1300) },
-    Skin(x_9, "Neon", 1500, "x_9") { BuyX(playerName = it, x = "x_9", price = 1500) },
-    Skin(x_10, "Hacking", 1600, "x_10") { BuyX(playerName = it, x = "x_10", price = 1600) },
-    Skin(x_11, "Pirate", 1700, "x_11") { BuyX(playerName = it, x = "x_11", price = 1700) },
-    Skin(x_12, "Music", 1800, "x_12") { BuyX(playerName = it, x = "x_12", price = 1800) },
-    Skin(x_13, "symbols", 1900, "x_13") { BuyX(playerName = it, x = "x_13", price = 1900) },
-    Skin(x_14, "Animals", 2000, "x_14") { BuyX(playerName = it, x = "x_14", price = 2000) },
-    Skin(x_15, "Space", 4000, "x_15") { BuyX(playerName = it, x = "x_15", price = 4000) }
+    Skin(x_2, "Candy", 250, "x_2") { BuyX(playerName = it, x = "x_2", price = 250) },
+    Skin(x_3, "Sport", 400, "x_3") { BuyX(playerName = it, x = "x_3", price = 400) },
+    Skin(x_4, "Food", 600, "x_4") { BuyX(playerName = it, x = "x_4", price = 600) },
+    Skin(x_5, "Nature", 800, "x_5") { BuyX(playerName = it, x = "x_5", price = 800) },
+    Skin(x_6, "Rainbow", 1000, "x_6") { BuyX(playerName = it, x = "x_6", price = 1000) },
+    Skin(x_7, "Knight", 1300, "x_7") { BuyX(playerName = it, x = "x_7", price = 1300) },
+    Skin(x_8, "Emoji", 1600, "x_8") { BuyX(playerName = it, x = "x_8", price = 1600) },
+    Skin(x_9, "Neon", 1900, "x_9") { BuyX(playerName = it, x = "x_9", price = 1900) },
+    Skin(x_10, "Hacking", 2000, "x_10") { BuyX(playerName = it, x = "x_10", price = 2000) },
+    Skin(x_11, "Pirate", 2350, "x_11") { BuyX(playerName = it, x = "x_11", price = 2350) },
+    Skin(x_12, "Music", 2500, "x_12") { BuyX(playerName = it, x = "x_12", price = 2500) },
+    Skin(x_13, "symbols", 2650, "x_13") { BuyX(playerName = it, x = "x_13", price = 2650) },
+    Skin(x_14, "Animals", 2700, "x_14") { BuyX(playerName = it, x = "x_14", price = 2800) },
+    Skin(x_15, "Space", 7000, "x_15") { BuyX(playerName = it, x = "x_15", price = 7000) }
 )
 
 val Os = listOf(
-    Skin(o_2, "Candy", 200, "o_2") { BuyO(playerName = it, o = "o_2", price = 200) },
-    Skin(o_3, "Sport", 250, "o_3") { BuyO(playerName = it, o = "o_3", price = 250) },
-    Skin(o_4, "Food", 450, "o_4") { BuyO(playerName = it, o = "o_4", price = 450) },
-    Skin(o_5, "Nature", 600, "o_5") { BuyO(playerName = it, o = "o_5", price = 600) },
-    Skin(o_6, "Rainbow", 700, "o_6") { BuyO(playerName = it, o = "o_6", price = 700) },
-    Skin(o_7, "Knight", 1100, "o_7") { BuyO(playerName = it, o = "o_7", price = 1100) },
-    Skin(o_8, "Emoji", 1300, "o_8") { BuyO(playerName = it, o = "o_8", price = 1300) },
-    Skin(o_9, "Neon", 1500, "o_9") { BuyO(playerName = it, o = "o_9", price = 1500) },
-    Skin(o_10, "Hacking", 1600, "o_10") { BuyO(playerName = it, o = "o_10", price = 1600) },
-    Skin(o_11, "Pirate", 1700, "o_11") { BuyO(playerName = it, o = "o_11", price = 1700) },
-    Skin(o_12, "Music", 1800, "o_12") { BuyO(playerName = it, o = "o_12", price = 1800) },
-    Skin(o_13, "symbols", 1900, "o_13") { BuyO(playerName = it, o = "o_13", price = 1900) },
-    Skin(o_14, "Animals", 2000, "o_14") { BuyO(playerName = it, o = "o_14", price = 2000) },
-    Skin(o_15, "Space", 4000, "o_15") { BuyO(playerName = it, o = "o_15", price = 4000) }
+    Skin(o_2, "Candy", 250, "o_2") { BuyO(playerName = it, o = "o_2", price = 250) },
+    Skin(o_3, "Sport", 400, "o_3") { BuyO(playerName = it, o = "o_3", price = 400) },
+    Skin(o_4, "Food", 600, "o_4") { BuyO(playerName = it, o = "o_4", price = 600) },
+    Skin(o_5, "Nature", 800, "o_5") { BuyO(playerName = it, o = "o_5", price = 800) },
+    Skin(o_6, "Rainbow", 1000, "o_6") { BuyO(playerName = it, o = "o_6", price = 1000) },
+    Skin(o_7, "Knight", 1300, "o_7") { BuyO(playerName = it, o = "o_7", price = 1300) },
+    Skin(o_8, "Emoji", 1600, "o_8") { BuyO(playerName = it, o = "o_8", price = 1600) },
+    Skin(o_9, "Neon", 1900, "o_9") { BuyO(playerName = it, o = "o_9", price = 1900) },
+    Skin(o_10, "Hacking", 2000, "o_10") { BuyO(playerName = it, o = "o_10", price = 2000) },
+    Skin(o_11, "Pirate", 2350, "o_11") { BuyO(playerName = it, o = "o_11", price = 2350) },
+    Skin(o_12, "Music", 2500, "o_12") { BuyO(playerName = it, o = "o_12", price = 2500) },
+    Skin(o_13, "symbols", 2650, "o_13") { BuyO(playerName = it, o = "o_13", price = 2650) },
+    Skin(o_14, "Animals", 2800, "o_14") { BuyO(playerName = it, o = "o_14", price = 2800) },
+    Skin(o_15, "Space", 7000, "o_15") { BuyO(playerName = it, o = "o_15", price = 7000) }
 )
 
 val Images = listOf(
-    Skin(xo_2, "Candy", 200, "xo_2") { BuyImage(playerName = it, image = "xo_2", price = 200) },
-    Skin(xo_3, "Sport", 250, "xo_3") { BuyImage(playerName = it, image = "xo_3", price = 250) },
-    Skin(xo_4, "Food", 450, "xo_4") { BuyImage(playerName = it, image = "xo_3", price = 450) },
-    Skin(xo_5, "Nature", 600, "xo_5") { BuyImage(playerName = it, image = "xo_5", price = 600) },
-    Skin(xo_6, "Rainbow", 700, "xo_6") { BuyImage(playerName = it, image = "xo_6", price = 700) },
-    Skin(xo_7, "Knight", 1100, "xo_7") { BuyImage(playerName = it, image = "xo_7", price = 1100) },
-    Skin(xo_8, "Emoji", 1300, "xo_8") { BuyImage(playerName = it, image = "xo_8", price = 1300) },
-    Skin(xo_9, "Neon", 1500, "xo_9") { BuyImage(playerName = it, image = "xo_9", price = 1500) },
-    Skin(xo_10, "Hacking", 1600, "xo_10") { BuyImage(playerName = it, image = "xo_10", price = 1600) },
-    Skin(xo_11, "Pirate", 1700, "xo_11") { BuyImage(playerName = it, image = "xo_11", price = 1700) },
-    Skin(xo_12, "Music", 1800, "xo_12") { BuyImage(playerName = it, image = "xo_12", price = 1800) },
-    Skin(xo_13, "symbols", 1900, "xo_13") { BuyImage(playerName = it, image = "xo_13", price = 1900) },
-    Skin(xo_14, "Animals", 2000, "xo_14") { BuyImage(playerName = it, image = "xo_14", price = 2000) },
-    Skin(xo_15, "Space", 4000, "xo_15") { BuyImage(playerName = it, image = "xo_15", price = 4000) }
+    Skin(xo_2, "Candy", 250, "xo_2") { BuyImage(playerName = it, image = "xo_2", price = 250) },
+    Skin(xo_3, "Sport", 400, "xo_3") { BuyImage(playerName = it, image = "xo_3", price = 400) },
+    Skin(xo_4, "Food", 600, "xo_4") { BuyImage(playerName = it, image = "xo_3", price = 600) },
+    Skin(xo_5, "Nature", 800, "xo_5") { BuyImage(playerName = it, image = "xo_5", price = 800) },
+    Skin(xo_6, "Rainbow", 1000, "xo_6") { BuyImage(playerName = it, image = "xo_6", price = 1000) },
+    Skin(xo_7, "Knight", 1300, "xo_7") { BuyImage(playerName = it, image = "xo_7", price = 1300) },
+    Skin(xo_8, "Emoji", 1600, "xo_8") { BuyImage(playerName = it, image = "xo_8", price = 1600) },
+    Skin(xo_9, "Neon", 1900, "xo_9") { BuyImage(playerName = it, image = "xo_9", price = 1900) },
+    Skin(xo_10, "Hacking", 2000, "xo_10") { BuyImage(playerName = it, image = "xo_10", price = 2000) },
+    Skin(xo_11, "Pirate", 2350, "xo_11") { BuyImage(playerName = it, image = "xo_11", price = 2350) },
+    Skin(xo_12, "Music", 2500, "xo_12") { BuyImage(playerName = it, image = "xo_12", price = 2500) },
+    Skin(xo_13, "symbols", 2650, "xo_13") { BuyImage(playerName = it, image = "xo_13", price = 2650) },
+    Skin(xo_14, "Animals", 2800, "xo_14") { BuyImage(playerName = it, image = "xo_14", price = 2800) },
+    Skin(xo_15, "Space", 7000, "xo_15") { BuyImage(playerName = it, image = "xo_15", price = 7000) }
 )
 
 

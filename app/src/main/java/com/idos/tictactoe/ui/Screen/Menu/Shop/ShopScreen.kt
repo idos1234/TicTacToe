@@ -474,7 +474,7 @@ fun ShopScreen(playerName: String, context: Context = LocalContext.current) {
                         colors = colors,
                         screenWidth = screenWidth,
                         screenHeight = screenHeight,
-                        coins = 100,
+                        coins = 80,
                         price = 0.99
                     )
                     ShowCoins(
@@ -488,7 +488,7 @@ fun ShopScreen(playerName: String, context: Context = LocalContext.current) {
                         colors = colors,
                         screenWidth = screenWidth,
                         screenHeight = screenHeight,
-                        coins = 1000,
+                        coins = 1200,
                         price = 9.99
                     )
                 }
@@ -503,21 +503,21 @@ fun ShopScreen(playerName: String, context: Context = LocalContext.current) {
                         colors = colors,
                         screenWidth = screenWidth,
                         screenHeight = screenHeight,
-                        coins = 2000,
+                        coins = 2500,
                         price = 19.99
                     )
                     ShowCoins(
                         colors = colors,
                         screenWidth = screenWidth,
                         screenHeight = screenHeight,
-                        coins = 5000,
+                        coins = 7000,
                         price = 49.99
                     )
                     ShowCoins(
                         colors = colors,
                         screenWidth = screenWidth,
                         screenHeight = screenHeight,
-                        coins = 10000,
+                        coins = 15000,
                         price = 99.99
                     )
                 }
