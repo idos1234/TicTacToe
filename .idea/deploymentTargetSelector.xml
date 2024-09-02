@@ -3,11 +3,11 @@
   <component name="deploymentTargetSelector">
     <selectionStates>
       <SelectionState runConfigName="app">
-        <option name="selectionMode" value="DIALOG" />
-        <DropdownSelection timestamp="2024-08-22T08:52:55.670138Z">
+        <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2024-09-02T14:57:10.294512100Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\sulim\.android\avd\Medium_Phone_API_34_2.avd" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=RZCW90WPZSP" />
             </handle>
           </Target>
         </DropdownSelection>

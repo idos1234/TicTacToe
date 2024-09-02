@@ -1152,8 +1152,6 @@ fun TicTacToeApp(
         navController.currentDestination!!.route != GameScreen.CodeGame.title &&
         navController.currentDestination!!.route != GameScreen.OpenGameWithCode.title &&
         navController.currentDestination!!.route != GameScreen.EnterGameWithCode.title &&
-        navController.currentDestination!!.route != GameScreen.GoogleSignIn.title &&
-        navController.currentDestination!!.route != GameScreen.NewName.title &&
         navController.currentDestination!!.route != GameScreen.TimeUp.title &&
         navController.currentDestination!!.route != GameScreen.SearchGame.title &&
         navController.currentDestination!!.route != GameScreen.SplashScreen.title &&
