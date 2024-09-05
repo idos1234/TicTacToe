@@ -1,5 +1,6 @@
 package com.idos.tictactoe
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -12,7 +13,7 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.android.play.core.ktx.isFlexibleUpdateAllowed
 import com.google.android.play.core.ktx.isImmediateUpdateAllowed
-import com.idos.tictactoe.ui.Screen.TicTacToeApp
+import com.idos.tictactoe.ui.screen.TicTacToeApp
 import com.idos.tictactoe.ui.theme.TicTacToeTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,6 +35,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("UnsafeIntentLaunch")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1) {
@@ -55,7 +57,7 @@ class MainActivity : ComponentActivity() {
                 ).show()
 
                 finish()
-                startActivity(getIntent())
+                startActivity(intent)
             }
         }
     }

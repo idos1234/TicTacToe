@@ -2,31 +2,31 @@ package com.idos.tictactoe.ui
 
 import androidx.compose.runtime.Composable
 import com.idos.tictactoe.data.UiState
-import com.idos.tictactoe.ui.Screen.Game.TicTacToeScreen
-import com.idos.tictactoe.ui.Screen.Game.TicTacToeSinglePlayerScreen
+import com.idos.tictactoe.ui.screen.game.TicTacToeScreen
+import com.idos.tictactoe.ui.screen.game.TicTacToeSinglePlayerScreen
 
 /**
  * Check the winner for the [TicTacToeScreen] and the [TicTacToeSinglePlayerScreen]
  */
 
 @Composable
-fun CheckWinner(uiState: UiState): String {
+fun checkWinner(uiState: UiState): String {
 
     var winner = ""
 
     // first row
 
-    if(uiState.boxes.Box1 == "X") {
-        if(uiState.boxes.Box2 == "X") {
-            if(uiState.boxes.Box3 == "X"){
+    if(uiState.boxes.box1 == "X") {
+        if(uiState.boxes.box2 == "X") {
+            if(uiState.boxes.box3 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.boxes.Box1 == "O") {
-        if(uiState.boxes.Box2 == "O") {
-            if(uiState.boxes.Box3 == "O"){
+    if(uiState.boxes.box1 == "O") {
+        if(uiState.boxes.box2 == "O") {
+            if(uiState.boxes.box3 == "O"){
                 winner = "O"
             }
         }
@@ -34,17 +34,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // second row
 
-    if(uiState.boxes.Box4 == "X") {
-        if(uiState.boxes.Box5 == "X") {
-            if(uiState.boxes.Box6 == "X"){
+    if(uiState.boxes.box4 == "X") {
+        if(uiState.boxes.box5 == "X") {
+            if(uiState.boxes.box6 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.boxes.Box4 == "O") {
-        if(uiState.boxes.Box5 == "O") {
-            if(uiState.boxes.Box6 == "O"){
+    if(uiState.boxes.box4 == "O") {
+        if(uiState.boxes.box5 == "O") {
+            if(uiState.boxes.box6 == "O"){
                 winner = "O"
             }
         }
@@ -52,17 +52,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // third row
 
-    if(uiState.boxes.Box7 == "X") {
-        if(uiState.boxes.Box8 == "X") {
-            if(uiState.boxes.Box9 == "X"){
+    if(uiState.boxes.box7 == "X") {
+        if(uiState.boxes.box8 == "X") {
+            if(uiState.boxes.box9 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.boxes.Box7 == "O") {
-        if(uiState.boxes.Box8 == "O") {
-            if(uiState.boxes.Box9 == "O"){
+    if(uiState.boxes.box7 == "O") {
+        if(uiState.boxes.box8 == "O") {
+            if(uiState.boxes.box9 == "O"){
                 winner = "O"
             }
         }
@@ -70,17 +70,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // first column
 
-    if(uiState.boxes.Box1 == "X") {
-        if(uiState.boxes.Box4 == "X") {
-            if(uiState.boxes.Box7 == "X"){
+    if(uiState.boxes.box1 == "X") {
+        if(uiState.boxes.box4 == "X") {
+            if(uiState.boxes.box7 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.boxes.Box1 == "O") {
-        if(uiState.boxes.Box4 == "O") {
-            if(uiState.boxes.Box7 == "O"){
+    if(uiState.boxes.box1 == "O") {
+        if(uiState.boxes.box4 == "O") {
+            if(uiState.boxes.box7 == "O"){
                 winner = "O"
             }
         }
@@ -88,17 +88,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // second column
 
-    if(uiState.boxes.Box2 == "X") {
-        if(uiState.boxes.Box5 == "X") {
-            if(uiState.boxes.Box8 == "X"){
+    if(uiState.boxes.box2 == "X") {
+        if(uiState.boxes.box5 == "X") {
+            if(uiState.boxes.box8 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.boxes.Box2 == "O") {
-        if(uiState.boxes.Box5 == "O") {
-            if(uiState.boxes.Box8 == "O"){
+    if(uiState.boxes.box2 == "O") {
+        if(uiState.boxes.box5 == "O") {
+            if(uiState.boxes.box8 == "O"){
                 winner = "O"
             }
         }
@@ -106,17 +106,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // third column
 
-    if(uiState.boxes.Box3 == "X") {
-        if(uiState.boxes.Box6 == "X") {
-            if(uiState.boxes.Box9 == "X"){
+    if(uiState.boxes.box3 == "X") {
+        if(uiState.boxes.box6 == "X") {
+            if(uiState.boxes.box9 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.boxes.Box3 == "O") {
-        if(uiState.boxes.Box6 == "O") {
-            if(uiState.boxes.Box9 == "O"){
+    if(uiState.boxes.box3 == "O") {
+        if(uiState.boxes.box6 == "O") {
+            if(uiState.boxes.box9 == "O"){
                 winner = "O"
             }
         }
@@ -124,17 +124,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // first diagonal line
 
-    if(uiState.boxes.Box1 == "X") {
-        if(uiState.boxes.Box5 == "X") {
-            if(uiState.boxes.Box9 == "X"){
+    if(uiState.boxes.box1 == "X") {
+        if(uiState.boxes.box5 == "X") {
+            if(uiState.boxes.box9 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.boxes.Box1 == "O") {
-        if(uiState.boxes.Box5 == "O") {
-            if(uiState.boxes.Box9 == "O"){
+    if(uiState.boxes.box1 == "O") {
+        if(uiState.boxes.box5 == "O") {
+            if(uiState.boxes.box9 == "O"){
                 winner = "O"
             }
         }
@@ -142,17 +142,17 @@ fun CheckWinner(uiState: UiState): String {
 
     // second diagonal line
 
-    if(uiState.boxes.Box3 == "X") {
-        if(uiState.boxes.Box5 == "X") {
-            if(uiState.boxes.Box7 == "X"){
+    if(uiState.boxes.box3 == "X") {
+        if(uiState.boxes.box5 == "X") {
+            if(uiState.boxes.box7 == "X"){
                 winner = "X"
             }
         }
     }
 
-    if(uiState.boxes.Box3 == "O") {
-        if(uiState.boxes.Box5 == "O") {
-            if(uiState.boxes.Box7 == "O"){
+    if(uiState.boxes.box3 == "O") {
+        if(uiState.boxes.box5 == "O") {
+            if(uiState.boxes.box7 == "O"){
                 winner = "O"
             }
         }

@@ -38,13 +38,13 @@ data class OnlineGameUiState(
 )
 
 data class Boxes (
-    var Box1: String = "",
-    var Box2: String = "",
-    var Box3: String = "",
-    var Box4: String = "",
-    var Box5: String = "",
-    var Box6: String = "",
-    var Box7: String = "",
-    var Box8: String = "",
-    var Box9: String = ""
+    var box1: String = "",
+    var box2: String = "",
+    var box3: String = "",
+    var box4: String = "",
+    var box5: String = "",
+    var box6: String = "",
+    var box7: String = "",
+    var box8: String = "",
+    var box9: String = ""
 )

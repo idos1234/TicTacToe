@@ -9,15 +9,15 @@ data class UiState (
     //nine boxes
     var boxes: Boxes = Boxes(),
     //show whose turn X/O
-    var player_Turn: String = "X",
+    var playerTurn: String = "X",
     //who is the winner
     var winner: String = "",
     //show if need to check winner
-    var ToCheck: Boolean = false,
+    var toCheck: Boolean = false,
     //times played in one round
     var times: Int = 0,
     //check if box is enabled(if it already clicked)
-    var isenabled: Boolean = true,
+    var isEnabled: Boolean = true,
     //player1 score
     var player1Score: Int = 0,
     //player2 score

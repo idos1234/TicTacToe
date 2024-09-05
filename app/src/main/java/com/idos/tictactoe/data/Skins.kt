@@ -58,7 +58,7 @@ data class Skin(
     val name: String,
     val price: Int,
     val tag: String,
-    val onClick: @Composable() ((String) -> Unit)?
+    val onClick: @Composable ((String) -> Unit)?
 )
 
 val Xs = listOf(

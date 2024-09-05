@@ -28,10 +28,10 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.idos.tictactoe.R
-import com.idos.tictactoe.ui.Screen.Game.Online.MyTurn
-import com.idos.tictactoe.ui.Screen.Game.Online.OnlineGameRememberedValues
-import com.idos.tictactoe.ui.Screen.Game.Online.onlineGameId
-import com.idos.tictactoe.ui.Screen.Game.Online.otherPlayerQuit
+import com.idos.tictactoe.ui.screen.game.online.MyTurn
+import com.idos.tictactoe.ui.screen.game.online.OnlineGameRememberedValues
+import com.idos.tictactoe.ui.screen.game.online.onlineGameId
+import com.idos.tictactoe.ui.screen.game.online.otherPlayerQuit
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -110,7 +110,7 @@ data class MainPlayerUiState(
     var onlineTimeLimit: Int = 40
 )
 
-fun GetXO(xo: String): Int {
+fun getXO(xo: String): Int {
     return when(xo) {
         "xo_1"-> R.drawable.xo_1
         "xo_2"-> R.drawable.xo_2
@@ -131,7 +131,7 @@ fun GetXO(xo: String): Int {
     }
 }
 
-fun GetX(x: String): Int {
+fun getX(x: String): Int {
     return when(x) {
         "x_1"-> R.drawable.x_1
         "x_2"-> R.drawable.x_2
@@ -152,7 +152,7 @@ fun GetX(x: String): Int {
     }
 }
 
-fun GetO(o: String): Int {
+fun getO(o: String): Int {
     return when(o) {
         "o_1"-> R.drawable.o_1
         "o_2"-> R.drawable.o_2
@@ -187,7 +187,7 @@ fun MainPlayerUiState.Draw(
         border = border
     ) {
         Image(
-            painter = painterResource(id = GetXO(currentImage)),
+            painter = painterResource(id = getXO(currentImage)),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -241,10 +241,10 @@ fun MainPlayerUiState.CountDownTimerWrite(
                 }?.getValue(OnlineGameUiState::class.java)!!
             } catch (_: Exception) { }
 
-            if (playerNumber == 1) {
-                timeLeft = gameState.game.player1TimeLeft
+            timeLeft = if (playerNumber == 1) {
+                gameState.game.player1TimeLeft
             } else {
-                timeLeft = gameState.game.player2TimeLeft
+                gameState.game.player2TimeLeft
             }
 
             reset = gameState.game.foundWinner || gameState.game.times == 9
@@ -263,7 +263,7 @@ fun MainPlayerUiState.CountDownTimerWrite(
             border = border
         ) {
             Image(
-                painter = painterResource(id = GetXO(currentImage)),
+                painter = painterResource(id = getXO(currentImage)),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -337,10 +337,10 @@ fun MainPlayerUiState.CountDownTimerRead(
                 }?.getValue(OnlineGameUiState::class.java)!!
             } catch (_: Exception) { }
 
-            if (playerNumber == 1) {
-                timeLeft = gameState.game.player1TimeLeft
+            timeLeft = if (playerNumber == 1) {
+                gameState.game.player1TimeLeft
             } else {
-                timeLeft = gameState.game.player2TimeLeft
+                gameState.game.player2TimeLeft
             }
 
         }
@@ -357,7 +357,7 @@ fun MainPlayerUiState.CountDownTimerRead(
             border = border
         ) {
             Image(
-                painter = painterResource(id = GetXO(currentImage)),
+                painter = painterResource(id = getXO(currentImage)),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
