@@ -47,7 +47,7 @@ fun DragableScreen(
                         scaleY = 1f
                         alpha = if (targetSize == IntSize.Zero) 0f else 1f
                         translationX = offset.x.minus(targetSize.width / 2)
-                        translationY = offset.y.minus(targetSize.height)
+                        translationY = offset.y.minus(targetSize.height / 2)
                     }
                     .onGloballyPositioned {
                         targetSize = it.size
@@ -80,7 +80,7 @@ fun <T> DragTarget(
             detectDragGesturesAfterLongPress(onDragStart = {
                 currentState.dataToDrop = dataToDrop
                 currentState.isDragging = true
-                currentState.dragPosition = currentPosition + it
+                currentState.dragPosition = currentPosition.copy(x = currentPosition.x + it.x)
                 currentState.draggableComposable = content
             }, onDrag = { change, dragAmount ->
                 change.consume()
@@ -106,9 +106,9 @@ fun <T> DragTarget(
 @Composable
 fun <T> DropItem(
     modifier: Modifier,
-    content: @Composable() (BoxScope.(isInBound: Boolean, data: T?) -> Unit)
+    content: @Composable (BoxScope.(isInBound: Boolean, data: T?) -> Unit)
 ) {
-
+    val screenWidth = LocalConfiguration.current.screenWidthDp
     val dragInfo = LocalDragTargetInfo.current
     val dragPosition = dragInfo.dragPosition
     val dragOffset = dragInfo.dragOffset
@@ -118,7 +118,7 @@ fun <T> DropItem(
 
     Box(modifier = modifier.onGloballyPositioned {
         it.boundsInWindow().let { rect ->
-            isCurrentDropTarget = rect.contains(dragPosition + dragOffset)
+            isCurrentDropTarget = rect.contains(dragPosition + dragOffset + Offset(x = 0f, y = (screenWidth*0.9/2).toFloat()))
         }
     }) {
         val data =

@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-09-02T14:57:10.294512100Z">
+        <DropdownSelection timestamp="2024-09-03T09:01:51.511105Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=RZCW90WPZSP" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\sulim\.android\avd\Huawei_p20_lite_API_28.avd" />
             </handle>
           </Target>
         </DropdownSelection>

@@ -584,7 +584,7 @@ fun TicTacToeApp(
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    val emailStr = encryptedSharedPreferences.getString("email", "")
+        val emailStr = encryptedSharedPreferences.getString("email", "")
     val botD = encryptedSharedPreferences.getInt("botDifficulty", 1)
     email.value = emailStr!!
     botDifficulty.value = botD
