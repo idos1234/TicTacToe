@@ -1,5 +1,8 @@
 package com.idos.tictactoe.dragAndDrop
 
+import android.content.res.Resources.getSystem
+import android.text.TextUtils
+import android.view.View
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -21,8 +24,15 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
+import java.util.Locale
 
 internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
+
+val Int.px: Int get() = (this * getSystem().displayMetrics.density).toInt()
+private fun isRtlLocale(locale: Locale): Boolean {
+    return TextUtils.getLayoutDirectionFromLocale(locale) == View.LAYOUT_DIRECTION_RTL
+}
+
 
 @Composable
 fun DraggableScreen(
@@ -30,6 +40,10 @@ fun DraggableScreen(
     content: @Composable BoxScope.() -> Unit
 ) {
     val state = remember { DragTargetInfo() }
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.px
+    val currentLocale = Locale.getDefault().language
+
     CompositionLocalProvider(
         LocalDragTargetInfo provides state
     ) {
@@ -46,7 +60,11 @@ fun DraggableScreen(
                         scaleX = 1f
                         scaleY = 1f
                         alpha = if (targetSize == IntSize.Zero) 0f else 1f
-                        translationX = offset.x.minus(targetSize.width / 2)
+                        if (isRtlLocale(Locale(currentLocale))) {
+                            translationX = offset.x.plus(targetSize.width / 2) - screenWidth
+                        } else {
+                            translationX = offset.x.minus(targetSize.width / 2)
+                        }
                         translationY = offset.y.minus(targetSize.height / 2)
                     }
                     .onGloballyPositioned {
